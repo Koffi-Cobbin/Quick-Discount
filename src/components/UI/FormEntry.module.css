@@ -1,0 +1,20 @@
+.form-entry-input[type=text], 
+.form-entry-input[type=password], 
+.form-entry-input[type=email], 
+.form-entry-input[type=file], 
+.form-entry-input[type=tel] {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+  
+.form-entry-label {
+    margin-bottom: 10px;
+    display: block;
+}
+
+.form-entry-label i {
+    margin-right: 5px;
+}

@@ -1,0 +1,240 @@
+.package-type {
+  color: #fff;
+  padding: 6px 14px;
+  margin-top: 10px;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  background-color: #777;
+}
+
+.item {
+  width: 100%;
+  height: fit-content;
+  padding: 0 20px;
+  background: #fff;
+  overflow: hidden;
+  border: 2px solid #ddd;
+
+  display: flex;
+  justify-content: space-between;
+
+  font-family: 'Inknut Antiqua', serif;
+  font-family: 'Ravi Prakash', cursive;
+  font-family: 'Lora', serif;
+  font-family: 'Indie Flower', cursive;
+  font-family: 'Cabin', sans-serif;
+}
+
+.item-left {
+  padding: 40px 0;
+  margin-right: 20px;
+  width: 25%;
+  position: relative;
+  /* height: 286px; */
+  /* border: 1px solid green; */
+}
+
+.item-left .up-border, .item-left .down-border {
+  padding: 14px 15px;
+  background-color: #ddd;
+  border-radius: 50%;
+  position: absolute;
+  /* border: 1px solid yellow; */
+}
+
+.item-left .up-border {
+  top: -13px;
+  right: -36px;
+}
+
+.item-left .down-border {
+  bottom: -13px;
+  right: -36px;
+}
+
+.item-left .num {
+  font-size: 60px;
+  text-align: center;
+  color: #111;
+}
+
+.item-left .day, .item-right .event {
+  color: #555;
+  font-size: 20px;
+  margin-bottom: 9px;
+}
+
+.item-left .day {
+  text-align: center;
+  font-size: 25px;
+}
+
+.item-right {
+  width: 71%;
+  padding: 34px 0px 19px 46px;
+  border-left: 3px dotted #999;
+  /* border: 1px solid black; */
+} 
+
+.item-right .title {
+  color: #111;
+  font-size: 25px;
+  margin-bottom: 12px
+}
+
+.item-right .sce {
+  margin-top: 5px;
+}
+
+.item-right .sce, .item-right .loc {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.item-right .sce {
+  height: 30px;
+  /* border: 1px solid blue; */
+}
+
+.item-right .loc {
+  height: 30px;
+  /* border: 1px solid blue; */
+}
+
+.item-right .sce p, .item-right .loc p{
+  word-spacing: 5px;
+  letter-spacing: 1px;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-right .sce .icon img, .item-right .loc .icon img{
+  margin-right: 10px;
+  width: 20px;
+}
+
+.fix {clear: both;}
+
+.item .packages, .booked, .cancel{
+    color: #fff;
+    padding: 6px 14px;
+    float: right;
+    margin-top: 10px;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+}
+
+.item .packages {background: #777}
+.item .booked {background: #3D71E9}
+.item .cancel {background: #DF5454}
+.linethrough {text-decoration: line-through}
+
+.price-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.price, .price-sm {
+  font-weight: bold;
+  color: #fa8128;
+  font-size: 2rem;
+}
+
+@media (min-width: 581px) {
+  .price-sm{
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 1150px) {
+  .item {
+    width: 100%;
+    margin-right: 20px
+  }
+}
+
+@media (max-width: 767px) {
+  .item-left {
+    margin-right: 5px;
+  }
+  .item-left .up-border, .item-left .down-border {
+    padding: 10px 11px;
+    right: -32px;
+  }
+  
+  .item-left .up-border {
+    top: -10px;
+  }
+  
+  .item-left .down-border {
+    bottom: -10px;
+  }
+}
+
+@media (max-width: 620px) {
+  .item {
+    padding: 0;
+  }
+}
+
+@media (max-width: 580px) {
+  .item-right {
+    padding: 30px 0px 15px 20px;
+  }
+  .price {
+    display: none;
+  }
+  .price-sm{
+    display: block;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .item-left .num {
+    font-size: 30px;
+  }
+  .item-right {
+    padding: 30px 0px 15px 10px;
+  }
+  .item-left .day, .item-right .event {font-size: 18px;}
+  .item-right .title {
+    font-size: 18px;
+    margin: -5px 0 5px 0;
+  }
+  .price-sm{
+    font-size: 1.5rem;
+  }
+  .item-left .up-border, .item-left .down-border {
+    right: -28px;
+  }
+}
+
+@media (max-width: 375px) {
+  .item-left .up-border, .item-left .down-border {
+    right: -23px;
+  }
+}
+
+
+/* .meal {
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.meal h3 {
+  margin: 0 0 0.25rem 0;
+}
+
+.description {
+  font-style: italic;
+} */

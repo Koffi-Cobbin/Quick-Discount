@@ -1,0 +1,44 @@
+.button {
+  cursor: pointer;
+  border: 1px solid #fa8128;
+  color: white;
+  padding: 0.1rem 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 25px;
+  font-weight: bold;
+}
+
+.button:hover,
+.button:active {
+  background-color: #fa8128;
+}
+
+.icon {
+  font-size: 14px;
+  width: 20px;
+  margin-right: 3px;
+}
+
+.bump {
+  animation: bump 300ms ease-out;
+}
+
+@keyframes bump {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(0.9);
+  }
+  30% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
