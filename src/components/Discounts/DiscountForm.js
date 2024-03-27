@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useRef} from "react";
 import styled from "styled-components";
 import parse from 'html-react-parser';
 import { useState, useEffect } from "react";
@@ -25,7 +25,9 @@ import {
   deleteDiscountMediaAPI,
   deleteDiscountPackageAPI,
   setDiscountPackages,
-} from "../../actions"
+} from "../../actions";
+import { packageOptionsData } from "../Assets/data";
+import { set } from "react-hook-form";
 // import CreateDiscountSuccess from "./CreateDiscountSuccess";
 // import CreateDiscountFailed from "./CreateDiscountFailed";
 
@@ -39,6 +41,7 @@ const DiscountForm = (props) => {
   const [phoneNumber, setPhoneNumber] = useState(props.organizer ? props.organizer.phone_number : "");
   const [discountCategories, setDiscountCategories] = useState();
   const [discountType, setDiscountType] = useState("");
+  const [percentageDiscount, setPercentageDiscount] = useState("");
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
   const [occurrence, setOccurrence] = useState("");
@@ -50,7 +53,7 @@ const DiscountForm = (props) => {
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
-  const [socialMedia, setSocialMedia] = useState(props.organizer ? props.organizer.social_media_handle : "");
+  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : [{name: "whatsapp", socialMediaURL: ""},]);
   const [websiteURL, setWebsiteUrl] = useState("");
   const [agreement, setAgreement] = useState("");
 
@@ -60,9 +63,9 @@ const DiscountForm = (props) => {
   const [allCategories, setAllCategories] = useState(); // Categories from API
   const [enableSubmit, setEnableSubmit] = useState(false);
   const [filename, setFilename] = useState("");
-  const [packageOptions, setPackageOptions] = useState([
-    { price: null, package_type: "daily", quantity: 1 },
-  ]);
+  const [packageOption, setPackageOption] = useState({ 
+        ...packageOptionsData.results[0], quantity: 1
+  });
   
   // ERRORS
   const [emailError, setEmailError] = useState("");
@@ -70,7 +73,9 @@ const DiscountForm = (props) => {
   const [imageError, setImageError] = useState({ flyer: "", images: "" });
   const [urlError, setUrlError] = useState("");
 
-  const package_options = ["daily", "weekly", "monthly", "delete"];
+  // const priceInputRef = useRef(null);
+
+  // const package_options = ["daily", "weekly", "monthly"];
 
   const navigate = useNavigate();
 
@@ -94,6 +99,29 @@ const DiscountForm = (props) => {
 
   const doesDiscountNameExist = (value) => {
     console.log("Checking if discount name already exists", value);
+  };
+
+  const socialMediaChangeHandler = (index, social_media_url) => {
+    const updatedSocialMediaHandles = [...socialMediaHandles];
+    updatedSocialMediaHandles[index].socialMediaURL = social_media_url;
+    setSocialMediaHandles(updatedSocialMediaHandles);
+  };
+
+  const handleSocialMediaChange = (index, social_media_name) => {
+    if (socialMediaHandles.some((obj) => obj.name === social_media_name)) {
+      return; // Skip adding a social_media_name if the social_media_type exists
+    }
+    if (social_media_name === "delete") {
+      // let social_media = socialMediaHandles[index];    
+      const updatedMediaHandles = socialMediaHandles.slice();
+      updatedMediaHandles.splice(index, 1);
+      setSocialMediaHandles(updatedMediaHandles);
+    } else {
+      setSocialMediaHandles([
+        ...socialMediaHandles,
+        {name: social_media_name, socialMediaURL: ""}
+      ]);
+    }
   };
 
   // Function to get flyer image
@@ -130,6 +158,7 @@ const DiscountForm = (props) => {
       setPhoneNumber(props.discount.organizer.phone_number);
       setDiscountCategories(props.discount.categories);
       setDiscountType(props.discount.discount_type);
+      setPercentageDiscount(props.discount.percentage_discount);
       setSlotNumber(1);
       setLocation(props.discount.location);
       setAddress(props.discount.address);
@@ -138,9 +167,9 @@ const DiscountForm = (props) => {
       setEndDate(props.discount.end_date);
       setStartTime(props.discount.start_time);
       setEndTime(props.discount.end_time);
-      setSocialMedia(props.discount.organizer.social_media_handle);
+      setSocialMediaHandles(props.discount.organizer.social_media_handles);
       setWebsiteUrl(props.discount.website_url);
-      setPackageOptions(props.discount_packages);
+      setPackageOption(props.discount_packages);
       setDiscountFlyer(props.discount.flyer);
       setAgreement(props.discount.agreement);
 
@@ -169,6 +198,13 @@ const DiscountForm = (props) => {
         ...acceptedFiles,
       ]);
     };
+
+    // Package options
+    // if (packageOptionsData){
+    //   const updatedOption = {...packageOptionsData.results[0]};
+    //   updatedOption.quantity = 1;
+    //   setPackageOption(updatedOption);  
+    // };
 
   }, [props.categories, props.discount, props.discount_media, props.discount_packages]);
 
@@ -253,90 +289,22 @@ const DiscountForm = (props) => {
     singleImagePreview(mediaFile);
   };
 
-  const radioInputHandler = (id) => {
-    let elem = document.getElementById(id);
-
-    if (elem.checked) {
-      if (id === "paid-discount" || id === "free-discount") {
-        setDiscountType(elem.value);
-      }
-      if (id === "limited-slots" || id === "unlimited-slots") {
-        setSlotType(elem.value);
-      }
-      if (id === "once" || id === "recuring") {
-        setOccurrence(elem.value);
-      }
-      if (id === "agreement") {
-        setAgreement(elem.value);
-      }
-    }
-  };
 
   const editorTextChangeHandler = (value) => {
     setDiscountDescription(value !== "<p><br></p>" ? value : "");
   };
 
-  const handleAddButton = () => {
-    const newOptions = [...packageOptions];
-    const lastOption = newOptions[newOptions.length - 1];
-    console.log("Last option, ",lastOption);
-    if (lastOption && (!lastOption.price || lastOption.quantity < 1)) {
-      return; // Skip adding if the last package_type is incomplete
-    }
-    let selected_options = packageOptions.map((elem) => elem.package_type);
-    let remaining_options = package_options
-      .slice(0, 4)
-      .filter((elem) => !selected_options.includes(elem));
-    if (remaining_options.length > 0) {
-      setPackageOptions([
-        ...newOptions,
-        { package_type: remaining_options[0], price: null, quantity: 1 },
-      ]);
-    } else {
-      alert("All packages have been added");
-    }
+
+  const handleOptionChange = (package_type) => {
+    let updatedDiscountPackage = packageOptionsData.results.filter((option) => option.package_type == package_type)[0];
+    updatedDiscountPackage.quantity = 1;
+    setPackageOption(updatedDiscountPackage);
   };
 
-  const handleOptionChange = (index, package_type) => {
-    if (packageOptions.some((obj) => obj.package_type === package_type)) {
-      return; // Skip adding a package_type if the package_type exists
-    }
-    if (package_type === "delete") {
-      let discount_package = packageOptions[index];
-      // Check if discount_package has been sold
-      // If sold, don't Delete discount_package from db if it exists
-      if (discount_package.url && discount_package.sold_packages === 0){
-        const updatedOptions = packageOptions.slice();
-        updatedOptions.splice(index, 1);
-        setPackageOptions(updatedOptions);
-
-        props.deleteDiscountPackage(discount_package.id);
-        console.log("Package deleted!");
-        let updatedDiscountPackages = props.discount_packages.filter((elem) => elem.url !== discount_package.url);
-        props.updateDiscountPackages(updatedDiscountPackages);
-      }
-      if (!discount_package.url){
-        const updatedOptions = packageOptions.slice();
-        updatedOptions.splice(index, 1);
-        setPackageOptions(updatedOptions);
-      }
-    } else {
-      const updatedOptions = [...packageOptions];
-      updatedOptions[index].package_type = package_type;
-      setPackageOptions(updatedOptions);
-    }
-  };
-
-  const handlePriceChange = (index, price) => {
-    const updatedOptions = [...packageOptions];
-    updatedOptions[index].price = price;
-    setPackageOptions(updatedOptions);
-  };
-
-  const handleQuantityChange = (index, quantity) => {
-    const updatedOptions = [...packageOptions];
-    updatedOptions[index].quantity = quantity;
-    setPackageOptions(updatedOptions);
+  const handleQuantityChange = (quantity) => {
+    const updatedOption = {...packageOption};
+    updatedOption.quantity = parseInt(quantity);
+    setPackageOption(updatedOption);     
   };
 
   const updateIframeDimensions = (googleMap) => {
@@ -370,7 +338,7 @@ const DiscountForm = (props) => {
       return;
     }
 
-    const filteredPackageOptions = packageOptions.filter(
+    const filteredPackageOptions = packageOption.filter(
       (discount_package) =>
         discount_package.price !== null && discount_package.price > 0 && discount_package.quantity >= 1
     );
@@ -382,6 +350,7 @@ const DiscountForm = (props) => {
         name: discountName,
         description: discountDescription,
         discount_type: discountType,
+        percentage_discount: percentageDiscount,
         slot_type: slotType,
         slot_number: slotNumber,
         start_date: startDate,
@@ -400,7 +369,7 @@ const DiscountForm = (props) => {
         description: organizerDescription,
         email: email,
         phone_number: phoneNumber,
-        social_media_handle: socialMedia,
+        social_media_handles: socialMediaHandles,
       },
       packages_data: filteredPackageOptions,
     };
@@ -441,6 +410,7 @@ const DiscountForm = (props) => {
       if (
         discountName &&
         discountDescription &&
+        percentageDiscount &&
         organizerName &&
         organizerDescription &&
         email &&
@@ -455,7 +425,7 @@ const DiscountForm = (props) => {
         startTime &&
         endTime &&
         discountFlyer &&
-        socialMedia &&
+        socialMediaHandles &&
         agreement
       ) {
         setEnableSubmit(true);
@@ -468,6 +438,7 @@ const DiscountForm = (props) => {
   }, [
     discountName,
     discountDescription,
+    percentageDiscount,
     organizerName,
     organizerDescription,
     email,
@@ -483,13 +454,14 @@ const DiscountForm = (props) => {
     endTime,
     discountFlyer,
     discountImages,
-    socialMedia,
+    socialMediaHandles,
     agreement,
     websiteURL,
   ]);
 
   const reset = () => {
     setDiscountName("");
+    setPercentageDiscount("");
     setEmail("");
     setPhoneNumber("");
     setWebsiteUrl("");
@@ -502,7 +474,7 @@ const DiscountForm = (props) => {
     setStartTime("");
     setEndTime("");
     setLocation("");
-    setSocialMedia("");
+    setSocialMediaHandles([]);
     setEnableSubmit(false);
     setEmailError("");
     setDiscountCategories([]);
@@ -512,7 +484,7 @@ const DiscountForm = (props) => {
     setAddress("");
     setSlotType("");
     setSlotNumber(0);
-    setPackageOptions([{ price: null, package_type: "daily", quantity: 1 }]);
+    setPackageOption([{ price: null, package_type: "daily", quantity: 1 }]);
   };
 
   useEffect(() => {
@@ -580,6 +552,16 @@ const DiscountForm = (props) => {
                   >
                       {discountDescription}
                   </textarea>
+                </FormInputs>
+
+                <FormInputs>
+                  <label>Percentage Discount</label>
+                  <input
+                    type="text"
+                    value={percentageDiscount}
+                    onChange={(e) => setPercentageDiscount(e.target.value)}
+                    required
+                  />
                 </FormInputs>
               </FormContent>
             </Slide>
@@ -693,23 +675,21 @@ const DiscountForm = (props) => {
                 <FormInputs>
                   <PackagesFlexWrap className="add-package-section">
                     <div className="package-section">
-                      {packageOptions && packageOptions.map((option, index) => (
-                        <PackagesInputsFlexWrap key={index}>
+                      {packageOption &&
+                        <PackagesInputsFlexWrap>
                           <div>
                             <label htmlFor="package-type">Package type &nbsp;</label>
                             
                             <select
                               id="package-type"
                               name="package-type"
-                              value={option.package_type}
                               onChange={(e) =>
-                                handleOptionChange(index, e.target.value)
+                                handleOptionChange(e.target.value)
                               }
                             >
                               <option value="daily">daily</option>
                               <option value="weekly">weekly</option>
                               <option value="monthly">monthly</option>
-                              <option value="delete">delete</option>
                             </select>
                           </div>
                           <div>
@@ -717,13 +697,8 @@ const DiscountForm = (props) => {
                             <input
                               type="number"
                               name="package-price"
-                              step="0.01"
-                              placeholder="0.00"
-                              value={option.price}
+                              value={packageOption.price*packageOption.quantity}
                               readOnly="True"
-                              onChange={(e) =>
-                                handlePriceChange(index, e.target.value)
-                              }
                             />
                           </div>
                           <div>
@@ -731,21 +706,16 @@ const DiscountForm = (props) => {
                             <input
                               type="number"
                               name="package-quantity"
-                              placeholder="0"
-                              value={option.quantity}
+                              placeholder="1"
+                              min={1}
+                              value={packageOption.quantity}
                               onChange={(e) =>
-                                handleQuantityChange(index, e.target.value)
+                                handleQuantityChange(e.target.value)
                               }
                             />
                           </div>
                         </PackagesInputsFlexWrap>
-                      ))}                        
-                    </div>
-
-                    <div>
-                      <button type="button" onClick={handleAddButton}>
-                        Add
-                      </button>
+                      }                        
                     </div>
                   </PackagesFlexWrap>
                   <label>
@@ -835,30 +805,53 @@ const DiscountForm = (props) => {
 
             <Slide>
               <FormContent>
+                <label style={{textAlign: "left"}}>Social Media Handles</label>
                 <FormInputs>
-                  <InputsFlexWrap>
                   {!props.organizer && (
-                    <div>
-                      <label>Social Media Handle</label>
-                      <input
-                        type="text"
-                        value={socialMedia}
-                        onChange={(e) => setSocialMedia(e.target.value)}
-                        required
-                      />
-                    </div>
-                  )}
-                    <div>
-                      <label>Website link <small>or social media link</small></label>
-                      <input
-                        type="text"
-                        value={websiteURL}
-                        placeholder="https://www.xyz.com"
-                        onChange={(e) => validateUrl(e.target.value)}
-                      />
-                      {urlError && <p className="error">{urlError}</p>}
-                    </div>
-                  </InputsFlexWrap>
+                    <>
+                    {socialMediaHandles && socialMediaHandles.map((handle, index) => (
+                    <InputsFlexWrap>
+                      <div>
+                        <select
+                          id="social-media-type"
+                          name="social-media-type"
+                          value={handle.name}
+                          onChange={(e) =>
+                            handleSocialMediaChange(index, e.target.value)
+                          }
+                        >
+                          <option value="whatsapp">WhatsApp</option>
+                          <option value="facebook">Facebook</option>
+                          <option value="instagram">Instagram</option>
+                          <option value="delete">Delete</option>
+                        </select>                        
+                      </div>
+
+                      <div>
+                        <input
+                          type="text"
+                          value={handle.url}
+                          onChange={(e) => socialMediaChangeHandler(index, e.target.value)}
+                          required
+                        />
+                      </div>
+                      </InputsFlexWrap>  
+                      ))}
+                    </>
+                  )}                   
+                </FormInputs>
+
+                <FormInputs>
+                  <div>
+                    <label>Website link</label>
+                    <input
+                      type="text"
+                      value={websiteURL}
+                      placeholder="https://www.xyz.com"
+                      onChange={(e) => validateUrl(e.target.value)}
+                    />
+                    {urlError && <p className="error">{urlError}</p>}
+                  </div>
                 </FormInputs>
               </FormContent>
             </Slide>

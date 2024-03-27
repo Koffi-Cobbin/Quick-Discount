@@ -6,7 +6,7 @@ import { addToWishlistAPI, removeFromWishlistAPI } from '../../actions';
 // import WishlistContext from "../../store/wishlist-context";
 
 
-const StarRating = ({ rating }) => {
+const StarRating = ({ rating,  showRate}) => {
   // Convert the float rating to a percentage for star fill color
   const starPercentage = (rating / 5) * 100;
 
@@ -18,7 +18,9 @@ const StarRating = ({ rating }) => {
 
   return (
     <RatingWrap className="star-rating-container">
-      <RateValue className="float-value"><b>{rating.toFixed(1)}</b></RateValue>
+      {showRate &&
+        <RateValue className="float-value"><b>{rating.toFixed(1)}</b></RateValue>
+      }
       <StarsWrap className="stars-wrapper">
         {[...Array(quotient)].map((e, idx) => (
           <Star>

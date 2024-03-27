@@ -69,7 +69,7 @@ const Navbar = (props) => {
                             <NavLink onClick={() => toggleDropdown("events-drpdwn")} >
                                 <span>
                                     Discounts &nbsp;
-                                    <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    <img src="/images/icons/down-icon.svg" alt="" />
                                 </span>
                             </NavLink>
                             <div className="dropdown-content" id="events-drpdwn">
@@ -86,7 +86,7 @@ const Navbar = (props) => {
                             <NavLink onClick={() => toggleDropdown("help-drpdwn")}>
                                 <span>
                                     Help &nbsp;
-                                    <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    <img src="/images/icons/down-icon.svg" alt="" />
                                 </span>
                             </NavLink>
                             <div className="dropdown-content" id="help-drpdwn">
@@ -121,7 +121,7 @@ const Navbar = (props) => {
                                             )}
                                             <span>
                                                 &nbsp;
-                                                Me<img src="/images/icons/down-arrow-w.svg" alt="" className="down" />
+                                                Me<img src="/images/icons/down-icon.svg" alt="" className="down" />
                                             </span>
                                         </span>
                                     </User>
@@ -136,11 +136,11 @@ const Navbar = (props) => {
                             </>
                         ) : (
                             <>
-                            <NavList>
+                            {/* <NavList>
                                 <NavLink to="/signup" className={({isActive}) => isActive ? 'current' : undefined}>
                                     <span>Sign Up</span>
                                 </NavLink>
-                            </NavList>
+                            </NavList> */}
                             <NavList>
                                 <NavLink to="/discounts/add" className={({isActive}) => isActive ? 'current' : undefined}>
                                     <span>Post</span>
@@ -172,7 +172,9 @@ const Container = styled.div`
     padding-top: 10px;
     overflow: hidden;
     font-family: Arial;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    /* border-bottom: 1px solid rgba(0, 0, 0, 0.08); */
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10);
     @media (min-width: 768px) {
         #sidenav{
             display: none;
@@ -332,7 +334,7 @@ const CloseBtn = styled.button`
 const TopNav = styled.nav`
     margin-left: auto;
     display: block; 
-    color: #FFF;
+    color: #000;
     @media (max-width: 600px) {
         display: none;
     }
@@ -349,6 +351,7 @@ const NavListWrap = styled.ul`
 const NavList = styled.li`
     display: flex;
     align-items: center;
+    margin-right: 8px;
     
     a {
         // align-items: flex-start;
@@ -362,7 +365,7 @@ const NavList = styled.li`
         position: relative;
         text-decoration: none;
         margin-left: 5px;
-        color: #FFF;
+        color: #222;
 
         img {
             width: 30px;

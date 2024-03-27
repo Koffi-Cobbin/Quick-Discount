@@ -1,0 +1,44 @@
+.container {
+    position: relative;
+    width: 100%;
+    margin-top: 100px;
+    overflow-x: hidden; /* Disable default scrollbar */
+    white-space: nowrap; /* Prevent content from wrapping */
+  }
+  
+  .row {
+    display: inline-flex;
+  }
+  
+  .card {
+    flex: 0 0 auto;
+    width: calc(100% / 4 - 20px);
+    margin-right: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .card img {
+    width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+  }
+  
+  .control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .control.left {
+    left: 0;
+  }
+  
+  .control.right {
+    right: 0;
+  }
+  

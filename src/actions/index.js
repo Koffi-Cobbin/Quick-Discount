@@ -8,6 +8,7 @@ import {
   SET_LOADING_STATUS,
   SET_DISCOUNTS,
   SET_DISCOUNT_PACKAGES,
+  SET_DISCOUNT_REVIEWS,
   SET_ORGANIZER,
   SET_ORGANIZER_DISCOUNTS,
   SET_ORGANIZER_NOTIFICATIONS,
@@ -27,7 +28,7 @@ import {
 import db from "../firebase";
 import { BASE_URL } from "../utils/constants";
 import * as messages from "../utils/messages";
-import { discountsData, categoriesData } from "../components/Assets/data";
+import { discountsData, discountReviewsData, categoriesData } from "../components/Assets/data";
 
 
 export const setUserActivationStatus = (payload) => ({
@@ -98,6 +99,11 @@ export const setDiscounts = (payload) => ({
 export const setDiscountPackages = (payload) => ({
   type: SET_DISCOUNT_PACKAGES,
   discount_packages: payload,
+});
+
+export const setDiscountReviews = (payload) => ({
+  type: SET_DISCOUNT_REVIEWS,
+  reviews: payload,
 });
 
 export const setDiscountMedia = (payload) => ({
@@ -628,6 +634,43 @@ export function getOrganizerDiscountsAPI(organizer_id) {
       });
   };
 }
+
+
+// ------------------------------
+// ------ GET DISCOUNT REVIEWS --------
+
+export function getDiscountReviewsAPI(discount_id) {
+  return (dispatch) => {
+    dispatch(setLoading(true));
+    const url = `${BASE_URL}/reviews/${discount_id}/`;
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response.json();
+      })
+      .then((discounts) => {
+        dispatch(setDiscountReviews(discounts));
+        console.log("Discount Reviews ", discounts);
+        dispatch(setLoading(false));
+      })
+      .catch((errorMessage) => {
+        console.log(errorMessage);
+        // --------TO BE REMOVED---------
+        dispatch(setDiscountReviews(discountReviewsData));
+        console.log("Discounts Reviews ...");
+        // ------------------------------
+        dispatch(setLoading(false));
+      });
+  };
+}
+
 
 // ---------------------
 // ------ ORDER --------

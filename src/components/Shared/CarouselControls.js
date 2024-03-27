@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const LeftButton = (props) => {
     const prev = (id) => {
         const carousel = document.getElementById(id);
-        carousel.scrollBy(-200, 0);
+        carousel.scrollBy(-290, 0);
     };
 
     return (
@@ -17,7 +17,7 @@ export const LeftButton = (props) => {
 export const RightButton = (props) => {
     const next = (id) => {
         const carousel = document.getElementById(id);
-        carousel.scrollBy(200, 0);
+        carousel.scrollBy(290, 0);
     };
 
     return (
@@ -37,6 +37,8 @@ const ControlButton = styled.button`
   opacity: 0.55;
   outline: none;
   border: none;
+  /* border: 1px solid black; */
+  z-index: 10;
   img {
     width: 25px;
     margin-left: -5px;
@@ -53,8 +55,8 @@ const ControlButton = styled.button`
 
 const LeftControl = styled(ControlButton)`
   left: 0;
-  @media (min-width: 768px) {
-    left: ${props => props.pos ? props.pos : "8%"};
+  @media (min-width: 1024px) {
+    left: ${props => props.pos ? props.pos : "5%"};
     &.categories-section {
       left: 0;
     }
@@ -63,8 +65,8 @@ const LeftControl = styled(ControlButton)`
 
 const RightControl = styled(ControlButton)`
   right: 0;
-  @media (min-width: 768px) {
-    right: ${props => props.pos ? props.pos : "8%"};
+  @media (min-width: 1024px) {
+    right: ${props => props.pos ? props.pos : "5%"};
     &.categories-section {
       right: 0;
     }

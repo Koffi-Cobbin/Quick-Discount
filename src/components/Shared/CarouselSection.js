@@ -32,23 +32,30 @@ const Section = styled.div`
   position: relative;
   width: 100%;
   background-image: ${props => props.bgImage ? `url(${props.bgImage})` : "none"};
+  /* border: 1px solid black; */
 `;
 
 const Wrapper = styled.div`
-  max-width: ${props => props.maxWidth ? props.maxWidth : "80%"};
+  width: ${props => props.maxWidth ? props.maxWidth : "80%"};
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    width: 95%;
+  }
 `;
 
 const ContentList = styled.div`
   display: grid;
   grid-auto-columns: 100%;
-  grid-column-gap: 10px;
+  grid-column-gap: 20px;
   grid-auto-flow: column;
   overflow-x: scroll;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   padding: 20px 10px;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  /* border: 1px solid black; */
 
   &::-webkit-scrollbar {
       display: none;
@@ -66,17 +73,23 @@ const ContentList = styled.div`
   
   @media (min-width: 900px) {
     grid-auto-columns: calc(calc(100% / 3) - 20px);
-    grid-column-gap: 30px;
+    grid-column-gap: 20px;
   }
   
   @media (min-width: 1200px) {
     grid-auto-columns: calc(25% - 30px);
-    grid-column-gap: 40px;
+    grid-column-gap: 30px;
+  }
+
+  @media (min-width: 2560px) {
+    grid-auto-columns: calc(20% - 20px);
+    grid-column-gap: 20px;
   }
 `;
 
 const ListItem = styled.div`
-  min-width: 250px;
+  min-width: 300px;
+  /* border: 1px solid black; */
 `;
 
 

@@ -25,7 +25,7 @@ const DiscountCard = (props) => {
       cardStyle={props.discountCardStyles["card"]}
       fontSizes={props.discountCardStyles["fontSizes"]}
     >
-      <a href={props.discount.websiteURL ? props.discount.websiteURL : '#'} target="_blank">
+      <a href={`/discounts/${props.discount.id}`} >
         <BackgroundImage
           style={{ backgroundImage: `url(${props.discount.flyer})` }}
           bgImageStyle={props.discountCardStyles["bgImage"]}
@@ -36,12 +36,12 @@ const DiscountCard = (props) => {
         fontSizes={props.discountCardStyles["fontSizes"]}
       >
         <Title eventTitle={props.discountCardStyles["title"]}>
-          {handleSlice(props.discount.name)}
+          {handleSlice(props.discount.title)}
           {slice && <span> ...</span>}
         </Title>
 
-        <Description>
-          <p>{props.discount.description}</p>
+        <Description>        
+          <p>{props.discount.description.slice(0, 45)} ...</p>
         </Description>
 
         <Address>
@@ -61,7 +61,7 @@ const DiscountCard = (props) => {
           <SocialActions>
             <Left>1,220</Left>
             <Right>
-              <StarRating rating={props.discount.rate} />
+              <StarRating rating={props.discount.rate} showRate={true}/>
             </Right>
             {/* <AddToWishlist type="icon" discount={props.discount} /> */}
         </SocialActions>
@@ -72,37 +72,33 @@ const DiscountCard = (props) => {
 };
 
 const Card = styled.div`
-  width: 250px;
-  height: 280px;
+  position: relative;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   transition: all 0.3s;
   border-radius: 10px;
   overflow: hidden;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   background-color: #fff;
   margin: 0 auto;
   box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
-  /* margin: ${(props) =>
-    props.cardStyle.margin ? props.cardStyle.margin : 0}; */
-  /* margin-bottom: ${(props) =>
-    props.cardStyle.marginBottom ? props.cardStyle.marginBottom : 0}; */
 
   &:first-of-type {
     /* Allow users to fully scroll to the start */
-    /* scroll-snap-align: center; */
+    scroll-snap-align: center;
   }
   &:last-of-type {
     /* Allow users to fully scroll to the end */
-    /* scroll-snap-align: end; */
+    scroll-snap-align: end;
   }
 
   &:hover {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
   }
 
-  @media (max-width: 768px) {
+  /* @media (max-width: 768px) {
     width: ${(props) =>
       props.cardStyle.md ? props.cardStyle.md.width : "250px"};
   }
@@ -115,7 +111,7 @@ const Card = styled.div`
   @media (max-width: 420px) {
     width: ${(props) =>
       props.cardStyle.xsm ? props.cardStyle.xsm.width : "250px"};
-  }
+  } */
 `;
 
 const BackgroundImage = styled.div`
@@ -130,7 +126,7 @@ const BackgroundImage = styled.div`
 const EventInfo = styled.div`
   color: #36454f;
   position: relative;
-  flex-grow: 1;
+  flex-grow: 0;
   padding: ${(props) =>
     props.eventInfoStyle["paddingMd"]
       ? props.eventInfoStyle["paddingMd"]

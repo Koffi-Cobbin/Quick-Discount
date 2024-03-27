@@ -20,6 +20,9 @@ const SideNav = (props) => {
                 </div>
             </SearchEntry>
 
+            <Link to="/" onClick={props.close}>
+                <span>Home</span>
+            </Link>
             <Link to="/discounts" onClick={props.close}>
                 <span>Discounts</span>
             </Link>
@@ -62,9 +65,9 @@ const SideNav = (props) => {
             </>
             ) : (
             <>
-            <Link to="/signup" onClick={props.close}>
+            {/* <Link to="/signup" onClick={props.close}>
                 <span>Signup</span>
-            </Link>
+            </Link> */}
             <Link to="/login" onClick={props.close}>
                 <span>Login</span>
             </Link>

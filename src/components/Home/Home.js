@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react";
 
 import BackgroundSlider from "./BackgroundSlider";
 import CarouselSection from "../Shared/CarouselSection";
+import CarouselFlex from "../Shared/CarouselFlex";
 import TopDiscounts from "../Discounts/TopDiscounts";
 import { LeftButton, RightButton } from "../Shared/CarouselControls";
 import DiscountCard from "../Discounts/DiscountCard";
@@ -92,18 +93,20 @@ const Home = (props) => {
           discountCardStyles={discountCardStyles}/>}
 
       <Section>
+        <LeftButton target="filter"/>
+        
         <Categories
           id="filter"
           role="region"
           aria-label="categories-filter"
           tabindex="0"
         >
-          <span className="active" onClick={() => handleClickScroll("popular")}>
-            Popular
-          </span>
           {categories && (
             <>
-              {categories.map((category, key) => (
+              <span className="active" onClick={() => handleClickScroll("popular")}>
+                {categories[0]}
+              </span>
+              {categories.slice(1).map((category, key) => (
                 <span key={key} onClick={() => handleClickScroll(category)}>
                   {category}
                 </span>
@@ -111,8 +114,8 @@ const Home = (props) => {
             </>
           )}
         </Categories>
-        <LeftButton target="filter" pos="0" />
-        <RightButton target="filter" pos="0" />
+        
+        <RightButton target="filter"/>
       </Section>
 
       <CategoriesWrap>
@@ -134,9 +137,10 @@ const Home = (props) => {
                   </h4>
                 </CategoryTitle>
                 {props.discounts.results && (
-                  <CarouselSection
+                  <CarouselFlex
                     type="category"
                     divId={category.toLowerCase()}
+                    className="category-carousel-section"
                   >
                     {props.discounts.results.map((discount, key) => (
                       <DiscountCard
@@ -145,7 +149,7 @@ const Home = (props) => {
                         discountCardStyles={discountCardStyles}
                       />
                     ))}
-                  </CarouselSection>
+                  </CarouselFlex>
                 )}
               </CategorySection>
             ))}
@@ -166,7 +170,10 @@ const Section = styled.div`
   width: 100%;
   overflow-x: hidden;
   margin: 10px 0;
-  background-color: #e5e4e2;
+  background-color: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const Categories = styled.div`
@@ -223,9 +230,10 @@ const CategorySection = styled.div`
   width: 100%;
   margin: 10px 0;
   padding-bottom: 10px;
+  /* border: 1px solid blue; */
 
-  & > div.category-section {
-    background: ${(props) => (props.index % 2 === 0 ? "#e0e0e0" : "white")};
+  &.category-section {
+    background: ${(props) => (props.index % 2 === 0 ? "#fff" : "#fbfbfb")};
     background-image: ${(props) =>
       props.bgImage ? `url(${props.bgImage})` : "none"};
   }
@@ -248,7 +256,7 @@ const CategoryTitle = styled.div`
     }
   }
   @media (min-width: 768px) {
-    width: 80%;
+    width: 90%;
     margin: 0 auto;
   }
 `;

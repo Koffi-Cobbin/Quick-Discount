@@ -30,6 +30,8 @@ import TermsAndConditions from "./components/Discounts/TermsAndConditions";
 import { getUserAuth } from "./actions";
 import Protected from "./ProtectedRoute";
 
+import Test from "./components/Tests/Test";
+
 
 function App(props) {
   const [scrollTop, setScrollTop] = useState(0);
@@ -89,7 +91,7 @@ function App(props) {
               path="/"
               element={[
                 <Navbar
-                  style={{ backgroundColor: "transparent" }}
+                  style={{ }}
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
                 />,
@@ -103,7 +105,6 @@ function App(props) {
                 key={index}
                 element={[
                   <Navbar
-                    style={{ backgroundColor: "#67309b" }}
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
                   />,
@@ -116,7 +117,6 @@ function App(props) {
               path="/discounts/:discountId"
               element={[
                 <Navbar
-                  style={{ backgroundColor: "transparent" }}
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
                 />,
@@ -130,7 +130,6 @@ function App(props) {
                 // <Protected user={props.user}>
                 //   </Protected>
                   <Navbar
-                    style={{ backgroundColor: "#67309b" }}
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
                   />,
@@ -142,7 +141,6 @@ function App(props) {
               path="/discounts/update/:eventId"
               element={[
                 <Navbar
-                  style={{ backgroundColor: "#67309b" }}
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
                 />,
@@ -155,7 +153,6 @@ function App(props) {
               element={[
                 <Protected user={props.user}>
                   <Navbar
-                    style={{ backgroundColor: "#67309b" }}
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
                   />,
@@ -169,7 +166,6 @@ function App(props) {
               element={[
                 <Protected user={props.user}>
                   <Navbar
-                    style={{ backgroundColor: "#67309b" }}
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
                   />,
@@ -183,7 +179,6 @@ function App(props) {
               element={[
                 <Protected user={props.user}>
                   <Navbar
-                    style={{ backgroundColor: "#67309b" }}
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
                   />,
@@ -196,7 +191,6 @@ function App(props) {
               path="/login"
               element={[
                 <Navbar
-                  style={{ backgroundColor: "#67309b" }}
                   sidenav={openSideNav}
                 />,
                 <Login />,
@@ -207,7 +201,6 @@ function App(props) {
               path="/signup"
               element={[
                 <Navbar
-                  style={{ backgroundColor: "#67309b" }}
                   sidenav={openSideNav}
                 />,
                 <Signup />,
@@ -218,7 +211,6 @@ function App(props) {
               path="/logout"
               element={[
                 <Navbar
-                  style={{ backgroundColor: "#67309b" }}
                   sidenav={openSideNav}
                 />,
                 <Logout />,
@@ -231,7 +223,6 @@ function App(props) {
               key={index}
               element={[
                 <Navbar
-                  style={{ backgroundColor: "#67309b" }}
                   sidenav={openSideNav}
                 />,
                 <Help />,
@@ -243,12 +234,22 @@ function App(props) {
               path="/terms"
               element={[
                 <Navbar
-                  style={{ backgroundColor: "#67309b" }}
                   sidenav={openSideNav}
                 />,
                 <TermsAndConditions />,
               ]}
-            />
+            />,
+
+            <Route
+              exact
+              path="/test"
+              element={[
+                <Navbar
+                  sidenav={openSideNav}
+                />,
+                <Test />
+              ]}
+              />
           </Routes>
           {
             openNav && (

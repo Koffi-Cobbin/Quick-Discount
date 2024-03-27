@@ -77,7 +77,7 @@ const Signup = (props) => {
             <Section>
                 <FormSection>
                     <Form>
-                        <h1>Let's Bougie!</h1>
+                        <h1>Don't miss out!</h1>
                         <form>
                             <div className="inputbox-wrap">
                                 <div className="inputbox">
@@ -149,7 +149,7 @@ const Signup = (props) => {
                 </FormSection>
                 <Hero>
                     <div>
-                        <img src="/images/art8.png" alt="SignUp" />
+                        <img src="/images/free.png" alt="SignUp" />
                     </div>
                 </Hero>
             </Section>
@@ -208,7 +208,7 @@ const Form = styled.div`
     /* border: 1px solid red; */
     & h1{
         font-size: 2em;
-        border-left: 5px solid dodgerblue;
+        border-left: 5px solid #67309b;
         padding: 10px;
         color: #000;
         letter-spacing: 5px;
@@ -261,11 +261,11 @@ const Form = styled.div`
 
     & [type="button"] {
         width: 100%;
-        background: dodgerblue;
+        background: #67309b;
         color: #fff;
         border: #fff;
         &:hover {
-            background: linear-gradient(45deg, greenyellow, dodgerblue);
+            background: linear-gradient(45deg, blue, #67309b);
         }
     }
     @media (max-width: 768px) {
