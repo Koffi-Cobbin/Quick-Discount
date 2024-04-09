@@ -171,7 +171,7 @@ const Container = styled.div`
     padding: 5px 0;
     padding-top: 10px;
     overflow: hidden;
-    font-family: Arial;
+    font-family: Lato, 'Roboto', sans-serif;
     /* border-bottom: 1px solid rgba(0, 0, 0, 0.08); */
     background-color: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10);
@@ -196,9 +196,10 @@ const Content = styled.div`
 const Logo = styled.span`
     font-size: 0px;
     img {
-        height: 45px;
+        height: 50px;
         margin-top: -5px;
         margin-right: 10px;
+        padding: 0px;
         /* border: 2px solid white; */
     }
     @media screen and (max-width: 768px){
@@ -263,7 +264,7 @@ const SearchEntryDisplay = styled.div`
         z-index: 1000;
         padding: 10px 0;
         overflow: hidden;
-        font-family: Arial;
+        font-family: Lato, 'Roboto', sans-serif;
         height: 70px;
     }
     .show {display:block;}
@@ -376,7 +377,7 @@ const NavList = styled.li`
             display: flex;
             align-items: center;
             margin: 0;
-            font-family: Arial;
+            font-family: Lato, 'Roboto', sans-serif;
             position: relative;
             img {
                 width: 12px;

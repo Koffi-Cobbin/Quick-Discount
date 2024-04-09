@@ -85,7 +85,7 @@ const Card = styled.div`
 
 const BackgroundImage = styled.div` 
   width: 100%;
-  min-height: 130px;  
+  min-height: 140px;  
   border-radius: 10px 10px 0 0;
   background-color: #333;
   background-size: cover;
@@ -97,6 +97,7 @@ const EventInfo = styled.div`
   color: #36454f;
   position: relative;
   padding: 12px;
+  font-family: Lato, 'Roboto', sans-serif;
   /* border: 1px solid blue; */
 `;
 

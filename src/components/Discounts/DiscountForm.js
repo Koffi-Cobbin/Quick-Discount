@@ -895,6 +895,7 @@ const DiscountForm = (props) => {
 
 const Container = styled.div`
   margin-bottom: 20px;
+  font-family: Lato, 'Roboto', sans-serif;
 `;
 
 const FlexWrap = styled.div`

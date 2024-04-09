@@ -148,6 +148,7 @@ const FooterSection = styled.div`
     color: white;
     padding: 10px;
     margin-bottom: 0;
+    font-family: Lato, 'Roboto', sans-serif;
     @media (max-width: 768px) {
     }
 `;
@@ -264,7 +265,7 @@ const Form = styled.div`
         left: 20px;
         font-size: 1em;
         transition: 0.6s;
-        font-family: sans-serif;
+        font-family: Lato, 'Roboto', sans-serif;
         color: #999;
     }
 

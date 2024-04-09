@@ -87,6 +87,7 @@ const Container = styled.div`
   z-index: 999;
   background-color: rgba(0, 0, 0, 0.8);
   animation: fadeIn 0.4s;
+  font-family: Lato, 'Roboto', sans-serif;
 `;
 
 const Sidenav = styled.div`
@@ -142,7 +143,7 @@ const SearchEntry = styled.div`
         padding: 5px 0;
         position: relative;
         overflow: hidden;
-        font-family: Arial;
+        font-family: Lato, 'Roboto', sans-serif;
         border:  1px solid white;
         border-radius: 4px;
         & input {

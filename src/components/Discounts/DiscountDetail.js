@@ -367,6 +367,7 @@ const Container = styled.div`
   color: rgba(0, 0, 0, 0.6);
   text-align: left;
   background: #fff;
+  font-family: Lato, 'Roboto', sans-serif;
 `;
 
 const Wrapper = styled.div`
@@ -774,7 +775,7 @@ const Like = styled.p`
 
 const Description = styled.div`
     margin: 10px 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Lato, 'Roboto', sans-serif;
     line-height: 1.5;
     @media (max-width: 530px) {
     font-size: 13px;
