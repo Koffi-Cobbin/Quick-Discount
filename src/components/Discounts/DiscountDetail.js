@@ -196,6 +196,10 @@ const DiscountDetail = (props) => {
                     <Description>
                         {/* <h4><b>About this promo</b></h4> */}
                         <p>
+                            <b>Discount: </b> 
+                            <Colored> {discount.percentage_discount} </Colored>            
+                        </p>
+                        <p>
                             <b>Duration: </b> 
                             <Colored> {formatDate(discount.start_date)} </Colored> to        
                             <Colored> {formatDate(discount.start_date)} </Colored>                 
@@ -339,7 +343,8 @@ const DiscountDetail = (props) => {
                     {recomendedDiscounts && (
                     <CarouselFlex    
                         divId="recomended"    
-                        type="category"                   
+                        type="category" 
+                        classId="recomendations"                  
                     >
                         {recomendedDiscounts.slice(0, 2).map((discount, key) => (
                         <DiscountCard
@@ -887,7 +892,7 @@ const OrganiserInfo = styled.div`
 
 const CommentsSection = styled(SectionWrapper)`
     margin: 10px 0;
-    padding: 30px 0;
+    /* border: 1px solid black; */
 `;
 
 const SectionTitle = styled.h4`
@@ -919,6 +924,8 @@ const SuggestedDiscounts = styled(SectionWrapper)`
 `;
 
 const RecomendedDiscounts = styled.div`
+    width: 80%;
+    margin: 0 auto;
     /* border: 1px solid red; */
     @media (max-width: 768px) {
         width: 100%;
@@ -943,7 +950,6 @@ const SuggestedDiscountsTitle = styled.div`
     }
   }
   @media (min-width: 768px) {
-    width: 90%;
     margin: 0 auto;
   }
 `;

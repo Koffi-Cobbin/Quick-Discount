@@ -6,8 +6,9 @@ export const CarouselFlex = (props) => {
   return (
       <Section bgImage={props.bgImage}>
           {/* <LeftButton target={props.divId} pos={props.ctrlPos}/> */}
-          <Wrapper>
+          <Wrapper className={props.classId}>
               <ContentList
+                  className={`${props.classId}-carousel`}
                   id={props.divId}
                   role="region" 
                   aria-label={props.divId}
@@ -33,7 +34,7 @@ const Section = styled.div`
 
     /* Largest devices such as desktops (1280px and up) */
     @media only screen and (min-width: 160em) {
-        width: 80%;
+        width: 80%;        
         margin: 0 auto;
     }
 `;
@@ -43,6 +44,10 @@ const Wrapper = styled.div`
     margin: 0 auto;
     /* border: 1px solid blue; */
 
+    &.recomendations{
+        width: 100%;
+    }
+
     @media (max-width: 768px) {
         width: 100%;
     }
@@ -50,7 +55,7 @@ const Wrapper = styled.div`
     /* Largest devices such as desktops (1920px and up) */
     @media only screen and (min-width: 120em) {
         width: 80%;
-        margin: 0 auto;
+        margin: 0 auto;        
     }
 
     /* Largest devices such as desktops (2560px and up) */
@@ -65,6 +70,11 @@ const ContentList = styled.div`
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between; 
+
+    &.recomendations-carousel{
+        justify-content: flex-start;
+        padding: 0px;
+    }
     
     /* border: 1px solid black; */
 
@@ -113,7 +123,7 @@ const ListItem = styled.div`
     
     @media (max-width: 640px) {
         width: calc(100% - 20px);
-        min-width: 280px;
+        min-width: 300px;
     }
 
     /* Small devices such as large phones (640px and up) */
