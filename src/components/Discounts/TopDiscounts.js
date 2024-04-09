@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import DiscountCard from "./DiscountCard"; 
-import CarouselSection from "../Shared/CarouselSection";
+// import CarouselSection from "../Shared/CarouselSection";
 import CarouselFlex from "../Shared/CarouselFlex";
 
 
@@ -55,6 +55,18 @@ const CategoryTitle = styled.div`
   }
   @media (min-width: 768px) {
     width: 90%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1920px and up) */
+  @media only screen and (min-width: 120em) {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1280px and up) */
+  @media only screen and (min-width: 160em) {
+    width: 60%;
     margin: 0 auto;
   }
 `;

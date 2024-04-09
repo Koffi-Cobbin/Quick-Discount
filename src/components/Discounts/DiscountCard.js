@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
-import { useContext, useState, useEffect } from "react";
-import { formatDate, formatTime } from "../../utils/middleware";
+// import { Link } from "react-router-dom";
+import { useState } from "react";
+import { formatDate } from "../../utils/middleware";
 import StarRating from "./StarRating";
 // import AddToWishlist from "../Wishlist/AddToWishlist";
 
@@ -62,14 +62,12 @@ const DiscountCard = (props) => {
   );
 };
 
-const Card = styled.div`
+const Card = styled.div`  
   /* width: 270px;
   height: 300px; */
   width: 100%;
   height: fit-content;
   border-radius: 10px;
-  transition: all 0.3s;
-  scroll-snap-align: start;
   background-color: #fff;
   margin: 0 auto;  
   overflow: hidden;
@@ -77,15 +75,11 @@ const Card = styled.div`
 
   &:first-of-type {
     /* Allow users to fully scroll to the start */
-    scroll-snap-align: center;
+    /* scroll-snap-align: center; */
   }
   &:last-of-type {
     /* Allow users to fully scroll to the end */
-    scroll-snap-align: end;
-  }
-
-  &:hover {
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    /* scroll-snap-align: end; */
   }
 `;
 

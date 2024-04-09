@@ -2,10 +2,9 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import BackgroundSlider from "./BackgroundSlider";
-import CarouselSection from "../Shared/CarouselSection";
 import CarouselFlex from "../Shared/CarouselFlex";
 import TopDiscounts from "../Discounts/TopDiscounts";
 import { LeftButton, RightButton } from "../Shared/CarouselControls";
@@ -257,6 +256,18 @@ const CategoryTitle = styled.div`
   }
   @media (min-width: 768px) {
     width: 90%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1920px and up) */
+  @media only screen and (min-width: 120em) {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1280px and up) */
+  @media only screen and (min-width: 160em) {
+    width: 60%;
     margin: 0 auto;
   }
 `;
