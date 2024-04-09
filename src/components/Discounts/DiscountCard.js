@@ -21,28 +21,19 @@ const DiscountCard = (props) => {
   return (
     <>
     {props.discount &&
-    <Card
-      cardStyle={props.discountCardStyles["card"]}
-      fontSizes={props.discountCardStyles["fontSizes"]}
-    >
-      <a href={`/discounts/${props.discount.id}`} >
-        <BackgroundImage
-          style={{ backgroundImage: `url(${props.discount.flyer})` }}
-          bgImageStyle={props.discountCardStyles["bgImage"]}
-        />
-      </a>
-      <EventInfo
-        eventInfoStyle={props.discountCardStyles["eventInfo"]}
-        fontSizes={props.discountCardStyles["fontSizes"]}
-      >
+    <Card>
+        <a href={`/discounts/${props.discount.id}`} >      
+          <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }}/>
+        </a>
+      <EventInfo>
         <Title eventTitle={props.discountCardStyles["title"]}>
           {handleSlice(props.discount.title)}
           {slice && <span> ...</span>}
         </Title>
 
-        <Description>        
-          <p>{props.discount.description.slice(0, 45)} ...</p>
-        </Description>
+        <PercentageDiscount>        
+          <p>{props.discount.percentage_discount}</p>
+        </PercentageDiscount>
 
         <Address>
           <span>{props.discount.location}</span>
@@ -72,18 +63,17 @@ const DiscountCard = (props) => {
 };
 
 const Card = styled.div`
-  position: relative;
-  min-height: 280px;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  transition: all 0.3s;
+  /* width: 270px;
+  height: 300px; */
+  width: 100%;
+  height: fit-content;
   border-radius: 10px;
-  overflow: hidden;
+  transition: all 0.3s;
   scroll-snap-align: start;
   background-color: #fff;
-  margin: 0 auto;
-  box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;  
+  overflow: hidden;
+  position: relative;
 
   &:first-of-type {
     /* Allow users to fully scroll to the start */
@@ -97,58 +87,26 @@ const Card = styled.div`
   &:hover {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
   }
-
-  /* @media (max-width: 768px) {
-    width: ${(props) =>
-      props.cardStyle.md ? props.cardStyle.md.width : "250px"};
-  }
-
-  @media (max-width: 530px) {
-    width: ${(props) =>
-      props.cardStyle.sm ? props.cardStyle.sm.width : "250px"};
-  }
-
-  @media (max-width: 420px) {
-    width: ${(props) =>
-      props.cardStyle.xsm ? props.cardStyle.xsm.width : "250px"};
-  } */
 `;
 
-const BackgroundImage = styled.div`
+const BackgroundImage = styled.div` 
   width: 100%;
+  min-height: 130px;  
   border-radius: 10px 10px 0 0;
   background-color: #333;
-  background-position: center;
   background-size: cover;
-  height: ${(props) => props.bgImageStyle["height"]};
+  /* background-position: center; */
+  /* border: 2px solid green; */
 `;
 
 const EventInfo = styled.div`
   color: #36454f;
   position: relative;
-  flex-grow: 0;
-  padding: ${(props) =>
-    props.eventInfoStyle["paddingMd"]
-      ? props.eventInfoStyle["paddingMd"]
-      : "20px"};
-  height: ${(props) => props.eventInfoStyle["height"]};
-
-  @media (max-width: 767px) {
-    font-size: ${(props) => props.fontSizes["fontSizeSm"]};
-    padding: ${(props) =>
-      props.eventInfoStyle["paddingSm"]
-        ? props.eventInfoStyle["paddingSm"]
-        : "10px"};
-  }
-  /* @media (max-width: 420px) {
-        font-size: ${(props) => props.fontSizes["fontSizeSm"]}; 
-    } */
-  @media (min-width: 768px) {
-    font-size: ${(props) => props.fontSizes["fontSizeMd"]};
-  }
+  padding: 12px;
+  /* border: 1px solid blue; */
 `;
 
-const Title = styled.h1`
+const Title = styled.h4`
   margin-top: 1px;
   margin-bottom: 5px;
   font-weight: 600;
@@ -156,13 +114,6 @@ const Title = styled.h1`
   max-height: 35px;
   overflow: hidden;
   /* border: 1px solid black; */
-  @media (min-width: 768px) {
-    font-size: ${(props) => props.eventTitle["fontSizeMd"]};
-  }
-
-  @media (max-width: 530px) {
-    font-size: ${(props) => props.eventTitle["fontSizeSm"]};
-  }
 `;
 
 const DateTimeWrapper = styled.div`
@@ -171,30 +122,13 @@ const DateTimeWrapper = styled.div`
     align-items: center;
   }
 
-  @media (max-width: 530px) {
-    display: ${(props) =>
-      props.dateTime["md"]["display"]
-        ? props.dateTime["md"]["display"]
-        : "block"};
-    align-items: ${(props) =>
-      props.dateTime["md"]["alignItems"]
-        ? props.dateTime["md"]["alignItems"]
-        : "center"};
-  }
-
-  @media (max-width: 420px) {
-    flex-direction: ${(props) =>
-      props.dateTime["xsm"]["flexDir"]
-        ? props.dateTime["xsm"]["flexDir"]
-        : "row"};
-    align-items: ${(props) =>
-      props.dateTime["xsm"] ? "flex-start" : "center"};
-  }
+  @media (max-width: 420px) {}
 `;
 
 const Date = styled.div`
   text-align: left;
   align-items: center;
+  font-size: 13px;
   font-weight: 600;
   display: flex;
   p {
@@ -216,56 +150,16 @@ const Time = styled(Date)`
     props.time["marginTop"] ? props.time["marginTop"] : "0"};
 `;
 
-const Description = styled.div`
-  display: flex;
-  align-items: center;
+const PercentageDiscount = styled.p`
+  padding: 0;
   color: #fa8128;
-`;
-
-
-
-// const AttendeesTicketSlotWrapper = styled.div`
-//     display: ${props => props.attendeesSlots['display'] ? props.attendeesSlots['display'] : 'block'};
-//     align-items: ${props => props.attendeesSlots['alignItems'] ? props.attendeesSlots['alignItems'] : 'center'};
-//     justify-content: ${props => props.attendeesSlots['justifyContent'] ? props.attendeesSlots['justifyContent'] : 'space-between'};
-//     margin-top: ${props => props.attendeesSlots['marginTop'] ? props.attendeesSlots['marginTop'] : '0'};
-// `;
-
-const EventType = styled.span`
-  margin-right: 2px;
-`;
-
-const Free = styled(EventType)``;
-
-const Ticketed = styled(EventType)``;
-
-const AvailableTickets = styled.span`
-  float: left;
-  margin-left: 1px;
-  margin-top: ${(props) =>
-    props.slots["marginTop"] ? props.slots["marginTop"] : "0"};
-`;
-
-const AvailableSlots = styled.span`
-  float: left;
-  margin-right: 3px;
-  margin-top: ${(props) =>
-    props.slots["marginTop"] ? props.slots["marginTop"] : "0"};
-`;
-
-const Attendees = styled.span`
-  display: flex;
-  align-items: center;
-  img {
-    width: 15px;
-    height: 15px;
-    margin-right: 3px;
-  }
-`;
-
-const Address = styled.div`
   text-align: left;
-  max-height: 30px;
+`;
+
+
+const Address = styled.p`
+  text-align: left;
+  /* max-height: 30px; */
   overflow: hidden;
   margin-bottom: 4px;
 `;
@@ -300,16 +194,5 @@ const Like = styled.span`
   }
 `;
 
-// const AttendButton = styled.button`
-//     color: white;
-//     border: none;
-//     outline: none;
-//     background-color: rgba(0, 0, 0, 1);
-//     padding: 7px;
-//     width: 100%;
-//     margin-top: 1px;
-//     border-radius: 0 0 5px 5px;
-//     font-weight: 600;
-// `;
 
 export default DiscountCard;

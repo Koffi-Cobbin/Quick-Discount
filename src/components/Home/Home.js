@@ -58,7 +58,7 @@ const Home = (props) => {
 
   const discountCardStyles = {
     card: { margin: "0 auto", width: "80%" },
-    bgImage: { height: "110px" },
+    bgImage: { height: "120px" },
     eventInfo: { paddingMd: "20px", height: "115px" },
     title: { fontSizeSm: "13px", fontSizeMd: "15px", fontSizeL: "18px" },
     fontSizes: { fontSizeSm: "12px", fontSizeMd: "12px", fontSizeL: "15.5px" },
@@ -89,7 +89,7 @@ const Home = (props) => {
 
       {props.discounts.results && 
         <TopDiscounts 
-          discounts={props.discounts.results} 
+          discounts={props.discounts.results.slice(0,4)} 
           discountCardStyles={discountCardStyles}/>}
 
       <Section>
@@ -142,7 +142,7 @@ const Home = (props) => {
                     divId={category.toLowerCase()}
                     className="category-carousel-section"
                   >
-                    {props.discounts.results.map((discount, key) => (
+                    {props.discounts.results.slice(0,4).map((discount, key) => (
                       <DiscountCard
                         key={key}
                         discount={discount}

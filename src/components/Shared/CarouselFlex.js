@@ -6,7 +6,7 @@ import { LeftButton, RightButton } from "./CarouselControls";
 export const CarouselFlex = (props) => {
   return (
       <Section bgImage={props.bgImage}>
-          <LeftButton target={props.divId} pos={props.ctrlPos}/>
+          {/* <LeftButton target={props.divId} pos={props.ctrlPos}/> */}
           <Wrapper>
               <ContentList
                   id={props.divId}
@@ -20,7 +20,7 @@ export const CarouselFlex = (props) => {
                   }                    
               </ContentList>
           </Wrapper>
-          <RightButton target={props.divId} pos={props.ctrlPos}/>
+          {/* <RightButton target={props.divId} pos={props.ctrlPos}/> */}
       </Section>
   )
 };
@@ -35,61 +35,59 @@ const Section = styled.div`
 const Wrapper = styled.div`
     width: 90%;
     margin: 0 auto;
-    /* overflow-x: auto; 
-    white-space: nowrap;  */
-    /* border: 1px solid blue;     */
+    /* border: 1px solid blue; */
 
     @media (max-width: 768px) {
-        width: 95%;
+        width: 100%;
     }
 `;
 
 const ContentList = styled.div`
+    width: 100%;    
+    padding: 20px 0px;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly; /* Center the cards horizontally */
+
     overflow-x: scroll;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    padding: 20px 10px;
     -webkit-overflow-scrolling: touch;
-    width: 100%;
     /* border: 1px solid black; */
 
     &::-webkit-scrollbar {
         display: none;
     }
+
+    @media (max-width: 481px) {
+        padding: 0;
+    }
 `;
 
-const ListItem = styled.div`
-    flex: 0 0 auto;
-    width: calc(100% / 4 - 20px);
-    height: calc((calc(100% / 4 - 20px)) * 1.5);
-    margin-left: 12px;
-    margin-right: 12px;
+const ListItem = styled.div` 
+    position: relative;
+    margin: 10px;
     border-radius: 8px;
-    overflow: hidden;
     cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
     /* border: 1px solid red; */
 
-    & img {
-        width: 100%;
-        height: auto;
-        transition: transform 0.3s ease;
-    }
-    
-    &:hover img {
-        transform: scale(1.1);
+    &:hover {
+        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
     }
 
     /* Adjust number of columns for different screen sizes */
-    @media (max-width: 992px) {
-        flex-basis: calc(100% / 3 - 20px);
+    @media (min-width: 992px) {
+        width: calc(100% / 4 - 20px);
     }
 
     @media (max-width: 768px) {
-        flex-basis: calc(100% / 2 - 20px);
+        width: calc(100% / 2 - 20px);
     }
+    
     @media (max-width: 480px) {
-        flex-basis: calc(100% - 20px);
+        width: calc(100% - 20px);
     }
 `;
 
