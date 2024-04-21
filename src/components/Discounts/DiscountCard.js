@@ -42,15 +42,15 @@ const DiscountCard = (props) => {
         <DateTimeWrapper dateTime={props.discountCardStyles["dateTime"]}>
           <Date>
             <p>
-              <span>{formatDate(props.discount.start_date)} 
-              <span style={{color: "#fa8128"}}><b> -</b></span> {formatDate(props.discount.end_date)}</span> 
+              <span>{formatDate(props.discount.start_date, false)} 
+              <span style={{color: "#fa8128"}}><b> to </b></span> {formatDate(props.discount.end_date, false)}</span> 
             </p>
           </Date>
         </DateTimeWrapper>
 
 
           <SocialActions>
-            <Left>1,220</Left>
+            <Left><b>1,220</b></Left>
             <Right>
               <StarRating rating={props.discount.rate} showRate={true}/>
             </Right>
@@ -67,7 +67,7 @@ const Card = styled.div`
   height: 300px; */
   width: 100%;
   height: fit-content;
-  border-radius: 10px;
+  border-radius: 20px;
   background-color: #fff;
   margin: 0 auto;  
   overflow: hidden;
@@ -85,8 +85,8 @@ const Card = styled.div`
 
 const BackgroundImage = styled.div` 
   width: 100%;
-  min-height: 140px;  
-  border-radius: 10px 10px 0 0;
+  min-height: 180px;  
+  border-radius: 20px 2s0px 0 0;
   background-color: #333;
   background-size: cover;
   /* background-position: center; */
@@ -97,13 +97,15 @@ const EventInfo = styled.div`
   color: #36454f;
   position: relative;
   padding: 12px;
+  font-size: 20px;
   font-family: Lato, 'Roboto', sans-serif;
   /* border: 1px solid blue; */
 `;
 
 const Title = styled.h4`
-  margin-top: 1px;
-  margin-bottom: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 30px;
   font-weight: 600;
   text-align: left;
   max-height: 35px;
@@ -122,9 +124,7 @@ const DateTimeWrapper = styled.div`
 
 const Date = styled.div`
   text-align: left;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
+  align-items: center;  
   display: flex;
   p {
     span {
@@ -139,11 +139,6 @@ const Date = styled.div`
   }
 `;
 
-const Time = styled(Date)`
-  margin-right: 2px;
-  margin-top: ${(props) =>
-    props.time["marginTop"] ? props.time["marginTop"] : "0"};
-`;
 
 const PercentageDiscount = styled.p`
   padding: 0;
@@ -154,15 +149,16 @@ const PercentageDiscount = styled.p`
 
 const Address = styled.p`
   text-align: left;
-  /* max-height: 30px; */
   overflow: hidden;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  font-weight: 600;
 `;
 
 const SocialActions = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* border: 1px solid blue; */
 `;
 
 const Left = styled.div``;

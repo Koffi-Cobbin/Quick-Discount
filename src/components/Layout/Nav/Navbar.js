@@ -41,12 +41,7 @@ const Navbar = (props) => {
 
                 <SearchWrapper>
                     <Search>
-                        <div>
-                            <input type="text" placeholder="Search" />
-                        </div>
-                        <SearchIcon>
-                            <img src="/images/icons/search-icon.svg" alt="" />
-                        </SearchIcon> 
+                        <input type="text" placeholder="Search" />
                     </Search>
                 </SearchWrapper>
 
@@ -169,11 +164,10 @@ const Container = styled.div`
     width: 100%;
     z-index: 1000;
     padding: 5px 0;
-    padding-top: 10px;
+    padding-top: 10px;    
     overflow: hidden;
     font-family: Lato, 'Roboto', sans-serif;
-    /* border-bottom: 1px solid rgba(0, 0, 0, 0.08); */
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #fa8128;
     backdrop-filter: blur(10);
     @media (min-width: 768px) {
         #sidenav{
@@ -185,18 +179,32 @@ const Container = styled.div`
 
 const Content = styled.div`
     display: flex;
-    align-items: flex-start;
+    align-items: center; /** flex-start */
     min-height: 100%;
     justify-content: space-between;
     width: 95%;
     margin: 0 auto;
+
+    @media (min-width: 768px) {
+        width: 90%;        
+    }
+
+    /* Largest devices such as desktops (1920px and up) */
+    @media only screen and (min-width: 120em) {
+        width: 80%;
+    }
+
+    /* Largest devices such as desktops (1280px and up) */
+    @media only screen and (min-width: 160em) {
+        width: 60%;
+    }
 `;
 
 
 const Logo = styled.span`
     font-size: 0px;
     img {
-        height: 50px;
+        height: 70px;
         margin-top: -5px;
         margin-right: 10px;
         padding: 0px;
@@ -204,7 +212,7 @@ const Logo = styled.span`
     }
     @media screen and (max-width: 768px){
         img {
-            height: 30px;
+            height: 40px;
             margin-top: -5px;
             /* border: 2px solid white; */
         }
@@ -275,51 +283,38 @@ const SearchWrapper = styled.div`
 `;
 
 const Search = styled.div`
-    /* border: 1px solid white; */
-    position: relative;
-    & > div {
-        padding: 0;
-        /* border: 1px solid blue; */
-        input {
-            border: none;
-            box-sizing: none;
-            background-color: #f2f2f2;
-            border-radius: 20px;
-            color: rgba(0, 0, 0, 0.95); 
-            width: 300px;
-            padding: 0 8px 0 40px;
-            line-height: 1.75;
-            font-weight: 14px;
-            height: 34px;
-            border-color: #dce6f1;
-            vertical-align: text-top;
-            outline: none;
-            @media (max-width: 768px) {
-                max-width: 150px;
-            }
+    padding: 0;
+    margin: 0;
+    /* border: 1px solid blue; */
+    input {
+        border: none;
+        box-sizing: none;
+        background-color: rgba(255, 255, 255, 0.4);
+        border-radius: 20px;
+        color: #fff; 
+        width: 300px;
+        padding: 0 8px 0 40px;
+        font-size: 20px;
+        font-weight: 600;
+        height: 40px;
+        border-color: #dce6f1;
+        /* vertical-align: text-top; */
+        outline: none;
+        &::placeholder{
+            color: #fff;
+            font-weight: 600;
         }
-        @media (min-width: 769px) {
-            min-width: 300px;
+        @media (max-width: 768px) {
+            max-width: 150px;
         }
     }
+    @media (min-width: 769px) {
+        min-width: 300px;
+    }
+
     @media (max-width: 1020px) {
         display: none;
     }
-`;
-
-
-const SearchIcon = styled.span`
-    width: 40px;
-    position: absolute;
-    z-index: 1;
-    top: 11px;
-    left: 2px;
-    border-radius: 2px;
-    margin: 0;
-    pointer-events: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 `;
 
 const CloseBtn = styled.button`
@@ -336,6 +331,8 @@ const TopNav = styled.nav`
     margin-left: auto;
     display: block; 
     color: #000;
+    font-size: 30px;
+    font-weight: 500;
     @media (max-width: 600px) {
         display: none;
     }
@@ -359,14 +356,13 @@ const NavList = styled.li`
         background: transparent;
         display: flex;
         flex-direction: row;
-        font-size: 15.5px;
         justify-content: center;
         min-height: 30px;
         min-width: 80px;
         position: relative;
         text-decoration: none;
         margin-left: 5px;
-        color: #222;
+        color: #fff;
 
         img {
             width: 30px;
@@ -388,17 +384,8 @@ const NavList = styled.li`
 
         &.current{
             background-color: #fa8128;
+            padding: 0 15px;
             border-radius: 40px;
-            // border-bottom: 2px solid #fa8128;
-            // span:after {
-            //     content: '';
-            //     transform: scaleX(1);
-            //     bottom: 0;
-            //     left: 0;
-            //     position: absolute;
-            //     transition: transform 0.2s ease-in-out;
-            //     width: 100%;
-            // };
         }
 
         @media (max-width: 768px) {
@@ -409,9 +396,6 @@ const NavList = styled.li`
     &.active{
         a {
             border-bottom: 2px solid #fa8128;
-            /* text-decoration: underline;
-            text-decoration-color: #fa8128;
-            text-decoration-thickness: 2px; */
         }
 
         span:after {
@@ -475,6 +459,8 @@ const TicketCart = styled(NavList)`
 
 const Menu = styled(NavList)`
     color: #fff;
+    font-size: 30px;
+    font-weight: 600;
     a {
         min-width: 5px;
     }

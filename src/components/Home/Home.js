@@ -82,79 +82,82 @@ const Home = (props) => {
 
   return (
     <Container>
-      <div>
+      <>
         <BackgroundSlider />
-      </div>
+      </>
 
-      {props.discounts.results && 
-        <TopDiscounts 
-          discounts={props.discounts.results.slice(0,4)} 
-          discountCardStyles={discountCardStyles}/>}
+      <Content>
+        {props.discounts.results && 
+          <TopDiscounts 
+            discounts={props.discounts.results.slice(0,4)} 
+            discountCardStyles={discountCardStyles}/>}     
 
-      <Section>
-        <LeftButton target="filter"/>
-        
-        <Categories
-          id="filter"
-          role="region"
-          aria-label="categories-filter"
-          tabindex="0"
-        >
+
+        <Section>
+          <LeftButton target="filter" pos='0'/>
+          
+          <Categories
+            id="filter"
+            role="region"
+            aria-label="categories-filter"
+            tabindex="0"
+          >
+            {categories && (
+              <>
+                <span className="active" onClick={() => handleClickScroll("popular")}>
+                  {categories[0]}
+                </span>
+                {categories.slice(1).map((category, key) => (
+                  <span key={key} onClick={() => handleClickScroll(category)}>
+                    {category}
+                  </span>
+                ))}
+              </>
+            )}
+          </Categories>
+          
+          <RightButton target="filter" pos='0'/>
+        </Section>
+
+        <CategoriesWrap>
           {categories && (
             <>
-              <span className="active" onClick={() => handleClickScroll("popular")}>
-                {categories[0]}
-              </span>
-              {categories.slice(1).map((category, key) => (
-                <span key={key} onClick={() => handleClickScroll(category)}>
-                  {category}
-                </span>
+              {categories.map((category, key) => (
+                <CategorySection
+                  key={key}
+                  id={`${category.toLowerCase()}-section`}
+                  index={key}
+                  className="category-section"
+                >
+                  <CategoryTitle>
+                    <h4>{category}</h4>
+                    <h4>
+                      <Link to={`/discounts/cat/${category.toLowerCase()}`}>
+                        See more
+                      </Link>
+                    </h4>
+                  </CategoryTitle>
+                  {props.discounts.results && (
+                    <CarouselFlex
+                      type="category"
+                      divId={category.toLowerCase()}
+                      className="category-carousel-section"
+                    >
+                      {props.discounts.results.slice(0,4).map((discount, key) => (
+                        <DiscountCard
+                          key={key}
+                          discount={discount}
+                          discountCardStyles={discountCardStyles}
+                        />
+                      ))}
+                    </CarouselFlex>
+                  )}
+                </CategorySection>
               ))}
             </>
           )}
-        </Categories>
-        
-        <RightButton target="filter"/>
-      </Section>
-
-      <CategoriesWrap>
-        {categories && (
-          <>
-            {categories.map((category, key) => (
-              <CategorySection
-                key={key}
-                id={`${category.toLowerCase()}-section`}
-                index={key}
-                className="category-section"
-              >
-                <CategoryTitle>
-                  <h4>{category}</h4>
-                  <h4>
-                    <Link to={`/discounts/cat/${category.toLowerCase()}`}>
-                      See more
-                    </Link>
-                  </h4>
-                </CategoryTitle>
-                {props.discounts.results && (
-                  <CarouselFlex
-                    type="category"
-                    divId={category.toLowerCase()}
-                    className="category-carousel-section"
-                  >
-                    {props.discounts.results.slice(0,4).map((discount, key) => (
-                      <DiscountCard
-                        key={key}
-                        discount={discount}
-                        discountCardStyles={discountCardStyles}
-                      />
-                    ))}
-                  </CarouselFlex>
-                )}
-              </CategorySection>
-            ))}
-          </>
-        )}
-      </CategoriesWrap>
+        </CategoriesWrap>
+      </Content>
     </Container>
   );
 };
@@ -162,6 +165,28 @@ const Home = (props) => {
 const Container = styled.div`
   max-width: 100%;
   position: relative;
+`;
+
+const Content = styled.div`
+  max-width: 100%;
+  position: relative;
+
+  @media (min-width: 768px) {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1920px and up) */
+  @media only screen and (min-width: 120em) {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1280px and up) */
+  @media only screen and (min-width: 160em) {
+    width: 60%;
+    margin: 0 auto;
+  }
 `;
 
 const Section = styled.div`
@@ -191,7 +216,7 @@ const Categories = styled.div`
     padding: 8px 20px;
     background-color: #fff;
     border-radius: 20px;
-    font-size: 14px;
+    font-size: 20px;
     flex-shrink: 0;
     scroll-snap-align: center;
 
@@ -214,10 +239,10 @@ const Categories = styled.div`
     display: none;
   }
 
-  @media (min-width: 768px) {
+  /* @media (min-width: 768px) {
     margin: 0 auto;
     width: 80%;
-  }
+  } */
 `;
 
 const CategoriesWrap = styled.div`
@@ -245,31 +270,32 @@ const CategoryTitle = styled.div`
   justify-content: space-between;
   h4 {
     margin: 5px;
+    font-size: 30px;
     a {
       color: #808080;
-      font-size: 14px;
+      font-size: 20px;
       text-decoration: none;
       &:hover {
         cursor: default;
       }
     }
   }
-  @media (min-width: 768px) {
+  /* @media (min-width: 768px) {
     width: 90%;
     margin: 0 auto;
-  }
+  } */
 
   /* Largest devices such as desktops (1920px and up) */
-  @media only screen and (min-width: 120em) {
+  /* @media only screen and (min-width: 120em) {
     width: 80%;
     margin: 0 auto;
-  }
+  } */
 
   /* Largest devices such as desktops (1280px and up) */
-  @media only screen and (min-width: 160em) {
+  /* @media only screen and (min-width: 160em) {
     width: 60%;
     margin: 0 auto;
-  }
+  } */
 `;
 
 const Popular = styled(CategorySection)`

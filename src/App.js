@@ -91,7 +91,7 @@ function App(props) {
               path="/"
               element={[
                 <Navbar
-                  style={{ }}
+                  style={{backgroundColor : 'transparent'}}
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
                 />,
@@ -107,6 +107,7 @@ function App(props) {
                   <Navbar
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
+                    style={{}}
                   />,
                   <Discounts />,
                 ]}
@@ -119,6 +120,7 @@ function App(props) {
                 <Navbar
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
+                  style={{}}
                 />,
                 <DiscountDetail />,
               ]}

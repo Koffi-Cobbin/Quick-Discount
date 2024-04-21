@@ -26,8 +26,8 @@ const StarRating = ({ rating,  showRate}) => {
           <Star>
             <svg 
               key={idx}
-              height="12px" 
-              width="12px" 
+              height="20px" 
+              width="20px" 
               version="1.1" 
               id={idx} 
               xmlns="http://www.w3.org/2000/svg" 
@@ -52,8 +52,8 @@ const StarRating = ({ rating,  showRate}) => {
         {remainder > 0 &&
           <Star>
             <svg 
-              height="12px" 
-              width="12px" 
+              height="20px" 
+              width="20px" 
               version="1.1" 
               id="Capa_1" 
               xmlns="http://www.w3.org/2000/svg" 
@@ -79,8 +79,8 @@ const StarRating = ({ rating,  showRate}) => {
           <Star>
             <svg 
               key={idx}
-              height="12px" 
-              width="12px" 
+              height="20px" 
+              width="20px" 
               version="1.1" 
               id={idx} 
               xmlns="http://www.w3.org/2000/svg" 
@@ -105,17 +105,18 @@ const StarRating = ({ rating,  showRate}) => {
 const RatingWrap = styled.div`
     display: flex;
     align-items: center;
+    justify-content: center;
 `;
 
 const RateValue = styled.div`
-  font-size: 14px;
   margin-right: 10px;
 `;
 
 const StarsWrap = styled.div`
     display: inline-block;
     position: relative;
-    // justify-content: center;
+    /* border: 1px solid blue; */
+    /* justify-content: center; */
     font-size: 0; /* Remove space between inline-block elements */
 `;
 
@@ -123,8 +124,9 @@ const Star = styled.div`
     display: inline-block;
     overflow: hidden;
     position: relative;
-    width: 16px; /* Adjust width of stars container */
-    height: 16px; /* Adjust height of stars container */
+    width: 20px; /* Adjust width of stars container */
+    height: 20px; /* Adjust height of stars container */
+    margin: 2px;
     // border: 1px solid black;
 `;
 

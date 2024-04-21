@@ -53,7 +53,7 @@ const DiscountForm = (props) => {
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
-  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : [{name: "whatsapp", socialMediaURL: ""},]);
+  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : {whatsapp: " ", facebook: " ", instagram: " ", twitter: " "});
   const [websiteURL, setWebsiteUrl] = useState("");
   const [agreement, setAgreement] = useState("");
 
@@ -678,7 +678,7 @@ const DiscountForm = (props) => {
                       {packageOption &&
                         <PackagesInputsFlexWrap>
                           <div>
-                            <label htmlFor="package-type">Package type &nbsp;</label>
+                            <label htmlFor="package-type">Package type</label>
                             
                             <select
                               id="package-type"
@@ -808,37 +808,54 @@ const DiscountForm = (props) => {
                 <label style={{textAlign: "left"}}>Social Media Handles</label>
                 <FormInputs>
                   {!props.organizer && (
+                    <>                    
+                    {socialMediaHandles &&
                     <>
-                    {socialMediaHandles && socialMediaHandles.map((handle, index) => (
-                    <InputsFlexWrap>
-                      <div>
-                        <select
-                          id="social-media-type"
-                          name="social-media-type"
-                          value={handle.name}
-                          onChange={(e) =>
-                            handleSocialMediaChange(index, e.target.value)
-                          }
-                        >
-                          <option value="whatsapp">WhatsApp</option>
-                          <option value="facebook">Facebook</option>
-                          <option value="instagram">Instagram</option>
-                          <option value="delete">Delete</option>
-                        </select>                        
-                      </div>
+                    {socialMediaHandles.instagram &&
+                      <InputsFlexWrap>
+                        <div>
+                          <input
+                            type="text"
+                            value="instagram"
+                            readOnly
+                          />
+                        </div>
 
-                      <div>
-                        <input
-                          type="text"
-                          value={handle.url}
-                          onChange={(e) => socialMediaChangeHandler(index, e.target.value)}
-                          required
-                        />
-                      </div>
-                      </InputsFlexWrap>  
-                      ))}
+                        <div>
+                          <input
+                            type="text"
+                            value={socialMediaHandles.instagram}
+                            onChange={(e) => socialMediaChangeHandler("instagram", e.target.value)}
+                            required
+                          />
+                        </div>  
+                      </InputsFlexWrap>
+                      }                      
+
+                    {socialMediaHandles.facebook &&
+                      <InputsFlexWrap>
+                        <div>
+                          <input
+                            type="text"
+                            value="facebook"
+                            readOnly
+                          />
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            value={socialMediaHandles.facebook}
+                            onChange={(e) => socialMediaChangeHandler("facebook", e.target.value)}
+                            required
+                          />
+                        </div>
+                      </InputsFlexWrap>
+                      }
                     </>
-                  )}                   
+                      }
+                  </>
+                  )}
                 </FormInputs>
 
                 <FormInputs>
@@ -896,6 +913,7 @@ const DiscountForm = (props) => {
 const Container = styled.div`
   margin-bottom: 20px;
   font-family: Lato, 'Roboto', sans-serif;
+  font-size: 20px;
 `;
 
 const FlexWrap = styled.div`
@@ -959,17 +977,17 @@ const Content = styled.div`
 const Header = styled.div`
   padding: 16px 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  font-size: 16px;
+  /* font-size: 16px; */
   line-height: 1.5;
   color: #fa8128; /* dodgerblue rgba(0, 0, 0, 0.6); */
-  font-weight: 400;
+  /* font-weight: 400; */
   @media (max-width: 480px) {
     padding: 0;
     /* border: 1px solid black; */
     & h2 {
       padding: 0;
       margin: 0;
-      font-size: larger;
+      /* font-size: larger; */
     }
   }
 `;
@@ -1015,7 +1033,7 @@ const UploadImage = styled.div`
     label {
       border: 1px solid blue;
       padding: 3px;
-      font-size: 13px;
+      /* font-size: 13px; */
     }
   }
   img {
@@ -1027,7 +1045,7 @@ const UploadVideo = styled.div`
   input {
     width: 100%;
     height: 35px;
-    font-size: 16px;
+    /* font-size: 16px; */
     margin-bottom: 20px;
   }
 `;
@@ -1036,14 +1054,14 @@ const FormInputs = styled.div`
   label {
     float: left;
     color: rgba(0, 0, 0, 0.6);
-    font-size: 15px;
+    /* font-size: 15px; */
     margin-bottom: 2px;
   }
   input,
   select {
     width: 100%;
     height: 45px;
-    font-size: 16px;
+    /* font-size: 16px; */
     border: 1px solid #e5e4e2;
     padding: 0 12px;
     margin-bottom: 20px;
@@ -1053,7 +1071,7 @@ const FormInputs = styled.div`
   }
   textarea {
     width: 100%;
-    font-size: 16px;
+    /* font-size: 16px; */
     border: 1px solid #e5e4e2;
     padding: 0 12px;
     min-height: 100px;
@@ -1063,7 +1081,7 @@ const FormInputs = styled.div`
   button {
     width: 100%;
     height: 45px;
-    font-size: 16px;
+    /* font-size: 16px; */
     background-color: blue;
     color: #fff;
     border: 1px solid #e5e4e2;
@@ -1081,8 +1099,8 @@ const FormInputs = styled.div`
 const RadioInputs = styled.div`
   margin-bottom: 20px;
   & span.radio-title {
-    font-size: 15px;
-    font-weight: 600;
+    /* font-size: 15px; */
+    /* font-weight: 600; */
     color: rgba(0, 0, 0, 0.6);
     text-align: left;
     display: block;
@@ -1092,7 +1110,7 @@ const RadioInputs = styled.div`
   & label.radio-label {
     float: none;
     color: rgba(0, 0, 0, 0.6);
-    font-size: 15px;
+    /* font-size: 15px; */
   }
 `;
 
@@ -1140,8 +1158,8 @@ const Agreement = styled.div`
     display: block;
     text-align: left;
     padding: 5px 0;
-    font-size: 15px;
-    font-weight: 600;
+    /* font-size: 15px; */
+    /* font-weight: 600; */
     color: #fa8128;
   }
   & div {

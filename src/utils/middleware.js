@@ -146,7 +146,7 @@ export function isValidURL(url) {
 // -----------------------------------
 // DATE FORMATTER
 // ------------------------------
-export function formatDate(inputDate) {
+export function formatDate(inputDate, show_year=true) {
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -165,7 +165,7 @@ export function formatDate(inputDate) {
   const abbrMonth = months[date.getMonth()];
   const fullYear = date.getFullYear();
 
-  const formattedDate = `${abbrWeekday}, ${abbrMonth} ${day}, ${fullYear}`;
+  const formattedDate = `${abbrWeekday}, ${abbrMonth} ${day}${ show_year ? ","+fullYear : ''}`;
   return formattedDate;
 };
 

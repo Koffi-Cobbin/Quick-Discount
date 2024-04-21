@@ -33,14 +33,14 @@ const Section = styled.div`
     /* border: 1px solid black; */
 
     /* Largest devices such as desktops (1280px and up) */
-    @media only screen and (min-width: 160em) {
+    /* @media only screen and (min-width: 160em) {
         width: 80%;        
         margin: 0 auto;
-    }
+    } */
 `;
 
 const Wrapper = styled.div`
-    width: 90%;
+    /* width: 90%; */
     margin: 0 auto;
     /* border: 1px solid blue; */
 
@@ -48,20 +48,20 @@ const Wrapper = styled.div`
         width: 100%;
     }
 
-    @media (max-width: 768px) {
+    /* @media (max-width: 768px) {
         width: 100%;
-    }
+    } */
  
     /* Largest devices such as desktops (1920px and up) */
-    @media only screen and (min-width: 120em) {
+    /* @media only screen and (min-width: 120em) {
         width: 80%;
         margin: 0 auto;        
-    }
+    } */
 
     /* Largest devices such as desktops (2560px and up) */
-    @media only screen and (min-width: 160em) {
+    /* @media only screen and (min-width: 160em) {
         width: 80%;
-    }
+    } */
 `;
 
 const ContentList = styled.div`
@@ -83,11 +83,11 @@ const ContentList = styled.div`
     }
     
     @media (max-width: 640px) {
-        flex-wrap: nowrap;
+        /* flex-wrap: nowrap;
         overflow-x: scroll;
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
+        -webkit-overflow-scrolling: touch; */
     }
 
     @media (max-width: 481px) {
@@ -98,14 +98,14 @@ const ContentList = styled.div`
 const ListItem = styled.div` 
     position: relative;
     margin: 10px;
-    border-radius: 8px;
+    border-radius: 20px;
     cursor: pointer;
     overflow: hidden;
     box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
 
     /* border: 1px solid red; */
 
-    scroll-snap-align: center;
+    /* scroll-snap-align: center; */
     transition: all 0.3s;
 
     &:hover {
@@ -123,7 +123,7 @@ const ListItem = styled.div`
     
     @media (max-width: 640px) {
         width: calc(100% - 20px);
-        min-width: 300px;
+        /* min-width: 300px; */
     }
 
     /* Small devices such as large phones (640px and up) */

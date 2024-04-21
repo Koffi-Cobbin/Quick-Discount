@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import DiscountCard from "./DiscountCard"; 
-// import CarouselSection from "../Shared/CarouselSection";
 import CarouselFlex from "../Shared/CarouselFlex";
 
 
@@ -32,9 +31,6 @@ const Container = styled.div`
   margin: 0 auto;
   margin-top: 40px;
   background-color: #fff;
-  /* @media (min-width: 768px) {
-    width: 80%;
-  } */
 `;
 
 const CategoryTitle = styled.div`
@@ -42,32 +38,19 @@ const CategoryTitle = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: inherit;
+  
   h4 {
+    font-size: 30px;
     margin: 0 10px;
     a {
       color: #808080;
-      font-size: 14px;
+      font-size: 20px;
       text-decoration: none;
       &:hover{
-        cursor: default;
+        cursor: pointer;
       }
     }
-  }
-  @media (min-width: 768px) {
-    width: 90%;
-    margin: 0 auto;
-  }
-
-  /* Largest devices such as desktops (1920px and up) */
-  @media only screen and (min-width: 120em) {
-    width: 80%;
-    margin: 0 auto;
-  }
-
-  /* Largest devices such as desktops (1280px and up) */
-  @media only screen and (min-width: 160em) {
-    width: 60%;
-    margin: 0 auto;
   }
 `;
 

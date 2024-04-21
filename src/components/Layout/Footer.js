@@ -55,76 +55,25 @@ const Footer = (props) => {
         <FooterSection>
             <Layout>
                 <LeftSide>
-                    <h3><b>Contact Us</b></h3>
-                    <FormSection>
-                        <Form>
-                            <form>
-                                <div className="inputbox-wrap">
-                                    <div className="inputbox">
-                                        <input 
-                                            type="text"
-                                            value={username}
-                                            onChange={(e) => setUsername(e.target.value)} 
-                                            required="required" 
-                                        />
-                                        <span>Full name</span>
-                                    </div>
-                                </div>
-
-                                <div className="inputbox-wrap">
-                                    <div className="inputbox">
-                                        <input 
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => validateEmail(e.target.value)} 
-                                            required="required" 
-                                        />
-                                        <span>Email</span>
-                                    </div>
-                                    {emailError && <p>{emailError}</p>}
-                                </div>
-                                
-                                <div className="textbox">
-                                    <div><label>Message</label></div>
-                                    <div className="textinput">
-                                        <textarea 
-                                            id="w3review" 
-                                            name="w3review" 
-                                            rows="4" 
-                                            cols="30"
-                                            value={message}
-                                            onChange={(e) => setMessage(e.target.value)} 
-                                            required="required" 
-                                        >
-                                            {message}
-                                        </textarea>
-                                    </div>
-                                </div>
-
-                                <div className="inputbox">
-                                    <input 
-                                        type="button"
-                                        disabled={!(username && email && message)? true : false}
-                                        onClick={(event) => handleSubmit(event)}
-                                        value="submit" 
-                                    />
-                                </div>
-                            </form>
-                        </Form>
-                    </FormSection>
-                </LeftSide>
-
-                <Main>
                     <h3><b>Sitemap</b></h3>
                     <p>Quick links to all pages</p>
                     <p><a href="/">Home</a></p>                    
                     <p><a href="/discounts">Discounts</a></p>
                     <p><a href="/help">Help</a></p>
                     <p><a href="/signup">Sign up</a></p>
-                    <p><a href="/post">Post</a></p>
+                    <p><a href="/post">Post</a></p>                   
+                </LeftSide>
+
+                <Main>
+                    <h3><b>Let's Vybe</b></h3>
+                    <p><a href="/">Twitter / X</a></p>                    
+                    <p><a href="/">Instagram</a></p>
+                    <p><a href="/">Facebook</a></p>
+                    <p><a href="/">YouTube</a></p>
+                    <p><a href="/">Customer Support</a></p>
                 </Main>
 
-                <RightSide>
+                <RightSide>                 
                     <div className="footer-logo">
                         <img src="/images/logo-w.png" alt="QuickDiscount" />
                     </div>
