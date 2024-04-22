@@ -28,7 +28,7 @@ import {
 import db from "../firebase";
 import { BASE_URL } from "../utils/constants";
 import * as messages from "../utils/messages";
-import { discountsData, discountReviewsData, categoriesData } from "../components/Assets/data";
+import { userData, discountsData, discountReviewsData, categoriesData } from "../components/Assets/data";
 
 
 export const setUserActivationStatus = (payload) => ({
@@ -285,6 +285,10 @@ export function loginAPI(payload) {
         }
       })
       .catch((errorMessage) => {
+        // --------TO BE REMOVED---------
+        dispatch(setUser(userData));
+        console.log("user_data ...");
+        // ------------------------------
         console.log(errorMessage);
       });
   };

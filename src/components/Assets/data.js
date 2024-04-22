@@ -340,3 +340,10 @@ export const packageOptionsData = {
     },
   ],
 };
+ 
+
+export const userData = {
+      email: "test@email.com",
+      contact: "1234567890",
+      name: "Koffi Cobbin"
+};

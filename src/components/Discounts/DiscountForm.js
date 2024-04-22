@@ -28,6 +28,7 @@ import {
 } from "../../actions";
 import { packageOptionsData } from "../Assets/data";
 import { set } from "react-hook-form";
+import Payment from "../Payment/Payment";
 // import CreateDiscountSuccess from "./CreateDiscountSuccess";
 // import CreateDiscountFailed from "./CreateDiscountFailed";
 
@@ -66,6 +67,8 @@ const DiscountForm = (props) => {
   const [packageOption, setPackageOption] = useState({ 
         ...packageOptionsData.results[0], quantity: 1
   });
+  const [next, setNext] = useState(false);
+  const [prev, setPrev] = useState(false);
   
   // ERRORS
   const [emailError, setEmailError] = useState("");
@@ -78,6 +81,20 @@ const DiscountForm = (props) => {
   // const package_options = ["daily", "weekly", "monthly"];
 
   const navigate = useNavigate();
+
+  const handleNext = () => {
+    setNext(!next);
+    if (prev){
+      setPrev(!prev);
+    }
+  };
+
+  const handlePrev = () => {
+    setPrev(!prev);
+    if (next){
+      setNext(!next);
+    }
+  };
 
   const validateEmail = (value) => {
     setEmail(value);
@@ -524,6 +541,7 @@ const DiscountForm = (props) => {
           </Header>
 
           <Slides class="slides">
+            {!next && 
             <Slide>
               <FormContent>
                 <FormInputs>
@@ -564,9 +582,8 @@ const DiscountForm = (props) => {
                   />
                 </FormInputs>
               </FormContent>
-            </Slide>
+          
 
-            <Slide>
               <FormContent>
                 <FormInputs>
                   {!props.organizer && (
@@ -636,42 +653,203 @@ const DiscountForm = (props) => {
                   {/* handleCategoriesChange */}
                 </FormInputs>
               </FormContent>
-            </Slide>
-
-            <Slide>
+           
               <FormContent>
-                {/* <RadioInputs>
-                  <span className="radio-title">Discount Type</span>
-                  <RadioWrap>
-                    <div>
-                      <input
-                        type="radio"
-                        id="paid-discount"
-                        name="discount-type"
-                        value="paid"
-                        onChange={() => radioInputHandler("paid-discount")}
-                        checked={discountType === "paid"}
-                      />
-                      <label for="discount-type" className="radio-label">
-                        Paid
-                      </label>
-                    </div>
-                    <div>
-                      <input
-                        type="radio"
-                        id="free-discount"
-                        name="discount-type"
-                        value="free"
-                        onChange={() => radioInputHandler("free-discount")}
-                        checked={discountType === "free"}
-                      />
-                      <label for="discount-type" className="radio-label">
-                        Free
-                      </label>
-                    </div>
-                  </RadioWrap>
-                </RadioInputs> */}
+                <FormInputs>
+                  <label for="location">Location </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                </FormInputs>
+              </FormContent>
+        
 
+              <FormContent>
+                <FormInputs>
+                  <InputsFlexWrap>
+                    <div>
+                      <label>Start Date</label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label>End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </InputsFlexWrap>
+                </FormInputs>
+              </FormContent>
+       
+
+              <FormContent>
+                <AssetsArea>
+                  <div>
+                    <label>Upload Discount Flyer</label>
+                    <Dropzone
+                      onDrop={flyerImageHandler}
+                      accept={"image/*"}
+                      minSizeBytes={1}
+                      maxSizeBytes={1000000}
+                      maxFiles={1}
+                      preview={true}
+                      filename={filename}
+                      bgImage={readDiscountFlyer}
+                      error={imageError.flyer && imageError.flyer}
+                    />
+                  </div>
+                  {/* <div>
+                    <label>Upload Discount Images</label>
+                    <Dropzone
+                      onDrop={onDrop}
+                      accept={"image/*"}
+                      minSizeBytes={1}
+                      maxSizeBytes={1000000}
+                      maxFiles={3}
+                      error={imageError.images && imageError.images}
+                    />
+                  </div> */}
+                </AssetsArea>
+              </FormContent>
+              {readDiscountImages && readDiscountImages.length > 0 && (
+                <ImageGrid images={readDiscountImages} popImage={popImage} />
+              )}
+
+           
+              <FormContent>
+                <label style={{textAlign: "left"}}>Social Media Handles</label>
+                <FormInputs>
+                  {!props.organizer && (
+                    <>                    
+                    {socialMediaHandles &&
+                    <>
+                    {socialMediaHandles.instagram &&
+                      <InputsFlexWrap>
+                        <div>
+                          <input
+                            type="text"
+                            value="instagram"
+                            readOnly
+                          />
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            value={socialMediaHandles.instagram}
+                            onChange={(e) => socialMediaChangeHandler("instagram", e.target.value)}
+                            required
+                          />
+                        </div>  
+                      </InputsFlexWrap>
+                      }                      
+
+                    {socialMediaHandles.facebook &&
+                      <InputsFlexWrap>
+                        <div>
+                          <input
+                            type="text"
+                            value="facebook"
+                            readOnly
+                          />
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            value={socialMediaHandles.facebook}
+                            onChange={(e) => socialMediaChangeHandler("facebook", e.target.value)}
+                            required
+                          />
+                        </div>
+                      </InputsFlexWrap>
+                      }
+
+                      {socialMediaHandles.whatsapp &&
+                      <InputsFlexWrap>
+                        <div>
+                          <input
+                            type="text"
+                            value="whatsapp"
+                            readOnly
+                          />
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            value={socialMediaHandles.whatsapp}
+                            onChange={(e) => socialMediaChangeHandler("whatsapp", e.target.value)}
+                            required
+                          />
+                        </div>
+                      </InputsFlexWrap>
+                      }
+                    </>
+                      }
+                  </>
+                  )}
+                </FormInputs>
+
+                <FormInputs>
+                  <div>
+                    <label>Website link</label>
+                    <input
+                      type="text"
+                      value={websiteURL}
+                      placeholder="https://www.xyz.com"
+                      onChange={(e) => validateUrl(e.target.value)}
+                    />
+                    {urlError && <p className="error">{urlError}</p>}
+                  </div>
+                </FormInputs>
+              </FormContent>
+
+              {!props.discount &&
+              <Agreement>
+                <span>Discount Creation Agreement</span>
+                <div>
+                  <input
+                    type="radio"
+                    id="agreement"
+                    name="agreement"
+                    value="agreed"
+                    onChange={(e) => setAgreement(e.target.value)}
+                  />
+                  <label for="agreement" className="radio-label">
+                    I agree to the &nbsp;
+                    <a href="/terms" target="_blank" rel="noopener noreferrer">
+                      Terms and Conditions
+                    </a>
+                  </label>
+                </div>
+              </Agreement>
+              }
+
+              <SubmitSection>
+                <SubmitButton
+                  onClick={handleNext}
+                >
+                  Next
+                </SubmitButton>
+              </SubmitSection>
+            </Slide>
+            }
+
+            {next && !prev &&
+            <Slide>
+              {/* Payment section */}
+              <FormContent>
                 <FormInputs>
                   <PackagesFlexWrap className="add-package-section">
                     <div className="package-section">
@@ -723,186 +901,31 @@ const DiscountForm = (props) => {
                       Learn more about discount package types.
                     </Link>
                   </label>
-                </FormInputs>
-             
+                </FormInputs>             
               </FormContent>
+
+              {/* Payment Section  */}
+              <Payment amount={packageOption.price*packageOption.quantity}/>
+
+              <SubmitSection>
+                <SubmitButton
+                  onClick={handlePrev}
+                >
+                  Previous
+                </SubmitButton>
+
+                <SubmitButton
+                  disabled={!enableSubmit}
+                  onClick={(discount) => handlePostDiscount(discount)}
+                >
+                  Submit
+                </SubmitButton>
+              </SubmitSection>
             </Slide>
-
-            <Slide>
-              <FormContent>
-                <FormInputs>
-                  <label for="location">Location </label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
-                </FormInputs>
-              </FormContent>
-            </Slide>
-
-            <Slide>
-              <FormContent>
-                <FormInputs>
-                  <InputsFlexWrap>
-                    <div>
-                      <label>Start Date</label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label>End Date</label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </InputsFlexWrap>
-                </FormInputs>
-              </FormContent>
-            </Slide>
-
-            <Slide>
-              <FormContent>
-                <AssetsArea>
-                  <div>
-                    <label>Upload Discount Flyer</label>
-                    <Dropzone
-                      onDrop={flyerImageHandler}
-                      accept={"image/*"}
-                      minSizeBytes={1}
-                      maxSizeBytes={1000000}
-                      maxFiles={1}
-                      preview={true}
-                      filename={filename}
-                      bgImage={readDiscountFlyer}
-                      error={imageError.flyer && imageError.flyer}
-                    />
-                  </div>
-                  {/* <div>
-                    <label>Upload Discount Images</label>
-                    <Dropzone
-                      onDrop={onDrop}
-                      accept={"image/*"}
-                      minSizeBytes={1}
-                      maxSizeBytes={1000000}
-                      maxFiles={3}
-                      error={imageError.images && imageError.images}
-                    />
-                  </div> */}
-                </AssetsArea>
-              </FormContent>
-              {readDiscountImages && readDiscountImages.length > 0 && (
-                <ImageGrid images={readDiscountImages} popImage={popImage} />
-              )}
-            </Slide>
-
-            <Slide>
-              <FormContent>
-                <label style={{textAlign: "left"}}>Social Media Handles</label>
-                <FormInputs>
-                  {!props.organizer && (
-                    <>                    
-                    {socialMediaHandles &&
-                    <>
-                    {socialMediaHandles.instagram &&
-                      <InputsFlexWrap>
-                        <div>
-                          <input
-                            type="text"
-                            value="instagram"
-                            readOnly
-                          />
-                        </div>
-
-                        <div>
-                          <input
-                            type="text"
-                            value={socialMediaHandles.instagram}
-                            onChange={(e) => socialMediaChangeHandler("instagram", e.target.value)}
-                            required
-                          />
-                        </div>  
-                      </InputsFlexWrap>
-                      }                      
-
-                    {socialMediaHandles.facebook &&
-                      <InputsFlexWrap>
-                        <div>
-                          <input
-                            type="text"
-                            value="facebook"
-                            readOnly
-                          />
-                        </div>
-
-                        <div>
-                          <input
-                            type="text"
-                            value={socialMediaHandles.facebook}
-                            onChange={(e) => socialMediaChangeHandler("facebook", e.target.value)}
-                            required
-                          />
-                        </div>
-                      </InputsFlexWrap>
-                      }
-                    </>
-                      }
-                  </>
-                  )}
-                </FormInputs>
-
-                <FormInputs>
-                  <div>
-                    <label>Website link</label>
-                    <input
-                      type="text"
-                      value={websiteURL}
-                      placeholder="https://www.xyz.com"
-                      onChange={(e) => validateUrl(e.target.value)}
-                    />
-                    {urlError && <p className="error">{urlError}</p>}
-                  </div>
-                </FormInputs>
-              </FormContent>
-            </Slide>
+            }
           </Slides>
 
-          {!props.discount &&
-          <Agreement>
-            <span>Discount Creation Agreement</span>
-            <div>
-              <input
-                type="radio"
-                id="agreement"
-                name="agreement"
-                value="agreed"
-                onChange={(e) => setAgreement(e.target.value)}
-              />
-              <label for="agreement" className="radio-label">
-                I agree to the &nbsp;
-                <a href="/terms" target="_blank" rel="noopener noreferrer">
-                  Terms and Conditions
-                </a>
-              </label>
-            </div>
-          </Agreement>
-          }
-
-          <SubmitSection>
-            <SubmitButton
-              disabled={!enableSubmit}
-              onClick={(discount) => handlePostDiscount(discount)}
-            >
-              Submit
-            </SubmitButton>
-          </SubmitSection>
+          
         </Content>
       </Container>
       {/* )} */}
@@ -1017,6 +1040,7 @@ const AssetButton = styled.button`
 const SubmitButton = styled.button`
   min-width: 100px;
   padding: 8px 20px;
+  margin: 0px 10px;
   background: ${(props) => (props.disabled ? "rgba(0, 0, 0, 0.5)" : "#0a66c2")};
   border-radius: 20px;
   color: white;

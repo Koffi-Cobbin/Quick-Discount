@@ -129,13 +129,13 @@ function App(props) {
             <Route
               path="/discounts/add"
               element={[
-                // <Protected user={props.user}>
-                //   </Protected>
+                <Protected user={props.user}>
                   <Navbar
-                    sidenav={openSideNav}
-                    onShowCart={showCartHandler}
+                  sidenav={openSideNav}
+                  onShowCart={showCartHandler}
                   />,
                   <CreateDiscount />
+                </Protected>
               ]}
             />
 
@@ -153,13 +153,13 @@ function App(props) {
             <Route
               path="/payment"
               element={[
-                <Protected user={props.user}>
+                // <Protected user={props.user}></Protected>
                   <Navbar
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
                   />,
                   <Payment />
-                </Protected>
+                
               ]}
             />
 

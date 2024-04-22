@@ -98,6 +98,7 @@ const FooterSection = styled.div`
     padding: 10px;
     margin-bottom: 0;
     font-family: Lato, 'Roboto', sans-serif;
+    font-size: 20px;
     @media (max-width: 768px) {
     }
 `;
@@ -113,7 +114,7 @@ const Layout = styled.div`
         padding-bottom: 10px;
     }
     p {
-        font-size: 14px;
+        /* font-size: 14px; */
         padding: 1px;
         line-height: 1.5;
         a {
@@ -194,7 +195,7 @@ const Form = styled.div`
         position: relative;
         padding: 11px 5px;
         border-radius: 10px;
-        font-size: 1.2em;
+        /* font-size: 1.2em; */
         color: #4a4a4a;
         outline: none;
         display: block;
@@ -203,7 +204,7 @@ const Form = styled.div`
         &:focus ~ span,
         &:valid ~ span {
             transform: translateX(-13px) translateY(-35px);
-            font-size: 1em;
+            /* font-size: 1em; */
             color: #fff;
         }
     }
@@ -212,7 +213,7 @@ const Form = styled.div`
         position: absolute;
         top: 14px;
         left: 20px;
-        font-size: 1em;
+        /* font-size: 1em; */
         transition: 0.6s;
         font-family: Lato, 'Roboto', sans-serif;
         color: #999;
@@ -251,7 +252,7 @@ const Form = styled.div`
         /* padding: 20px; */
         & span {
             top: 16px;
-            font-size: 13px;
+            /* font-size: 13px; */
         }
     }
 `;
@@ -260,7 +261,7 @@ const Form = styled.div`
 const Copyright = styled.div`
     margin-top: 30px;
     p {
-        font-size: 13px;
+        /* font-size: 13px; */
         margin: 10px auto;
         line-height: 1.5;
         .text-center {

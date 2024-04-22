@@ -64,7 +64,7 @@ const Navbar = (props) => {
                             <NavLink onClick={() => toggleDropdown("events-drpdwn")} >
                                 <span>
                                     Discounts &nbsp;
-                                    <img src="/images/icons/down-icon.svg" alt="" />
+                                    <img src="/images/icons/down-arrow-w.svg" alt="" />
                                 </span>
                             </NavLink>
                             <div className="dropdown-content" id="events-drpdwn">
@@ -81,7 +81,7 @@ const Navbar = (props) => {
                             <NavLink onClick={() => toggleDropdown("help-drpdwn")}>
                                 <span>
                                     Help &nbsp;
-                                    <img src="/images/icons/down-icon.svg" alt="" />
+                                    <img src="/images/icons/down-arrow-w.svg" alt="" />
                                 </span>
                             </NavLink>
                             <div className="dropdown-content" id="help-drpdwn">
@@ -97,13 +97,21 @@ const Navbar = (props) => {
                             </div>
                         </NavList>
 
+                        <NavList>
+                        <NavList>
+                                <NavLink to="/discounts/add" className={({isActive}) => isActive ? 'current' : undefined}>
+                                    <span>Post</span>
+                                </NavLink>
+                            </NavList>
+                        </NavList>
+
                         {props.user ? (
                             <>
-                            <NavList>
+                            {/* <NavList>
                                 <NavLink>
                                     <NavCartButton onClick={props.onShowCart} />
                                 </NavLink>
-                            </NavList>
+                            </NavList> */}
 
                             <NavList className="dropdown">
                                 <NavLink >
@@ -116,7 +124,7 @@ const Navbar = (props) => {
                                             )}
                                             <span>
                                                 &nbsp;
-                                                Me<img src="/images/icons/down-icon.svg" alt="" className="down" />
+                                                Me<img src="/images/icons/down-arrow-w.svg" alt="" className="down" />
                                             </span>
                                         </span>
                                     </User>
@@ -135,12 +143,7 @@ const Navbar = (props) => {
                                 <NavLink to="/signup" className={({isActive}) => isActive ? 'current' : undefined}>
                                     <span>Sign Up</span>
                                 </NavLink>
-                            </NavList> */}
-                            <NavList>
-                                <NavLink to="/discounts/add" className={({isActive}) => isActive ? 'current' : undefined}>
-                                    <span>Post</span>
-                                </NavLink>
-                            </NavList>
+                            </NavList> */}                            
                             </>)
                         }
                         {/* <TicketCart id="ticket-card-2">
@@ -378,7 +381,6 @@ const NavList = styled.li`
             img {
                 width: 12px;
                 height: 12px;
-                // align-self: flex-end;
             }
         }
 

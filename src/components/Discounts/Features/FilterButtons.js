@@ -155,13 +155,15 @@ const FilterButtons = ({
 const Wrapper = styled.div`
   margin: 1px 0;
   padding: 20px 0;
+  font-family: Lato, 'Roboto', sans-serif;
+  font-size: 20px;
   /* border: 1px solid red; */
   button {
     margin: 5px 10px;
     padding: 8px 20px;
     background-color: #E5E4E2;
     border-radius: 20px;
-    font-size: 14px;
+    /* font-size: 14px; */
     flex-shrink: 0;
     border: none;
     outline: none;

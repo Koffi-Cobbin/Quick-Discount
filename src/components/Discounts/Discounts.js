@@ -110,16 +110,31 @@ const Discounts = (props) => {
 
 const Wrapper = styled.div`
   margin-top: 50px;
+  font-family: Lato, 'Roboto', sans-serif;
+  font-size: 20px;
 `;
 
 const Container = styled.div`
+  position: relative;
+  max-width: 100%;
   margin: 0 auto;
   border-top: 1px solid white;
-  @media (min-width: 481px) {
-    width: 95%;
+
+  @media (min-width: 768px) {
+    width: 90%;
+    margin: 0 auto;
   }
-  @media (min-width: 769px) {
-    width: 85%;
+
+  /* Largest devices such as desktops (1920px and up) */
+  @media only screen and (min-width: 120em) {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1280px and up) */
+  @media only screen and (min-width: 160em) {
+    width: 60%;
+    margin: 0 auto;
   }
 `;
 
@@ -141,7 +156,7 @@ const Title = styled.h3`
     padding:4px 0px;
   }
   @media (max-width: 480px) {
-    font-size: medium;
+    /* font-size: medium; */
     margin-top: 20px;
     padding-left: 20px;
   }
@@ -165,8 +180,8 @@ const FlexWrap = styled.div`
 
 const FilteredEvents = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  grid-template-rows: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-rows: repeat(auto-fill, minmax(300px, 1fr));
   grid-gap: 20px 10px;
   /* border: 1px solid black; */
 
@@ -176,7 +191,7 @@ const FilteredEvents = styled.div`
   
   @media (min-width: 700px) {
     grid-auto-columns: calc(calc(100% / 3) - 20px);
-    grid-gap: 30px 10px;
+    grid-gap: 30px 30px;
   }
   
   @media (min-width: 1100px) {
@@ -185,8 +200,16 @@ const FilteredEvents = styled.div`
 `;
 
 const FilteredItem = styled.div`
+  position: relative;
   min-width: 250px;
+  border-radius: 20px;
   /* border: 1px solid black; */
+  cursor: pointer;
+  box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+      box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  }
 `;
 
 const mapStateToProps = (state) => {

@@ -47,21 +47,6 @@ const Wrapper = styled.div`
     &.recomendations{
         width: 100%;
     }
-
-    /* @media (max-width: 768px) {
-        width: 100%;
-    } */
- 
-    /* Largest devices such as desktops (1920px and up) */
-    /* @media only screen and (min-width: 120em) {
-        width: 80%;
-        margin: 0 auto;        
-    } */
-
-    /* Largest devices such as desktops (2560px and up) */
-    /* @media only screen and (min-width: 160em) {
-        width: 80%;
-    } */
 `;
 
 const ContentList = styled.div`
