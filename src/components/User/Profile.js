@@ -15,8 +15,7 @@ const Profile = (props) => {
   };
 
   useEffect(() => {
-    props.getUserPackages();
-    props.getWishlist();
+    // props.getWishlist();
     // props.getUserNotifications();
   }, []);
 
