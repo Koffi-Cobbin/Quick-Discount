@@ -1013,40 +1013,6 @@ export function removeFromWishlistAPI(payload) {
 }
 
 
-
-// ------------------------------
-// ------ GET USER PACKAGES ------
-
-export function getUserPackagesAPI() {
-  return (dispatch, getState) => {
-    const url = `${BASE_URL}/packages/user/`;
-
-    const state = getState();
-    const authToken = state.userState.token.access;
-
-    fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json", 
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      }
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error(response.status);
-        else return response.json();
-      })
-      .then((packages) => {
-        dispatch(setUserPackages(packages));
-        console.log("User Packages ", packages);
-      })
-      .catch((errorMessage) => {
-        console.log(errorMessage);
-      });
-  };
-}
-
-
 // ------------------------------
 // ------ GET DISCOUNT PACKAGES -------
 

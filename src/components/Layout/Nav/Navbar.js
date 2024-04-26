@@ -297,15 +297,13 @@ const Search = styled.div`
         color: #fff; 
         width: 300px;
         padding: 0 8px 0 40px;
-        font-size: 20px;
-        font-weight: 600;
+        font-size: 16px;
         height: 40px;
         border-color: #dce6f1;
         /* vertical-align: text-top; */
         outline: none;
         &::placeholder{
             color: #fff;
-            font-weight: 600;
         }
         @media (max-width: 768px) {
             max-width: 150px;
@@ -334,7 +332,7 @@ const TopNav = styled.nav`
     margin-left: auto;
     display: block; 
     color: #000;
-    font-size: 30px;
+    font-size: 20px;
     font-weight: 500;
     @media (max-width: 600px) {
         display: none;

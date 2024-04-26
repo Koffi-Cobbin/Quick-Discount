@@ -32,7 +32,7 @@ const Main = (props) => {
 
       {props.currentSection === "bookmarks" && <SavedDiscounts />}
 
-      {props.currentSection === "tickets" && <DiscountPackages />}
+      {props.currentSection === "discounts" && <DiscountPackages />}
 
       {props.currentSection === "settings" && <Settings />}
     </Container>

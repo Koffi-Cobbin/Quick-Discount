@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import LeftSide from "./LeftSide";
 import Main from "./Main";
-import { getUserPackagesAPI, getUserNotificationsAPI, getWishlistAPI } from "../../actions";
+import { getUserNotificationsAPI, getWishlistAPI } from "../../actions";
 
 
 const Profile = (props) => {
@@ -64,7 +64,6 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  getUserPackages: () => {dispatch(getUserPackagesAPI())},
   getWishlist: () => {dispatch(getWishlistAPI())}, 
   getUserNotifications: () => {dispatch(getUserNotificationsAPI())}
 });

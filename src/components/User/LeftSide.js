@@ -65,15 +65,15 @@ const LeftSide = (props) => {
           </Widget>
 
           <Widget
-            id="tickets"
+            id="discounts"
             className="widget"
-            onClick={() => widgetOnClickHandler("tickets")}
+            onClick={() => widgetOnClickHandler("discounts")}
           >
             <div>
               <img src="/images/icons/ticket-b.svg" alt="" />
-              <span>Tickets</span>
+              <span>Discount</span>
             </div>
-            <span>{props.tickets ? props.tickets.length : 0}</span>
+            <span>{props.discounts ? props.discounts.length : 0}</span>
           </Widget>
 
           <Widget
@@ -83,7 +83,7 @@ const LeftSide = (props) => {
           >
             <div>
               <img src="/images/icons/item-icon.svg" alt="" />
-              <span>Saved Events</span>
+              <span>Saved Discounts</span>
             </div>
             <span>{props.wishlist ? props.wishlist.length : 0}</span>
           </Widget>
@@ -257,9 +257,9 @@ const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
     tickets: state.userState.tickets,
-    events: state.eventState.events,
+    discounts: state.discountState.discounts,
     notifications: state.userState.notifications,
-    wishlist: state.eventState.wishlist,
+    wishlist: state.discountState.wishlist,
     organizer: state.organizerState.organizer,
   };
 };

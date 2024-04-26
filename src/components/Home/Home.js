@@ -216,7 +216,7 @@ const Categories = styled.div`
     padding: 8px 20px;
     background-color: #fff;
     border-radius: 20px;
-    font-size: 20px;
+    font-size: 15px;
     flex-shrink: 0;
     scroll-snap-align: center;
 
@@ -270,10 +270,11 @@ const CategoryTitle = styled.div`
   justify-content: space-between;
   h4 {
     margin: 5px;
-    font-size: 30px;
+    padding-top: 15px;
+    font-size: 22px;
     a {
       color: #808080;
-      font-size: 20px;
+      font-size: 16px;
       text-decoration: none;
       &:hover {
         cursor: default;

@@ -51,7 +51,7 @@ const Wrapper = styled.div`
 
 const ContentList = styled.div`
     width: 100%;    
-    padding: 20px 0px;
+    padding: 10px 0px;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between; 
@@ -83,19 +83,11 @@ const ContentList = styled.div`
 const ListItem = styled.div` 
     position: relative;
     margin: 10px;
+    padding: 0 10px 10px 10px;
     border-radius: 20px;
     cursor: pointer;
     overflow: hidden;
-    box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
-
-    /* border: 1px solid red; */
-
-    /* scroll-snap-align: center; */
-    transition: all 0.3s;
-
-    &:hover {
-        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-    }
+    /* border: 1px solid blue; */
 
     /* Adjust number of columns for different screen sizes */
     /* @media (min-width: 992px) {

@@ -10,120 +10,79 @@ import { formatDate, formatTime } from "../../utils/middleware";
 
 
 const Dashboard = (props) => {
-    const [upcomingEvents, setUpcomingEvents] = useState();
+    const [userDiscounts, setUserDiscounts] = useState();
     const [wishlistEvents, setWishlistEvents] = useState();
 
     // Get user discount_packages and find events for those discount_packages as upcoming
-    const filterEvents = () => {
-        let eventsData = props.events.results;
-        let discount_packages = props.discount_packages;
-        console.log("Events Data ", eventsData);
-        console.log("TIckets ", discount_packages);
+    const getUserDiscounts = () => {
+        let discountsData = props.events.results;
+        console.log("Events Data ", discountsData);
 
-        let packages_events = [];
-
-        if (discount_packages){
-            packages_events = discount_packages.map((discount_package) => {
-                return  discount_package.event;
+        if (discountsData){
+            const user_discounts= discountsData.filter((discount) => {
+            return  discount.user === props.user;
             });
-        };
-        
-        console.log("packages_events ", packages_events);
+            console.log("user_discounts ", user_discounts);
 
-        if (eventsData){
-            const newFilteredEvents= eventsData.filter((event) => {
-            return  packages_events.includes(event.url);
-            });
-            console.log("newFilteredEvents ", newFilteredEvents);
-
-            if (newFilteredEvents.length > 0){
-                setUpcomingEvents([...newFilteredEvents]);
+            if (user_discounts.length > 0){
+                setUserDiscounts([...user_discounts]);
             };
         };
     };
 
     
-    const filterWishlistEvents = () => {
-        let eventsData = props.events.results;
+    const filterWishlistDiscounts = () => {
+        let discountsData = props.discounts.results;
         let wishlist = props.wishlist;
-        console.log("Events Data ", eventsData);
+        console.log("Events Data ", discountsData);
         console.log("wishlist ", wishlist);
 
         let wishlist_events = wishlist.map((wishItem) => {
-            return  wishItem.event;
+            return  wishItem.discount;
           });
         
         console.log("wishlist_events ", wishlist_events);
 
-        if (eventsData){
-            const newFilteredEvents= eventsData.filter((event) => {
-                return  wishlist_events.includes(event.url);
+        if (discountsData){
+            const newFilteredDiscounts= discountsData.filter((discount) => {
+                return  wishlist_events.includes(discount.url);
             });
-            console.log("newFilteredEvents ", newFilteredEvents);
+            console.log("newFilteredDiscounts ", newFilteredDiscounts);
 
-            if (newFilteredEvents.length > 0){
-                setWishlistEvents([...newFilteredEvents]);
+            if (newFilteredDiscounts.length > 0){
+                setWishlistEvents([...newFilteredDiscounts]);
             };
         };
     };
 
     useEffect(() => {
         if (props.wishlist){
-            filterWishlistEvents();
+            filterWishlistDiscounts();
         }
         else{
             props.getWishlist();
         }
-        if (!upcomingEvents){
-            filterEvents();
-        }
-    }, [props.wishlist, upcomingEvents]);
+        getUserDiscounts();
+    }, [props.wishlist]);
 
 
     return (
     <Container>
     <FlexWrap>
         <Main>
-            {/* User's upcoming events section */}
-            <Section className="show">
-                <Title>Upcoming</Title>
-                {upcomingEvents ? (
-                <Row>
-                    {upcomingEvents.slice(0, 2).map((event) => (
-                    <RowItem>
-                        <Card>
-                            <img src="/images/11.jpg" />
-                            <div className="overlay" />
-                            <div className="info">
-                                <p>{event.name}</p>
-                                <p>
-                                    {formatDate(event.start_date)} |&nbsp;
-                                    {formatTime(event.start_time)}
-                                </p>
-                                <p>{event.address}</p>
-                            </div>
-                        </Card>
-                    </RowItem>
-                    ))}
-                </Row>
-                ) : (
-                    <Message>You have no upcoming events</Message>
-                )}
-            </Section>
-
             {/* User's discount_packages section */}
             <Section>
-                <Title>Tickets </Title>
-                {props.discount_packages && props.discount_packages.length > 0 ? (
+                <Title>Discounts </Title>
+                {userDiscounts && userDiscounts.length > 0 ? (
                 <TicketGrid>
-                    {props.discount_packages.slice(0, 2).map((discount_package) => (
+                    {userDiscounts.slice(0, 2).map((discount) => (
                         <GridItem>
                             <DiscountPackage
-                                key={discount_package.id}
-                                id={discount_package.id}
-                                type={discount_package.type}
-                                event={props.events.results.find(obj => obj.url === discount_package.event)}
-                                price={discount_package.price}
+                                key={discount.id}
+                                id={discount.id}
+                                type={discount.type}
+                                discount={discount}
+                                price={discount.price}
                                 showForm={false}
                             />
                         </GridItem>
@@ -134,23 +93,23 @@ const Dashboard = (props) => {
                 )}
             </Section>
 
-            {/* User's saved events section */}
+            {/* User's saved discounts section */}
              <Section>
-                 <Title>Saved Events</Title>
+                 <Title>Saved Discounts</Title>
                  {wishlistEvents ? (
                  <Row>
-                    {wishlistEvents.slice(0,2).map((event, key) => (                        
+                    {wishlistEvents.slice(0,2).map((discount, key) => (                        
                         <RowItem key={key}>
                             <Card>
-                                <img src={event.flyer} />
+                                <img src={discount.flyer} alt="discount flyer"/>
                                 <div className="overlay" />
                                 <div className="info">
-                                    <p>{event.name}</p>
+                                    <p>{discount.name}</p>
                                     <p>
-                                        {formatDate(event.start_date)} |&nbsp;
-                                        {formatTime(event.start_time)}
+                                        {formatDate(discount.start_date)} |&nbsp;
+                                        {formatTime(discount.start_time)}
                                     </p>
-                                    <p>{event.address}</p>
+                                    <p>{discount.address}</p>
                                 </div>
                             </Card>
                         </RowItem>
@@ -158,7 +117,7 @@ const Dashboard = (props) => {
                     }
                  </Row>
                  ) : (
-                    <Message>You have no saved events.</Message>
+                    <Message>You have no saved discounts.</Message>
                  )}
             </Section> 
         </Main>
@@ -300,7 +259,7 @@ const mapStateToProps = (state) => {
     return {
         user: state.userState.user,
         discount_packages: state.userState.discount_packages,
-        events: state.eventState.events,
+        discounts: state.eventState.discounts,
         wishlist: state.eventState.wishlist,
     }
 };

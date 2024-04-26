@@ -41,11 +41,11 @@ const CategoryTitle = styled.div`
   width: inherit;
   
   h4 {
-    font-size: 30px;
+    font-size: 22px;
     margin: 0 10px;
     a {
       color: #808080;
-      font-size: 20px;
+      font-size: 16px;
       text-decoration: none;
       &:hover{
         cursor: pointer;

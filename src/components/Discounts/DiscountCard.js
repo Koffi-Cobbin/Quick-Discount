@@ -72,6 +72,15 @@ const Card = styled.div`
   margin: 0 auto;  
   overflow: hidden;
   position: relative;
+  box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
+
+  /* border: 1px solid red; */
+  /* scroll-snap-align: center; */
+  transition: all 0.3s;
+
+  &:hover {
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  }
 
   &:first-of-type {
     /* Allow users to fully scroll to the start */
@@ -97,7 +106,7 @@ const EventInfo = styled.div`
   color: #36454f;
   position: relative;
   padding: 12px;
-  font-size: 20px;
+  font-size: 16px;
   font-family: Lato, 'Roboto', sans-serif;
   /* border: 1px solid blue; */
 `;
@@ -105,7 +114,7 @@ const EventInfo = styled.div`
 const Title = styled.h4`
   margin-top: 10px;
   margin-bottom: 10px;
-  font-size: 30px;
+  font-size: 20px;
   font-weight: 600;
   text-align: left;
   max-height: 35px;
@@ -144,6 +153,7 @@ const PercentageDiscount = styled.p`
   padding: 0;
   color: #fa8128;
   text-align: left;
+  font-weight: 600;
 `;
 
 
@@ -151,7 +161,7 @@ const Address = styled.p`
   text-align: left;
   overflow: hidden;
   margin-bottom: 5px;
-  font-weight: 600;
+  font-weight: 600;  
 `;
 
 const SocialActions = styled.div`
