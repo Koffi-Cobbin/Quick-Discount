@@ -200,8 +200,8 @@ export const discountsData = {
     {
       id: 5,
       url: "http://test/url5",
-      title: "Buy & Win Promo",
-      percentage_discount: "20% on all products",
+      title: "Clearance Sales",
+      percentage_discount: "Up to 70% off!",
       description: `
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
             Duis ut mollis lacus, cursus blandit purus. Integer nec sollicitudin sapien. 
@@ -214,14 +214,14 @@ export const discountsData = {
             ultricies pellentesque nibh. Donec eu nulla tellus. Donec semper quis mauris nec 
             dapibus. Duis placerat elit vel ante rhoncus, vel porttitor purus accumsan.
         `,
-      location: "Electroland Showrooms",
+      location: "EGL Ring Road Branch",
       start_date: "2024-03-07",
       end_date: "2024-03-07",
-      flyer: "/images/10.jpg",
+      flyer: "/images/7.jpg",
       status: "live",
       likes: "902",
       rate: 2.6,
-      categories: [{ name: "Fashion" }, { name: "Restaurants" }],        
+      categories: [{ name: "Electronics" }],        
       organizer: {
         id: 4,
         name: "Electroland",
@@ -231,7 +231,7 @@ export const discountsData = {
                 Cras odio mi, mollis vel porttitor id, iaculis nec sapien.
             `,
         phone_number: "0987654321",
-        websiteURL: "https://www.zara.com/",
+        websiteURL: "https://www.electrolandgh.com/",
       },
       images: [
         "/images/1.jpg",
@@ -240,6 +240,38 @@ export const discountsData = {
     },
   ],
 };
+
+
+export const discountMediaData = {
+  results: [
+    {
+      id: 1,
+      discount: "http://test/url1",
+      media_url: "/images/4.jpg"
+    },
+    {
+      id: 2,
+      discount: "http://test/url2",
+      media_url: "/images/6.jpg"
+    },
+    {
+      id: 2,
+      discount: "http://test/url3",
+      media_url: "/images/5.jpg"
+    },
+    {
+      id: 2,
+      discount: "http://test/url4",
+      media_url: "/images/10.jpg"
+    },
+    {
+      id: 2,
+      discount: "http://test/url5",
+      media_url: "/images/7.jpg"
+    },
+  ],
+};
+
 
 export const discountReviewsData = {
   results: [
@@ -263,6 +295,7 @@ export const discountReviewsData = {
     },
   ],
 };
+
 
 export const categoriesData = {
   results: [

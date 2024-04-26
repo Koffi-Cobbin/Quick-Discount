@@ -28,7 +28,7 @@ import {
 import db from "../firebase";
 import { BASE_URL } from "../utils/constants";
 import * as messages from "../utils/messages";
-import { userData, discountsData, discountReviewsData, categoriesData } from "../components/Assets/data";
+import { userData, discountsData, discountReviewsData, categoriesData, discountMediaData } from "../components/Assets/data";
 
 
 export const setUserActivationStatus = (payload) => ({
@@ -1069,6 +1069,10 @@ export function getDiscountMediaAPI(discount_id) {
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
+        // --------TO BE REMOVED---------
+        dispatch(setDiscountMedia(discountMediaData.results));
+        console.log("Discounts Media ...");
+        // ------------------------------
       });
   };
 };

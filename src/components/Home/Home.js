@@ -165,6 +165,7 @@ const Home = (props) => {
 const Container = styled.div`
   max-width: 100%;
   position: relative;
+  font-family: Inter, 'Roboto', sans-serif;
 `;
 
 const Content = styled.div`
@@ -216,7 +217,7 @@ const Categories = styled.div`
     padding: 8px 20px;
     background-color: #fff;
     border-radius: 20px;
-    font-size: 15px;
+    font-size: 16px;
     flex-shrink: 0;
     scroll-snap-align: center;
 

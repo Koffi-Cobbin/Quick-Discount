@@ -27,7 +27,6 @@ import {
   setDiscountPackages,
 } from "../../actions";
 import { packageOptionsData } from "../Assets/data";
-import { set } from "react-hook-form";
 import Payment from "../Payment/Payment";
 // import CreateDiscountSuccess from "./CreateDiscountSuccess";
 // import CreateDiscountFailed from "./CreateDiscountFailed";
@@ -82,11 +81,19 @@ const DiscountForm = (props) => {
 
   const navigate = useNavigate();
 
+  const scrollUp = () => {
+    const element = document.getElementById("top");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const handleNext = () => {
     setNext(!next);
     if (prev){
       setPrev(!prev);
     }
+    scrollUp();
   };
 
   const handlePrev = () => {
@@ -94,6 +101,7 @@ const DiscountForm = (props) => {
     if (next){
       setNext(!next);
     }
+    scrollUp();
   };
 
   const validateEmail = (value) => {
@@ -708,7 +716,7 @@ const DiscountForm = (props) => {
                       error={imageError.flyer && imageError.flyer}
                     />
                   </div>
-                  {/* <div>
+                  <div>
                     <label>Upload Discount Images</label>
                     <Dropzone
                       onDrop={onDrop}
@@ -718,7 +726,7 @@ const DiscountForm = (props) => {
                       maxFiles={3}
                       error={imageError.images && imageError.images}
                     />
-                  </div> */}
+                  </div>
                 </AssetsArea>
               </FormContent>
               {readDiscountImages && readDiscountImages.length > 0 && (
@@ -856,7 +864,7 @@ const DiscountForm = (props) => {
                       {packageOption &&
                         <PackagesInputsFlexWrap>
                           <div>
-                            <label htmlFor="package-type">Package type</label>
+                            <label htmlFor="package-type" id="packageType">Package type</label>
                             
                             <select
                               id="package-type"
@@ -980,6 +988,9 @@ const PackagesInputsFlexWrap = styled(FlexWrap)`
   /* border: 1px solid black; */
   & div {
     width: 30%;
+    & #packageType{
+      white-space: nowrap;
+    }
     /* border: 1px solid blue; */
     @media (max-width: 480px) {
       width: 100%;

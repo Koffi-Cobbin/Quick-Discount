@@ -31,7 +31,7 @@ const DiscountDetail = (props) => {
     const [organizerDiscounts, setOrganizerDiscounts] = useState();
     const [recomendedDiscounts, setRecomendedDiscounts] = useState();
 
-    const linkName = readMore ? 'Read Less <<':'Read More >>'
+    const linkName = readMore ? 'Read Less':'Read More'
 
     // Other discounts from organizer: filter all discounts
     const getOrganizerDiscounts = () => {
@@ -104,7 +104,7 @@ const DiscountDetail = (props) => {
             console.log("Recomended Discounts XXX");
         };
         
-    }, [discountId, recomendedDiscounts, discount, props.reviews]);
+    }, [discountId, recomendedDiscounts, discount, props.discount_media, props.reviews]);
 
     const contactButtonHandler = () => {
         setPackagesIsShown(true);
@@ -180,21 +180,8 @@ const DiscountDetail = (props) => {
                             <span>{discount.likes}</span>
                         </Like>
                     </Title>
-                    
-                    {/* <DateTimeWrapper>
-                        <Wrapper>
-                            <Date>
-                                <p>{formatDate(discount.start_date)} </p> 
-                            </Date>
-                        </Wrapper>
-
-                        <Address>
-                            <p>{ discount.location }</p> 
-                        </Address>
-                    </DateTimeWrapper> */}
 
                     <Description>
-                        {/* <h4><b>About this promo</b></h4> */}
                         <p>
                             <b>Discount: </b> 
                             <Colored> {discount.percentage_discount} </Colored>            
@@ -209,7 +196,7 @@ const DiscountDetail = (props) => {
                             <Colored> { discount.location } </Colored>                           
                         </p>
                         {parse(discount.description)}                        
-                        {/* <ReadMoreOrLess onClick={()=>{readMoreHandler("discount-description")}}>{linkName}</ReadMoreOrLess> */}
+                        <ReadMoreOrLess onClick={()=>{readMoreHandler("discount-description")}}>{linkName}</ReadMoreOrLess>
                     </Description>
                 </DiscountInfo>
 
@@ -277,6 +264,19 @@ const DiscountDetail = (props) => {
                     </AboutOrganiser>
                 </SectionContent>
             </AboutOrganiserAndMap>
+
+            {props.discount_media && props.discount_media.length > 0 &&
+            <SectionWrapper>
+                <DiscountGalleryTitle>Discount Gallery</DiscountGalleryTitle>
+                <DiscountGallery>
+                    <GallerySection id="galery">
+                        <Gallery photos={props.discount_media} type={null} />
+                    </GallerySection>
+                    <LeftButton target="gallery" pos="0" />
+                    <RightButton target="gallery" pos="0" /> 
+                </DiscountGallery>
+            </SectionWrapper>
+            }
 
             <CommentsSection>
                 <ReviewSectionContent>
@@ -372,7 +372,7 @@ const Container = styled.div`
   color: rgba(0, 0, 0, 0.6);
   text-align: left;
   background: #fff;
-  font-family: Lato, 'Roboto', sans-serif;
+  font-family: Inter, 'Roboto', sans-serif;
 `;
 
 const Wrapper = styled.div`
@@ -386,7 +386,7 @@ const DiscountImageWrapper = styled.div`
     width: 100%;
     height: 50vh;
     /* background: black; */
-    margin-top: -7px;
+    margin-top: 80px; /* -7 */
     position: relative;
 `;
 
@@ -780,12 +780,25 @@ const Like = styled.p`
 
 const Description = styled.div`
     margin: 10px 0;
-    font-family: Lato, 'Roboto', sans-serif;
-    line-height: 1.5;
+    line-height: 1.75;
     @media (max-width: 530px) {
     font-size: 13px;
     padding: 5px 0 5px 0;
   }
+`;
+
+const ReadMoreOrLess = styled.button`
+    margin: 10px auto;
+    font-size: 12px;
+    padding: 3px 8px;
+    width: fit-content;
+    display: flex;
+    justify-content: space-around;
+    border: 1px solid #A9A9A9;
+    outline: none;
+    border-radius: 15px;
+    text-align: center;
+    color: #818589;
 `;
 
 
@@ -965,12 +978,12 @@ const DiscountGallery = styled.div`
     @media (min-width: 769px) {
         width: 80%;
         margin: 0 auto;
-        margin-top: 20px;
+        /* margin-top: 20px; */
     }
 `;
 
 const DiscountGalleryTitle = styled.h3`
-  padding: 0;
+  padding: 10px 0;
   margin: 0;
   @media (min-width: 481px) {
     font-size: 18px;

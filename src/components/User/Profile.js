@@ -32,7 +32,7 @@ const Profile = (props) => {
 };
 
 const Wrapper = styled.div`
-  margin-top: 50px;
+  margin-top: 60px;
   min-height: 100vh;
 `;
 

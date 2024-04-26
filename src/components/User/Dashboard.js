@@ -13,9 +13,9 @@ const Dashboard = (props) => {
     const [userDiscounts, setUserDiscounts] = useState();
     const [wishlistEvents, setWishlistEvents] = useState();
 
-    // Get user discount_packages and find events for those discount_packages as upcoming
+    // Get user discount_packages and find discounts for those discount_packages as upcoming
     const getUserDiscounts = () => {
-        let discountsData = props.events.results;
+        let discountsData = props.discounts.results;
         console.log("Events Data ", discountsData);
 
         if (discountsData){
@@ -258,9 +258,8 @@ const TicketWrap = styled.div`
 const mapStateToProps = (state) => {
     return {
         user: state.userState.user,
-        discount_packages: state.userState.discount_packages,
-        discounts: state.eventState.discounts,
-        wishlist: state.eventState.wishlist,
+        discounts: state.discountState.discounts,
+        wishlist: state.discountState.wishlist,
     }
 };
   

@@ -17,7 +17,7 @@ const Navbar = (props) => {
     };
 
     return (
-        <Container style={props.style}>
+        <Container style={props.style} id="top">
             <Content>
                 <Logo>
                     <NavLink to="/">
@@ -169,7 +169,7 @@ const Container = styled.div`
     padding: 5px 0;
     padding-top: 10px;    
     overflow: hidden;
-    font-family: Lato, 'Roboto', sans-serif;
+    font-family: Inter, 'Roboto', sans-serif;
     background-color: #fa8128;
     backdrop-filter: blur(10);
     @media (min-width: 768px) {
@@ -275,7 +275,6 @@ const SearchEntryDisplay = styled.div`
         z-index: 1000;
         padding: 10px 0;
         overflow: hidden;
-        font-family: Lato, 'Roboto', sans-serif;
         height: 70px;
     }
     .show {display:block;}
@@ -374,7 +373,6 @@ const NavList = styled.li`
             display: flex;
             align-items: center;
             margin: 0;
-            font-family: Lato, 'Roboto', sans-serif;
             position: relative;
             img {
                 width: 12px;

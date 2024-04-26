@@ -97,7 +97,7 @@ const FooterSection = styled.div`
     color: white;
     padding: 10px;
     margin-bottom: 0;
-    font-family: Lato, 'Roboto', sans-serif;
+    font-family: Inter, 'Roboto', sans-serif;
     font-size: 20px;
     @media (max-width: 768px) {
     }
@@ -213,9 +213,7 @@ const Form = styled.div`
         position: absolute;
         top: 14px;
         left: 20px;
-        /* font-size: 1em; */
         transition: 0.6s;
-        font-family: Lato, 'Roboto', sans-serif;
         color: #999;
     }
 
