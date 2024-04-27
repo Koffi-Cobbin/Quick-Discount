@@ -43,6 +43,7 @@ const CategoryTitle = styled.div`
   h4 {
     font-size: 22px;
     margin: 0 10px;
+    font-weight: Semibold;
     a {
       color: #808080;
       font-size: 16px;

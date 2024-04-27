@@ -83,11 +83,19 @@ const ContentList = styled.div`
 const ListItem = styled.div` 
     position: relative;
     margin: 10px;
-    padding: 0 10px 10px 10px;
+    padding: 0 5px 10px 5px;
     border-radius: 20px;
     cursor: pointer;
     overflow: hidden;
     /* border: 1px solid blue; */
+
+    &:first-of-type {
+        padding: 0 5px 10px 0;
+    }
+
+    &:last-of-type {
+        padding: 0 0 10px 5px;
+    }
 
     /* Adjust number of columns for different screen sizes */
     /* @media (min-width: 992px) {

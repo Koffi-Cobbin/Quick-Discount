@@ -98,7 +98,7 @@ const FooterSection = styled.div`
     padding: 10px;
     margin-bottom: 0;
     font-family: Inter, 'Roboto', sans-serif;
-    font-size: 20px;
+    font-size: 14px;
     @media (max-width: 768px) {
     }
 `;

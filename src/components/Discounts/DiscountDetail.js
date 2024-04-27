@@ -174,7 +174,7 @@ const DiscountDetail = (props) => {
             <AboutDiscount>
                 <DiscountInfo>
                     <Title>
-                        { discount.title} &nbsp;
+                        <b>{ discount.title} &nbsp;</b>                        
                         <Like>
                             <img src="/images/icons/like.svg" />
                             <span>{discount.likes}</span>
@@ -372,7 +372,24 @@ const Container = styled.div`
   color: rgba(0, 0, 0, 0.6);
   text-align: left;
   background: #fff;
-  font-family: Inter, 'Roboto', sans-serif;
+  /* font-family: Inter, 'Roboto', sans-serif; */
+
+  @media (min-width: 768px) {
+    width: 70%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1920px and up) */
+  @media only screen and (min-width: 120em) {
+    width: 60%;
+    margin: 0 auto;
+  }
+
+  /* Largest devices such as desktops (1280px and up) */
+  @media only screen and (min-width: 160em) {
+    width: 50%;
+    margin: 0 auto;
+  }
 `;
 
 const Wrapper = styled.div`
@@ -410,9 +427,9 @@ const DiscountImage = styled.div`
   background-image: ${props => `url(${props.imgUrl})`};
   margin: 0 auto;
   border-radius: 0 0 30px 30px;
-  @media (min-width: 769px) {
+  /* @media (min-width: 769px) {
         width: 80%;
-    }
+    } */
 `;
 
 const ShareDiscount = styled.button`
@@ -448,7 +465,7 @@ const SectionContent = styled.div`
         flex-wrap: wrap;
     }
 
-    @media (min-width: 481px) {
+    /* @media (min-width: 481px) {
         width: 95%;
     }
 
@@ -459,7 +476,7 @@ const SectionContent = styled.div`
     @media (min-width: 769px) {
         width: 80%;
         margin-top: 20px;
-    }
+    } */
 `;
 
 const ReviewSectionContent = styled(SectionContent)`
@@ -531,7 +548,7 @@ const ReviewVerificationInfo = styled.div`
 const DiscountInfo = styled.div`
     color: #36454F;
     padding: 10px;     
-    width: 70%;
+    width: 80%;
     /* border: 1px solid red; */
     @media (max-width: 620px) {
         width: 100%;
@@ -550,14 +567,6 @@ const Title = styled.h1`
   @media (max-width: 768px) {
     font-size: 20px; 
     }
-    
-  @media (max-width: 530px) {
-    /* font-size: 15px;  */
-    }
-
-  @media (max-width: 420px) {
-    /* font-size: 12px;  */
-    }
 `;
 
 const DateTimeWrapper = styled.div`
@@ -573,24 +582,7 @@ const DateTimeWrapper = styled.div`
 `;
 
 const Colored = styled.span`
-    /* text-align: left; */
-    /* align-items: center; */
-    /* padding: 5px 0; */
-    /* display: flex;
-    align-items: center; */
     color: #fa8128;
-
-    /* p {
-        span{
-            width: 100px;
-        }
-        span:first-child{
-            text-align: left;
-        }
-        span:last-child{
-            text-align: right;
-        }
-    } */
 `;
 
 const Time = styled(Date)``;
@@ -601,7 +593,7 @@ const Address = styled.div`
 `;
 
 const ContactSection = styled.div`
-    width: 30%;
+    width: 20%;
     /* border: 1px solid yellow; */
     display: flex;
     flex-direction: row-reverse;
@@ -742,9 +734,6 @@ const Owner = styled.div`
     border-radius: 30px;
     margin-top: 10px;
   }
-  @media (max-width: 530px) {
-    
-  }
 `;
 
 const DiscountType = styled.div`
@@ -869,9 +858,6 @@ const OrganiserButtons = styled.div`
     align-items: center;
     justify-content: center;
     margin-bottom: 10px;
-    @media (max-width: 620px) {
-
-    }
 `;
 
 
@@ -898,9 +884,6 @@ const FollowButton = styled.a`
 const OrganiserInfo = styled.div`
     margin: 0 15px;
     /* text-align: left; */
-    @media (max-width: 530px) {
-    font-size: 13px;
-  }
 `;
 
 const CommentsSection = styled(SectionWrapper)`
@@ -937,12 +920,7 @@ const SuggestedDiscounts = styled(SectionWrapper)`
 `;
 
 const RecomendedDiscounts = styled.div`
-    width: 80%;
-    margin: 0 auto;
     /* border: 1px solid red; */
-    @media (max-width: 768px) {
-        width: 100%;
-    }
 `;
 
 
@@ -971,33 +949,12 @@ const DiscountGallery = styled.div`
     position: relative;
     margin: 0 10px;
     /* border: 1px solid black; */
-    @media (min-width: 481px) {
-        width: 95%;
-        margin: 0 auto;
-    }
-    @media (min-width: 769px) {
-        width: 80%;
-        margin: 0 auto;
-        /* margin-top: 20px; */
-    }
 `;
 
-const DiscountGalleryTitle = styled.h3`
+const DiscountGalleryTitle = styled.h4`
   padding: 10px 0;
   margin: 0;
-  @media (min-width: 481px) {
-    font-size: 18px;
-    width: 95%;
-    margin: 0 auto;
-  }
-  @media (min-width: 769px) {
-    width: 80%;
-    margin: 0 auto;
-  }
-  @media (max-width: 480px) {
-    font-size: 16px;
-    padding: 0 10px;
-  } 
+  color: #000;
 `;
 
 const GallerySection = styled.div`

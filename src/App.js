@@ -4,6 +4,9 @@ import { connect } from "react-redux";
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import styled from "styled-components";
 
+import "@fontsource-variable/inter"; // Defaults to wght axis
+import "@fontsource-variable/inter/wght.css"; // Specify axis
+
 import "./App.css";
 import ScrollToTop from "./components/ScrollToTop";
 import Navbar from "./components/Layout/Nav/Navbar";

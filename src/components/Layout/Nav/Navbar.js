@@ -331,7 +331,7 @@ const TopNav = styled.nav`
     margin-left: auto;
     display: block; 
     color: #000;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 500;
     @media (max-width: 600px) {
         display: none;
@@ -358,7 +358,7 @@ const NavList = styled.li`
         flex-direction: row;
         justify-content: center;
         min-height: 30px;
-        min-width: 80px;
+        min-width: 40px;
         position: relative;
         text-decoration: none;
         margin-left: 5px;

@@ -121,19 +121,19 @@ const Container = styled.div`
   border-top: 1px solid white;
 
   @media (min-width: 768px) {
-    width: 90%;
+    width: 75%;
     margin: 0 auto;
   }
 
   /* Largest devices such as desktops (1920px and up) */
   @media only screen and (min-width: 120em) {
-    width: 80%;
+    width: 65%;
     margin: 0 auto;
   }
 
   /* Largest devices such as desktops (1280px and up) */
   @media only screen and (min-width: 160em) {
-    width: 60%;
+    width: 50%;
     margin: 0 auto;
   }
 `;
@@ -180,8 +180,8 @@ const FlexWrap = styled.div`
 
 const FilteredEvents = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-template-rows: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-rows: repeat(auto-fill, minmax(250px, 1fr));
   grid-gap: 20px 10px;
   /* border: 1px solid black; */
 

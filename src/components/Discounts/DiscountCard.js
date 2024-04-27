@@ -117,7 +117,7 @@ const Title = styled.h4`
   font-size: 20px;
   font-weight: 600;
   text-align: left;
-  max-height: 35px;
+  max-height: 40px;
   overflow: hidden;
   /* border: 1px solid black; */
 `;
@@ -154,6 +154,8 @@ const PercentageDiscount = styled.p`
   color: #fa8128;
   text-align: left;
   font-weight: 600;
+  max-height: 42px;
+  overflow: hidden;
 `;
 
 
@@ -162,6 +164,8 @@ const Address = styled.p`
   overflow: hidden;
   margin-bottom: 5px;
   font-weight: 600;  
+  max-height: 42px;
+  overflow: hidden;
 `;
 
 const SocialActions = styled.div`
@@ -169,6 +173,10 @@ const SocialActions = styled.div`
   align-items: center;
   justify-content: space-between;
   /* border: 1px solid blue; */
+  /* @media (min-width: 1024px) {
+    flex-direction: column;
+    align-items: flex-start;
+  } */
 `;
 
 const Left = styled.div``;

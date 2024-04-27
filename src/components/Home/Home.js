@@ -173,19 +173,19 @@ const Content = styled.div`
   position: relative;
 
   @media (min-width: 768px) {
-    width: 90%;
+    width: 75%;
     margin: 0 auto;
   }
 
   /* Largest devices such as desktops (1920px and up) */
   @media only screen and (min-width: 120em) {
-    width: 80%;
+    width: 65%;
     margin: 0 auto;
   }
 
   /* Largest devices such as desktops (1280px and up) */
   @media only screen and (min-width: 160em) {
-    width: 60%;
+    width: 50%;
     margin: 0 auto;
   }
 `;
@@ -273,6 +273,7 @@ const CategoryTitle = styled.div`
     margin: 5px;
     padding-top: 15px;
     font-size: 22px;
+    /* font-weight: 600; */
     a {
       color: #808080;
       font-size: 16px;
