@@ -237,7 +237,7 @@ const DiscountDetail = (props) => {
                 <SectionContent>
                     <Map 
                     id="mapIframe"
-                    style={{ backgroundImage: `url(${discount.flyer})` }}
+                    style={{ backgroundImage: `url("/images/map.png")` }}
                     >
                         {/* <MapImage src={discount.flyer}/> */}
                         {/* {parse(discount.location)} */}
