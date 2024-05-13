@@ -30,8 +30,6 @@ const Payment = (props) => {
   const [paymentMethod, setPaymentMethod] = useState("momo");
   const [enableSubmit, setEnableSubmit] = useState(false);
 
-  const navigate = useNavigate();
-
   const totalAmount = props.amount.toFixed(2);
 
   const validateEmail = (value) => {
@@ -55,60 +53,16 @@ const Payment = (props) => {
 
   useEffect(() => {
     const isAllEntriesFilled = async () => {
-      if (username && email && contact && momoNumber ) {
+      if (username && email && contact ) {
         setEnableSubmit(true);
       } else {
         setEnableSubmit(false);
       }
     };
 
-    const handleRedirect = async () => {
-      if (props.payment.paid) {
-        props.clearOrder()
-        props.clearPayment()
-        navigate("/dashboard");
-      }
-    };
-
     isAllEntriesFilled();
-    handleRedirect();
-  }, [username, email, contact, momoNumber, props.payment]);
+  }, [username, email, contact]);
 
-  useEffect(() => {
-
-  }, []);
-
-  // useEffect(() => {
-  //   const isAllEntriesFilled = async () => {
-  //     if (
-  //       username &&
-  //       email &&
-  //       contact &&
-  //       (momoNumber || (cardname && cardnumber && expmonth && expyear && cvv))
-  //     ) {
-  //       setEnableSubmit(true);
-  //     } else {
-  //       setEnableSubmit(false);
-  //     }
-  //   };
-  //   isAllEntriesFilled();
-  //   console.log(
-  //     username &&
-  //       email &&
-  //       contact &&
-  //       (momoNumber || (cardname && cardnumber && expmonth && expyear && cvv))
-  //   );
-  // }, [
-  //   username,
-  //   email,
-  //   contact,
-  //   momoNumber,
-  //   cardname,
-  //   cardnumber,
-  //   expmonth,
-  //   expyear,
-  //   cvv,
-  // ]);
 
   const handleCheckout = (e) => {
     e.preventDefault();
@@ -117,23 +71,36 @@ const Payment = (props) => {
       return;
     }
 
-    const payload = {
-      username: username,
-      email: email,
-      contact: contact,
-
-      momoNumber: momoNumber,
-      cardname: cardname,
-      cardnumber: cardnumber,
-      expmonth: expmonth,
-      expyear: expyear,
-      cvv: cvv,
-    };
-
-    props.checkout(payload);
-    // payWithPayStack();
-    console.log(payload);
+    props.handlePostDiscount(e);
   };
+
+
+  useEffect(() => {
+    const checkout = () => {
+      // Send discount form data to create new discount
+      const payload = {
+        username: username,
+        email: email,
+        contact: contact,
+  
+        momoNumber: momoNumber,
+        cardname: cardname,
+        cardnumber: cardnumber,
+        expmonth: expmonth,
+        expyear: expyear,
+        cvv: cvv,
+      };
+  
+      props.checkout(payload);
+  
+      console.log(payload);
+    };
+    // Send billing address to checkout
+    if (props.createDiscountStatus){
+      checkout();
+    }
+  }, [props.createDiscountStatus]);
+
 
   return (
     <Wrapper>
@@ -209,7 +176,7 @@ const Payment = (props) => {
               type="submit"
               value="Continue to checkout"
               className={`"payment-input" ${classess.btn}`}
-              disabled={!enableSubmit}
+              disabled={!enableSubmit && !props.enableSubmit}
               onClick={(event) => handleCheckout(event)}
             />
           </form>
@@ -226,6 +193,7 @@ const Wrapper = styled.div`
   align-items: center;
   font-family: Lato, 'Roboto', sans-serif;
   font-size: 20px;
+  padding: 10px;
 `;
 
 const Container = styled.div`
@@ -263,6 +231,7 @@ const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
     payment: state.userState.payment,
+    createDiscountStatus: state.discountState.createDiscountStatus,
   };
 };
 

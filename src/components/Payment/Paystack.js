@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useState, useContext, useEffect } from "react";
 import { connect } from "react-redux";
 import { verifyPaymentAPI } from "../../actions";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Paystack = (props) => {
   // Paystack configuration
@@ -13,6 +13,8 @@ const Paystack = (props) => {
   const email = props.payment.email;
   const currency = "GHS"; // Currency code
   const reference = props.payment.ref_code;
+
+  const navigate = useNavigate();
 
   const extraData = {
     firstName: "John",
@@ -31,18 +33,13 @@ const Paystack = (props) => {
     console.error("Payment failed!", error);
   };
 
-  // const verify = () => {
-  //   const paystack_response = {
-  //     message: "Approved",
-  //     redirecturl: "?trxref=QuickEvents-vXzGQPdh154tUha&reference=QuickEvents-vXzGQPdh154tUha",
-  //     reference: "QuickEvents-vXzGQPdh154tUha",
-  //     status: "success",
-  //     trans: "2872549296",
-  //     transaction: "2872549296",
-  //     trxref: "QuickEvents-vXzGQPdh154tUha"
-  //   };
-  //   props.verifyPayment(paystack_response);
-  // };
+  useEffect(() => {
+    // navigate to /dashboard if payment is made
+    if (props.payment.paid) {
+      navigate("/dashboard");
+      };
+  }, [props.payment]);
+
 
   return (
     <Container>

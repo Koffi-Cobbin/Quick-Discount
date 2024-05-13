@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import Dashboard from "./Dashboard";
 import SavedDiscounts from "./SavedDiscounts";
-import DiscountPackages from "./DiscountPackages";
+import UserDiscounts from "./UserDiscounts";
 import Settings from "./Settings";
 
 const Main = (props) => {
@@ -32,7 +32,7 @@ const Main = (props) => {
 
       {props.currentSection === "bookmarks" && <SavedDiscounts />}
 
-      {props.currentSection === "discounts" && <DiscountPackages />}
+      {props.currentSection === "discounts" && <UserDiscounts />}
 
       {props.currentSection === "settings" && <Settings />}
     </Container>

@@ -4,7 +4,6 @@ import {
   SET_USER,
   SET_USER_TOKEN,
   SET_USER_ORDER,
-  SET_USER_PACKAGES,
   SET_LOADING_STATUS,
   SET_DISCOUNTS,
   SET_DISCOUNT_PACKAGES,
@@ -49,11 +48,6 @@ export const setUserToken = (payload) => ({
 export const setUserOrder = (payload) => ({
   type: SET_USER_ORDER,
   order: payload,
-});
-
-export const setUserPackages = (payload) => ({
-  type: SET_USER_PACKAGES,
-  packages: payload,
 });
 
 export const setUserNotifications = (payload) => ({
@@ -286,8 +280,8 @@ export function loginAPI(payload) {
       })
       .catch((errorMessage) => {
         // --------TO BE REMOVED---------
-        dispatch(setUser(userData));
-        console.log("user_data ...");
+        // dispatch(setUser(userData));
+        // console.log("user_data ...");
         // ------------------------------
         console.log(errorMessage);
       });
@@ -563,8 +557,8 @@ export function getCategoriesAPI() {
       })
       .catch((errorMessage) => {
         // --------TO BE REMOVED---------
-        dispatch(setCategories(categoriesData));
-        console.log("Categories ...");
+        // dispatch(setCategories(categoriesData));
+        // console.log("Categories ...");
         // --------------------------------
         console.log(errorMessage);
       });
@@ -599,8 +593,8 @@ export function getDiscountsAPI() {
       .catch((errorMessage) => {
         console.log(errorMessage);
         // --------TO BE REMOVED---------
-        dispatch(setDiscounts(discountsData));
-        console.log("Discounts ...");
+        // dispatch(setDiscounts(discountsData));
+        // console.log("Discounts ...");
         // ------------------------------
         dispatch(setLoading(false));
       });
@@ -667,8 +661,8 @@ export function getDiscountReviewsAPI(discount_id) {
       .catch((errorMessage) => {
         console.log(errorMessage);
         // --------TO BE REMOVED---------
-        dispatch(setDiscountReviews(discountReviewsData));
-        console.log("Discounts Reviews ...");
+        // dispatch(setDiscountReviews(discountReviewsData));
+        // console.log("Discounts Reviews ...");
         // ------------------------------
         dispatch(setLoading(false));
       });
@@ -726,8 +720,8 @@ export function orderAPI(data) {
   };
 }
 
-// ---------------------------
-// ------- Checkout ----------
+// --------------------------------------
+// -------------- Checkout --------------
 
 export function checkoutAPI(data) {
   return (dispatch, getState) => {
@@ -739,7 +733,8 @@ export function checkoutAPI(data) {
     const payment_address = {
       username: data.username,
       email: data.email,
-      contact: data.contact};
+      contact: data.contact
+    };
 
     fetch(url, {
       method: "POST",
@@ -1016,10 +1011,10 @@ export function removeFromWishlistAPI(payload) {
 // ------------------------------
 // ------ GET DISCOUNT PACKAGES -------
 
-export function getDiscountPackagesAPI(discount_id) {
+export function getDiscountPackagesAPI() {
   return (dispatch) => {
     dispatch(setLoading(true));
-    const url = `${BASE_URL}/discounts/packages/${discount_id}/`;
+    const url = `${BASE_URL}/discounts/packages/`;
 
     fetch(url, {
       method: "GET",
@@ -1070,8 +1065,8 @@ export function getDiscountMediaAPI(discount_id) {
       .catch((errorMessage) => {
         console.log(errorMessage);
         // --------TO BE REMOVED---------
-        dispatch(setDiscountMedia(discountMediaData.results));
-        console.log("Discounts Media ...");
+        // dispatch(setDiscountMedia(discountMediaData.results));
+        // console.log("Discounts Media ...");
         // ------------------------------
       });
   };
@@ -1250,6 +1245,46 @@ export function getAnalyticsAPI(organizer_id) {
       .catch((errorMessage) => {
         console.log(errorMessage);
         dispatch(setLoading(false));
+      });
+  };
+}
+
+
+// ------------------------------
+// ------ FORGET PASSWORD -------
+
+export function forgetPasswordAPI(payload) {
+  return (dispatch) => {
+    dispatch(setLoading(true));
+    dispatch(setErrors(null));
+
+    const url = `${BASE_URL}/users/forgetpassword/`;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("login data ", data);        
+        if (data.success) {
+          dispatch(setUser(data.user_data));
+          console.log("user login email ", data.user_data.email);
+        } else if (data.failed) {
+          console.log(data.errors);
+          dispatch(setErrors({ forget_password: data.errors }));
+          dispatch(setLoading(false));
+        }
+      })
+      .catch((errorMessage) => {
+        // --------TO BE REMOVED---------
+        // dispatch(setUser(userData));
+        // console.log("Forget password failed ...");
+        // ------------------------------
+        console.log(errorMessage);
       });
   };
 }

@@ -52,7 +52,7 @@ const DiscountCard = (props) => {
           <SocialActions>
             <Left><b>1,220</b></Left>
             <Right>
-              <StarRating rating={props.discount.rate} showRate={true}/>
+              <StarRating rating={props.discount.likes} showRate={true}/>
             </Right>
             {/* <AddToWishlist type="icon" discount={props.discount} /> */}
         </SocialActions>

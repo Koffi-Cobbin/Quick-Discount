@@ -952,7 +952,7 @@ const DiscountGallery = styled.div`
 `;
 
 const DiscountGalleryTitle = styled.h4`
-  padding: 10px 0;
+  padding: 10px;
   margin: 0;
   color: #000;
 `;

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { loginAPI, googleAuth } from "../../actions";
+import { NavLink, Link } from "react-router-dom";
 import { Navigate, useNavigate } from "react-router-dom";
 import { setLoading, setLoadingMessage } from "../../actions";
 import { isEmailValid, isPasswordValid, isContactValid } from "../../utils/middleware";
@@ -156,12 +157,10 @@ const Login = (props) => {
                                     disabled={!((password && email) || (password && contact)) ? true : false}
                                 />
                             </div>
+                            <ForgetPassword><NavLink to="/forgetpassword">Forget password?</NavLink></ForgetPassword>
                         </form>
                         <hr/>
-                        {/* <Google onClick={() => props.signIn()}>
-                            <img src="/images/icons/google.svg" alt="Google"></img>
-                            Sign in with Google
-                        </Google> */}
+                        <CreateAccount>New here?<NavLink to="/signup">Create account </NavLink></CreateAccount>  
                     </Form>
 
                 </FormSection>
@@ -182,6 +181,11 @@ const Container = styled.div`
     height: 100vh;
     display: flex;
     justify-content: center;
+`;
+
+const CreateAccount = styled.div`
+    display: flex;
+    justify-content: space-around;
 `;
 
 const Section = styled.section`
@@ -375,6 +379,11 @@ const mapStateToProps = (state) => {
         errors: state.appState.errors,
     }
 };
+
+const ForgetPassword = styled.div`
+    padding-top: 10px;
+    text-align: right;
+`;
 
 const mapDispatchToProps = (dispatch) => ({
     signIn: (payload) => dispatch(loginAPI(payload)),

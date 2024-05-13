@@ -3,49 +3,30 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import DiscountPackage from "../DiscountPackages/DiscountPackage/DiscountPackage";
-import { DUMMY_TICKETS } from "../Assets/data";
 import Rightside from "./Rightside";
 import { getWishlistAPI } from "../../actions";
 import { formatDate, formatTime } from "../../utils/middleware";
+import DiscountCard from "../Discounts/DiscountCard";
 
 
 const Dashboard = (props) => {
-    const [userDiscounts, setUserDiscounts] = useState();
     const [wishlistEvents, setWishlistEvents] = useState();
-
-    // Get user discount_packages and find discounts for those discount_packages as upcoming
-    const getUserDiscounts = () => {
-        let discountsData = props.discounts.results;
-        console.log("Events Data ", discountsData);
-
-        if (discountsData){
-            const user_discounts= discountsData.filter((discount) => {
-            return  discount.user === props.user;
-            });
-            console.log("user_discounts ", user_discounts);
-
-            if (user_discounts.length > 0){
-                setUserDiscounts([...user_discounts]);
-            };
-        };
-    };
-
     
     const filterWishlistDiscounts = () => {
         let discountsData = props.discounts.results;
         let wishlist = props.wishlist;
-        console.log("Events Data ", discountsData);
+        console.log("Discounts Data ", discountsData);
         console.log("wishlist ", wishlist);
 
-        let wishlist_events = wishlist.map((wishItem) => {
+        let wishlist_discounts = wishlist.map((wishItem) => {
             return  wishItem.discount;
           });
         
-        console.log("wishlist_events ", wishlist_events);
+        console.log("wishlist_discounts ", wishlist_discounts);
 
         if (discountsData){
             const newFilteredDiscounts= discountsData.filter((discount) => {
-                return  wishlist_events.includes(discount.url);
+                return  wishlist_discounts.includes(discount.url);
             });
             console.log("newFilteredDiscounts ", newFilteredDiscounts);
 
@@ -62,7 +43,6 @@ const Dashboard = (props) => {
         else{
             props.getWishlist();
         }
-        getUserDiscounts();
     }, [props.wishlist]);
 
 
@@ -73,11 +53,11 @@ const Dashboard = (props) => {
             {/* User's discount_packages section */}
             <Section>
                 <Title>Discounts </Title>
-                {userDiscounts && userDiscounts.length > 0 ? (
+                {props.discounts && props.discounts.results.length > 0 ? (
                 <TicketGrid>
-                    {userDiscounts.slice(0, 2).map((discount) => (
+                    {props.discounts.results.slice(0, 1).map((discount) => (
                         <GridItem>
-                            <DiscountPackage
+                            <DiscountCard
                                 key={discount.id}
                                 id={discount.id}
                                 type={discount.type}
@@ -89,7 +69,7 @@ const Dashboard = (props) => {
                     ))}
                 </TicketGrid>
                 ) : (
-                <Message>You have no discount_packages.</Message>
+                <Message>You have no discounts.</Message>
                 )}
             </Section>
 

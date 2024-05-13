@@ -4,27 +4,26 @@ import DiscountPackage from "../DiscountPackages/DiscountPackage/DiscountPackage
 import { connect } from "react-redux";
 
 
-const DiscountPackages = (props) => {
+const UserDiscounts = (props) => {
 
     return (
         <Container>
             <Section>
                 <Title>Packages </Title>
-                {props.discount_packages && props.discount_packages.length > 0 ?
-                <PackageGrid>
-                  {props.events && props.discount_packages.map((discount_package) => (
+                {props.discounts && props.discounts.results.length > 0 ?
+                <DiscountGrid>
+                  {props.discounts.results.map((discount) => (
                     <GridItem>
                         <DiscountPackage
-                            key={discount_package.id}
-                            id={discount_package.id}
-                            type={discount_package.package_type}
-                            event={props.events.find(obj => obj.url === discount_package.event)}
-                            price={discount_package.price}
+                            key={discount.id}
+                            id={discount.id}
+                            type={discount.package_type}
+                            price={discount.price}
                             showForm={false}
                         />
                     </GridItem>
                   ))}
-                </PackageGrid>
+                </DiscountGrid>
                 :
                 <Message>You have no discount packages.</Message>
                 }
@@ -49,7 +48,7 @@ const Title = styled.h4`
     text-align: left;
 `;
 
-const PackageGrid = styled.div`
+const DiscountGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   grid-template-rows: repeat(auto-fill, minmax(280px, 1fr));
@@ -83,8 +82,7 @@ const Message = styled.div`
 const mapStateToProps = (state) => {
     return {
       user: state.userState.user,
-      discount_packages: state.userState.discount_packages,
-      events: state.eventState.events,
+      discounts: state.organizerState.discounts
     }
 };
   
@@ -92,4 +90,4 @@ const mapDispatchToProps = (dispatch) => ({
 
 });
 
-export default connect(mapStateToProps)(DiscountPackages);
+export default connect(mapStateToProps)(UserDiscounts);

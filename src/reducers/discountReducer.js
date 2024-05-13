@@ -17,7 +17,7 @@ export const initState = {
     +JSON.parse(sessionStorage.getItem('totalAmount')) : 0,
     categories: sessionStorage.getItem('categories') ?
     JSON.parse(sessionStorage.getItem('categories')) : null,
-    createEventStatus: null,
+    createDiscountStatus: null,
     wishlist: sessionStorage.getItem('wishlist') ?
     JSON.parse(sessionStorage.getItem('wishlist')) : [],    
     discount_packages: sessionStorage.getItem('discount_packages') ?
@@ -66,7 +66,7 @@ const discountReducer = (state = initState, action) => {
         case SET_CREATE_DISCOUNT_STATUS:
             return {
                 ...state,
-                createEventStatus: action.createEventStatus,
+                createDiscountStatus: action.createDiscountStatus,
             };
             
         case SET_CART_ITEMS:

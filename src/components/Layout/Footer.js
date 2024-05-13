@@ -130,14 +130,16 @@ const Layout = styled.div`
 
 const LeftSide = styled.div`
     width: 30%;
-    @media (max-width: 768px) {
+    @media (max-width: 480px) {
+        text-align: center;
         width: 100%;
     }
 `;
 
 const Main = styled.div`
     width: 30%;
-    @media (max-width: 768px) {
+    @media (max-width: 480px) {
+        text-align: center;
         width: 100%;
     }
 `;
@@ -145,12 +147,13 @@ const Main = styled.div`
 const RightSide = styled.div`
     width: 30%;
     & .footer-logo{
-        margin-bottom: 50px;
+        margin: 20px 0;
         &>img{
             width: 200px;
         }        
     }
-    @media (max-width: 768px) {
+    @media (max-width: 480px) {
+        text-align: center;
         width: 100%;
     }
 `;

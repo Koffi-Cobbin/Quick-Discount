@@ -24,7 +24,6 @@ import {
   getDiscountPackagesAPI,
   deleteDiscountMediaAPI,
   deleteDiscountPackageAPI,
-  setDiscountPackages,
 } from "../../actions";
 import { packageOptionsData } from "../Assets/data";
 import Payment from "../Payment/Payment";
@@ -33,39 +32,34 @@ import Payment from "../Payment/Payment";
 
 
 const DiscountForm = (props) => {
-  const [discountName, setDiscountName] = useState("");
+  const [discountTitle, setDiscountName] = useState("");
   const [discountDescription, setDiscountDescription] = useState("");
   const [organizerName, setOrganizerName] = useState(props.organizer ? props.organizer.name : "");
   const [organizerDescription, setOrganizerDescription] = useState(props.organizer ? props.organizer.description : "");
   const [email, setEmail] = useState(props.organizer ? props.organizer.email : "");
   const [phoneNumber, setPhoneNumber] = useState(props.organizer ? props.organizer.phone_number : "");
   const [discountCategories, setDiscountCategories] = useState();
-  const [discountType, setDiscountType] = useState("");
   const [percentageDiscount, setPercentageDiscount] = useState("");
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
-  const [occurrence, setOccurrence] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  // set defalt endDate to startDate plus 24hrs
+  const [endDate, setEndDate] = useState(new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [discountFlyer, setDiscountFlyer] = useState();
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
-  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : {whatsapp: " ", facebook: " ", instagram: " ", twitter: " "});
+  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : {whatsapp: "w", facebook: "f", instagram: "i", twitter: "t"});
   const [websiteURL, setWebsiteUrl] = useState("");
   const [agreement, setAgreement] = useState("");
-
-  const [slotType, setSlotType] = useState("");
-  const [slotNumber, setSlotNumber] = useState();
 
   const [allCategories, setAllCategories] = useState(); // Categories from API
   const [enableSubmit, setEnableSubmit] = useState(false);
   const [filename, setFilename] = useState("");
-  const [packageOption, setPackageOption] = useState({ 
-        ...packageOptionsData.results[0], quantity: 1
-  });
+  const [discountPackages, setDiscountPackages] = useState();
+  const [packageOption, setPackageOption] = useState();
   const [next, setNext] = useState(false);
   const [prev, setPrev] = useState(false);
   
@@ -126,28 +120,13 @@ const DiscountForm = (props) => {
     console.log("Checking if discount name already exists", value);
   };
 
-  const socialMediaChangeHandler = (index, social_media_url) => {
-    const updatedSocialMediaHandles = [...socialMediaHandles];
-    updatedSocialMediaHandles[index].socialMediaURL = social_media_url;
+  const socialMediaChangeHandler = (key, social_media_url) => {
+    console.log("Testing social media...")
+    const updatedSocialMediaHandles = {...socialMediaHandles};
+    updatedSocialMediaHandles[key] = social_media_url;
     setSocialMediaHandles(updatedSocialMediaHandles);
   };
 
-  const handleSocialMediaChange = (index, social_media_name) => {
-    if (socialMediaHandles.some((obj) => obj.name === social_media_name)) {
-      return; // Skip adding a social_media_name if the social_media_type exists
-    }
-    if (social_media_name === "delete") {
-      // let social_media = socialMediaHandles[index];    
-      const updatedMediaHandles = socialMediaHandles.slice();
-      updatedMediaHandles.splice(index, 1);
-      setSocialMediaHandles(updatedMediaHandles);
-    } else {
-      setSocialMediaHandles([
-        ...socialMediaHandles,
-        {name: social_media_name, socialMediaURL: ""}
-      ]);
-    }
-  };
 
   // Function to get flyer image
   const getFlyer = async () => {
@@ -169,12 +148,15 @@ const DiscountForm = (props) => {
       props.getCategories();
     };
 
-    // Get the discount packages
-    if (props.discount && !discountFlyer){
-      if (!props.discount_packages || (props.discount_packages.length>0 && props.discount_packages[0].discount != props.discount.url)){
-        props.getDiscountPackages(props.discount.id);
-      };
+    // Get Discount Packages
+    if (props.discount_packages) {
+      setDiscountPackages(props.discount_packages.results);
+      setPackageOption({...props.discount_packages.results[0], quantity:1});
+    } else {
+      props.getDiscountPackages();
+    };
 
+    if (props.discount && !discountFlyer){
       setDiscountName(props.discount.name);
       setDiscountDescription(props.discount.description);
       setOrganizerName(props.discount.organizer.name);
@@ -182,19 +164,16 @@ const DiscountForm = (props) => {
       setEmail(props.discount.organizer.email);
       setPhoneNumber(props.discount.organizer.phone_number);
       setDiscountCategories(props.discount.categories);
-      setDiscountType(props.discount.discount_type);
       setPercentageDiscount(props.discount.percentage_discount);
-      setSlotNumber(1);
       setLocation(props.discount.location);
       setAddress(props.discount.address);
-      setOccurrence(props.discount.occurrence);
       setStartDate(props.discount.start_date);
       setEndDate(props.discount.end_date);
       setStartTime(props.discount.start_time);
       setEndTime(props.discount.end_time);
       setSocialMediaHandles(props.discount.organizer.social_media_handles);
       setWebsiteUrl(props.discount.website_url);
-      setPackageOption(props.discount_packages);
+      setPackageOption(props.discount_packages.results[0]);
       setDiscountFlyer(props.discount.flyer);
       setAgreement(props.discount.agreement);
 
@@ -321,7 +300,7 @@ const DiscountForm = (props) => {
 
 
   const handleOptionChange = (package_type) => {
-    let updatedDiscountPackage = packageOptionsData.results.filter((option) => option.package_type == package_type)[0];
+    let updatedDiscountPackage = discountPackages.filter((option) => option.type === package_type)[0];
     updatedDiscountPackage.quantity = 1;
     setPackageOption(updatedDiscountPackage);
   };
@@ -356,38 +335,28 @@ const DiscountForm = (props) => {
     }
   };
 
-  const handlePostDiscount = (e) => {
-    e.preventDefault();
+  const handlePostDiscount = () => {
+    // e.preventDefault();
 
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-
-    const filteredPackageOptions = packageOption.filter(
-      (discount_package) =>
-        discount_package.price !== null && discount_package.price > 0 && discount_package.quantity >= 1
-    );
-
-    console.log("Filtered packages ", filteredPackageOptions);
+    // if (e.target !== e.currentTarget) {
+    //   return;
+    // }
 
     const payload = {
       discount_data: {
-        name: discountName,
-        description: discountDescription,
-        discount_type: discountType,
+        title: discountTitle,
+        description: discountDescription,      
+        package_type: packageOption.type,
         percentage_discount: percentageDiscount,
-        slot_type: slotType,
-        slot_number: slotNumber,
         start_date: startDate,
         end_date: endDate,
         start_time: startTime,
         end_time: endTime,
         categories: discountCategories,
-        occurrence: occurrence,
         website_url: websiteURL,
         agreement: agreement,
         location: location,
-        address: updateIframeDimensions(address),
+        address: updateIframeDimensions(address),             
       },
       organizer_data: {
         name: organizerName,
@@ -396,8 +365,14 @@ const DiscountForm = (props) => {
         phone_number: phoneNumber,
         social_media_handles: socialMediaHandles,
       },
-      packages_data: filteredPackageOptions,
+      package_data: {
+        type: packageOption.type,
+        quantity: packageOption.quantity,
+        // total_amount: packageOption.price * packageOption.quantity 
+      }
     };
+
+    console.log("Payload... ", payload);
 
     const files = {
       flyer: discountFlyer,
@@ -433,7 +408,7 @@ const DiscountForm = (props) => {
   useEffect(() => {
     const isAllEntriesFilled = async () => {
       if (
-        discountName &&
+        discountTitle &&
         discountDescription &&
         percentageDiscount &&
         organizerName &&
@@ -441,27 +416,24 @@ const DiscountForm = (props) => {
         email &&
         phoneNumber &&
         discountCategories &&
-        discountType &&
+        packageOption &&
         location &&
-        address &&
-        occurrence &&
+        // address &&
         startDate &&
         endDate &&
-        startTime &&
-        endTime &&
         discountFlyer &&
         socialMediaHandles &&
         agreement
       ) {
         setEnableSubmit(true);
+        console.log("FILLED!");
       } else {
         setEnableSubmit(false);
       }
     };
     isAllEntriesFilled();
-    // console.log(location);
   }, [
-    discountName,
+    discountTitle,
     discountDescription,
     percentageDiscount,
     organizerName,
@@ -469,10 +441,8 @@ const DiscountForm = (props) => {
     email,
     phoneNumber,
     discountCategories,
-    discountType,
     location,
     address,
-    occurrence,
     startDate,
     endDate,
     startTime,
@@ -492,8 +462,6 @@ const DiscountForm = (props) => {
     setWebsiteUrl("");
     setOrganizerName("");
     setOrganizerDescription("");
-    setDiscountType("");
-    setOccurrence("");
     setStartDate("");
     setEndDate("");
     setStartTime("");
@@ -507,19 +475,7 @@ const DiscountForm = (props) => {
     setDiscountImages([]);
     setAgreement("");
     setAddress("");
-    setSlotType("");
-    setSlotNumber(0);
-    setPackageOption([{ price: null, package_type: "daily", quantity: 1 }]);
   };
-
-  useEffect(() => {
-    if (props.createDiscountStatus) {
-      // reset();
-      // Instead of reset, redirect to dashboard & clear createDiscountStatus
-      props.resetCreateDiscountStatus();
-      navigate("/dashboard");
-    }
-  }, [props.createDiscountStatus]);
 
   const openTermsPage = () => {
     window.open('/terms', '_blank');
@@ -556,7 +512,7 @@ const DiscountForm = (props) => {
                   <label>Discount Title</label>
                   <input
                     type="text"
-                    value={discountName}
+                    value={discountTitle}
                     onChange={(e) => setDiscountName(e.target.value)}
                     onBlur={(e)=>doesDiscountNameExist(e.target.value)}
                     required
@@ -672,33 +628,22 @@ const DiscountForm = (props) => {
                   />
                 </FormInputs>
               </FormContent>
-        
 
               <FormContent>
                 <FormInputs>
-                  <InputsFlexWrap>
-                    <div>
-                      <label>Start Date</label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label>End Date</label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </InputsFlexWrap>
+                  <label>Google Location &nbsp;</label>
+                  <label>
+                    <Link to="/help/location" target="_blank">
+                      Click here to learn how to add location.
+                    </Link>
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
                 </FormInputs>
-              </FormContent>
-       
+              </FormContent>               
 
               <FormContent>
                 <AssetsArea>
@@ -873,9 +818,11 @@ const DiscountForm = (props) => {
                                 handleOptionChange(e.target.value)
                               }
                             >
-                              <option value="daily">daily</option>
-                              <option value="weekly">weekly</option>
-                              <option value="monthly">monthly</option>
+                              {discountPackages && discountPackages.map((discount_package) => (
+                                <option key={`pac-${discount_package.id}`} value={discount_package.type}>
+                                  {discount_package.type}
+                                </option>
+                              ))}
                             </select>
                           </div>
                           <div>
@@ -883,7 +830,7 @@ const DiscountForm = (props) => {
                             <input
                               type="number"
                               name="package-price"
-                              value={packageOption.price*packageOption.quantity}
+                              value={parseFloat(packageOption.price)*(packageOption.quantity ? packageOption.quantity : 1)}
                               readOnly="True"
                             />
                           </div>
@@ -912,8 +859,36 @@ const DiscountForm = (props) => {
                 </FormInputs>             
               </FormContent>
 
+              <FormContent>
+                <FormInputs>
+                  <InputsFlexWrap>
+                    <div>
+                      <label>Start Date</label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label>End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </InputsFlexWrap>
+                </FormInputs>
+              </FormContent>
+
               {/* Payment Section  */}
-              <Payment amount={packageOption.price*packageOption.quantity}/>
+              <Payment 
+                amount={packageOption.price*packageOption.quantity} 
+                enableSubmit={enableSubmit}
+                handlePostDiscount={handlePostDiscount}/>
 
               <SubmitSection>
                 <SubmitButton
@@ -922,12 +897,12 @@ const DiscountForm = (props) => {
                   Previous
                 </SubmitButton>
 
-                <SubmitButton
+                {/* <SubmitButton
                   disabled={!enableSubmit}
                   onClick={(discount) => handlePostDiscount(discount)}
                 >
                   Submit
-                </SubmitButton>
+                </SubmitButton> */}
               </SubmitSection>
             </Slide>
             }
@@ -967,9 +942,8 @@ const InputsFlexWrap = styled(FlexWrap)`
   }
 `;
 
-const PackagesFlexWrap = styled(FlexWrap)`
+const PackagesFlexWrap = styled(FlexWrap)`  
   & div.package-section {
-    width: 80%;
     /* border: 1px solid blue; */
   }
   &.add-package-section {
@@ -1226,9 +1200,8 @@ const mapDispatchToProps = (dispatch) => ({
   updateDiscount: ({formData, discount_id}) => dispatch(updateDiscountAPI({formData, discount_id})),
   getCategories: () => dispatch(getCategoriesAPI()),
   resetCreateDiscountStatus: () => dispatch(setCreateDiscountStatus(null)),
-  getDiscountPackages: (discount_id) => {dispatch(getDiscountPackagesAPI(discount_id))},
+  getDiscountPackages: () => {dispatch(getDiscountPackagesAPI())},
   getDiscountMedia: (discount_id) => {dispatch(getDiscountMediaAPI(discount_id))},
-  updateDiscountPackages: (payload) => {dispatch(setDiscountPackages(payload))},
   deleteDiscountPackage: (package_id) => {dispatch(deleteDiscountPackageAPI(package_id))},
   deleteDiscountMedia: (media_id) => {dispatch(deleteDiscountMediaAPI(media_id))},
 });

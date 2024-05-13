@@ -19,6 +19,7 @@ import UpdateDiscount from "./components/Discounts/UpdateDiscount";
 import Modal from "./components/Shared/Modal";
 import Signup from "./components/Auth/Signup";
 import Login from "./components/Auth/Login";
+import ForgetPassword from "./components/Auth/ForgetPassword";
 import Loading from "./components/Shared/Loading";
 import Footer from "./components/Layout/Footer";
 import CartProvider from "./store/CartProvider";
@@ -219,6 +220,16 @@ function App(props) {
                   sidenav={openSideNav}
                 />,
                 <Logout />,
+              ]}
+            />
+
+            <Route
+              path="/forgetpassword"
+              element={[
+                <Navbar
+                  sidenav={openSideNav}
+                />,
+                <ForgetPassword />,
               ]}
             />
 

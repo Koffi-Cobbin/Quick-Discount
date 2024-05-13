@@ -5,7 +5,7 @@ import {
     SET_USER_ORDER, 
     SET_PAYMENT, 
     SET_USER_NOTIFICATIONS,
-    SET_USER_PACKAGES
+    SET_USER_TICKETS
 } from "../actions/actionType";
 
 
@@ -29,6 +29,7 @@ const userReducer = (state = INITIAL_STATE, action) => {
                 sessionStorage.removeItem('payment');
                 sessionStorage.removeItem('user-order');
                 sessionStorage.removeItem('user-notifications');
+                sessionStorage.removeItem('user-discounts');
             }
             else {sessionStorage.setItem('user', JSON.stringify(action.user));}
             return {
@@ -56,7 +57,7 @@ const userReducer = (state = INITIAL_STATE, action) => {
                 order: action.order
             };
 
-        case SET_USER_PACKAGES:
+        case SET_USER_TICKETS:
             sessionStorage.setItem('user-tickets', JSON.stringify(action.tickets));
             return {
                 ...state,
