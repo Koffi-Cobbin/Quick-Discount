@@ -51,7 +51,8 @@ const DiscountForm = (props) => {
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
-  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : {whatsapp: "w", facebook: "f", instagram: "i", twitter: "t"});
+  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : {whatsapp: " ", facebook: " ", instagram: " ", twitter: " "});
+  const [videoURL, setVideoURL] = useState("");
   const [websiteURL, setWebsiteUrl] = useState("");
   const [agreement, setAgreement] = useState("");
 
@@ -67,7 +68,12 @@ const DiscountForm = (props) => {
   const [emailError, setEmailError] = useState("");
   const [contactError, setContactError] = useState("");
   const [imageError, setImageError] = useState({ flyer: "", images: "" });
-  const [urlError, setUrlError] = useState("");
+  const [videoURLError, setVideoURLError] = useState("");
+  const [websiteURLError, setWebsiteURLError] = useState("");
+  // social media handles url errors
+  const [socialMediaHandlesURLError, setSocialMediaHandlesURLError] = useState(
+    {whatsappError: "", facebookError: "", instagramError: "", twitterError: ""}
+  );
 
   // const priceInputRef = useRef(null);
 
@@ -110,10 +116,17 @@ const DiscountForm = (props) => {
     setContactError(contactRes[1] ? contactRes[1] : "");
   };
 
-  const validateUrl = (value) => {
-    setWebsiteUrl(value);
+  const validateUrl = (key, value) => {
     let urlRes = isValidURL(value);
-    setUrlError(urlRes ? "" : "Invalid url");
+    if (key === "website") {
+      setWebsiteUrl(value);
+      setWebsiteURLError(urlRes ? "" : "Invalid url");
+      } 
+    else if (key === "video") {
+      setVideoURL(value);
+      setVideoURLError(urlRes ? "" : "Invalid url");
+      } 
+
   };
 
   const doesDiscountNameExist = (value) => {
@@ -121,10 +134,22 @@ const DiscountForm = (props) => {
   };
 
   const socialMediaChangeHandler = (key, social_media_url) => {
-    console.log("Testing social media...")
     const updatedSocialMediaHandles = {...socialMediaHandles};
-    updatedSocialMediaHandles[key] = social_media_url;
+    console.log("updatedSocialMediaHandles... ", updatedSocialMediaHandles);
+    const updatedSocialMediaHandlesURLError = {...socialMediaHandlesURLError};
+    console.log("updatedSocialMediaHandlesURLError... ", updatedSocialMediaHandlesURLError);
+    
+    if (social_media_url.length === 0){
+      updatedSocialMediaHandlesURLError[`${key}Error`] = "";
+      updatedSocialMediaHandles[key] = " ";
+    }
+    else {
+      updatedSocialMediaHandles[key] = social_media_url;
+      let urlRes = isValidURL(social_media_url);
+      updatedSocialMediaHandlesURLError[`${key}Error`] = urlRes ? "" : "Invalid url";
+    }
     setSocialMediaHandles(updatedSocialMediaHandles);
+    setSocialMediaHandlesURLError(updatedSocialMediaHandlesURLError);
   };
 
 
@@ -353,6 +378,7 @@ const DiscountForm = (props) => {
         start_time: startTime,
         end_time: endTime,
         categories: discountCategories,
+        video_url: videoURL,
         website_url: websiteURL,
         agreement: agreement,
         location: location,
@@ -673,6 +699,19 @@ const DiscountForm = (props) => {
                     />
                   </div>
                 </AssetsArea>
+
+                <FormInputs>
+                  <div>
+                    <label>Discount Ad video link</label>
+                    <input
+                      type="text"
+                      value={videoURL}
+                      placeholder="https://www.youtube.com"
+                      onChange={(e) => validateUrl("video", e.target.value)}
+                    />
+                    {videoURLError && <p className="error">{videoURLError}</p>}
+                  </div>
+                </FormInputs>
               </FormContent>
               {readDiscountImages && readDiscountImages.length > 0 && (
                 <ImageGrid images={readDiscountImages} popImage={popImage} />
@@ -680,13 +719,14 @@ const DiscountForm = (props) => {
 
            
               <FormContent>
-                <label style={{textAlign: "left"}}>Social Media Handles</label>
+              {props.organizer &&
+                <>
+                <label style={{textAlign: "left", color: "rgba(0, 0, 0, 0.6)"}}>Social Media Links</label>
                 <FormInputs>
-                  {!props.organizer && (
-                    <>                    
-                    {socialMediaHandles &&
+                  {socialMediaHandles && (
                     <>
                     {socialMediaHandles.instagram &&
+                    <>
                       <InputsFlexWrap>
                         <div>
                           <input
@@ -705,9 +745,11 @@ const DiscountForm = (props) => {
                           />
                         </div>  
                       </InputsFlexWrap>
-                      }                      
+                      {socialMediaHandlesURLError.instagramError && <p className="error">{socialMediaHandlesURLError.instagramError}</p>}
+                      </>}                      
 
                     {socialMediaHandles.facebook &&
+                    <>
                       <InputsFlexWrap>
                         <div>
                           <input
@@ -726,9 +768,11 @@ const DiscountForm = (props) => {
                           />
                         </div>
                       </InputsFlexWrap>
-                      }
+                      {socialMediaHandlesURLError.facebookError && <p className="error">{socialMediaHandlesURLError.facebookError}</p>}
+                      </>}
 
                       {socialMediaHandles.whatsapp &&
+                      <>
                       <InputsFlexWrap>
                         <div>
                           <input
@@ -747,12 +791,35 @@ const DiscountForm = (props) => {
                           />
                         </div>
                       </InputsFlexWrap>
-                      }
+                      {socialMediaHandlesURLError.whatsappError && <p className="error">{socialMediaHandlesURLError.whatsappError}</p>}
+                      </>}
+
+                      {socialMediaHandles.twitter &&
+                      <>
+                      <InputsFlexWrap>
+                        <div>
+                          <input
+                            type="text"
+                            value="twitter"
+                            readOnly
+                          />
+                        </div>
+
+                        <div>
+                          <input
+                            type="text"
+                            value={socialMediaHandles.twitter}
+                            onChange={(e) => socialMediaChangeHandler("twitter", e.target.value)}
+                            required
+                          />
+                        </div>
+                      </InputsFlexWrap>
+                      {socialMediaHandlesURLError.twitterError && <p className="error">{socialMediaHandlesURLError.twitterError}</p>}
+                      </>}
                     </>
-                      }
-                  </>
                   )}
                 </FormInputs>
+                </>}
 
                 <FormInputs>
                   <div>
@@ -761,9 +828,9 @@ const DiscountForm = (props) => {
                       type="text"
                       value={websiteURL}
                       placeholder="https://www.xyz.com"
-                      onChange={(e) => validateUrl(e.target.value)}
+                      onChange={(e) => validateUrl("website", e.target.value)}
                     />
-                    {urlError && <p className="error">{urlError}</p>}
+                    {websiteURLError && <p className="error">{websiteURLError}</p>}
                   </div>
                 </FormInputs>
               </FormContent>
@@ -887,6 +954,7 @@ const DiscountForm = (props) => {
               {/* Payment Section  */}
               <Payment 
                 amount={packageOption.price*packageOption.quantity} 
+                package_type={packageOption.type}
                 enableSubmit={enableSubmit}
                 handlePostDiscount={handlePostDiscount}/>
 

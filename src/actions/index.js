@@ -299,6 +299,7 @@ export function sendMail(payload) {
     fetch(url, {
       method: "POST",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
@@ -407,6 +408,7 @@ export function createDiscountAPI(formData) {
     fetch(url, {
       method: "POST",
       headers: {
+        Accept: "application/json",
         Authorization: `Bearer ${authToken}`,
       },
       body: formData,
@@ -465,6 +467,7 @@ export function updateDiscountAPI({formData, discount_id}) {
     fetch(url, {
       method: "PUT",
       headers: {
+        Accept: "application/json",
         Authorization: `Bearer ${authToken}`,
       },
       body: formData,
@@ -640,7 +643,7 @@ export function getOrganizerDiscountsAPI(organizer_id) {
 export function getDiscountReviewsAPI(discount_id) {
   return (dispatch) => {
     dispatch(setLoading(true));
-    const url = `${BASE_URL}/reviews/${discount_id}/`;
+    const url = `${BASE_URL}/discounts/reviews/discount/${discount_id}/`;
 
     fetch(url, {
       method: "GET",
@@ -653,9 +656,9 @@ export function getDiscountReviewsAPI(discount_id) {
         if (!response.ok) throw new Error(response.status);
         else return response.json();
       })
-      .then((discounts) => {
-        dispatch(setDiscountReviews(discounts));
-        console.log("Discount Reviews ", discounts);
+      .then((reviews) => {
+        dispatch(setDiscountReviews(reviews));
+        console.log("Discount Reviews ", reviews);
         dispatch(setLoading(false));
       })
       .catch((errorMessage) => {
@@ -665,6 +668,44 @@ export function getDiscountReviewsAPI(discount_id) {
         // console.log("Discounts Reviews ...");
         // ------------------------------
         dispatch(setLoading(false));
+      });
+  };
+}
+
+
+// ------------------------------
+// ------ LIKE REVIEW --------
+
+export function likeAndDislikeReviewAPI(data) {
+  return (dispatch, getState) => {
+    const url = `${BASE_URL}/discounts/reviews/update/${data.id}/`;
+    const state = getState();
+    const authToken = state.userState.token.access;
+
+    fetch(url, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response.json();
+      })
+      .then((review) => {
+        console.log("Updated Review 1", review);
+        // Get local reviews and update with new review data
+        let reviews = state.discountState.reviews;
+        console.log("Discount Reviews ", reviews);
+        const updatedReviews = reviews.results.map(obj => obj.id === review.id? {...obj, ...review} : obj);
+        console.log("Updated Reviews 2", updatedReviews);
+        setDiscountReviews({...reviews, results: updatedReviews});
+      })
+      .catch((errorMessage) => {
+        console.log(errorMessage);
       });
   };
 }

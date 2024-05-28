@@ -10,21 +10,17 @@ import TopDiscounts from "../Discounts/TopDiscounts";
 import { LeftButton, RightButton } from "../Shared/CarouselControls";
 import DiscountCard from "../Discounts/DiscountCard";
 
-import { getDiscountsAPI, getCategoriesAPI} from "../../actions";
+import { getDiscountsAPI } from "../../actions";
 
 const Home = (props) => {
   const [categories, setCategories] = useState();
 
-  useEffect(() => {
-    const getData = () => {
-      props.getCategories();
-      props.getDiscounts();
-    };
-    getData();
-    console.log("GETTING DATA ...");
-  }, []);
 
   useEffect(() => {
+    if (!props.discounts) {
+      props.getDiscounts();
+    };
+
     if (props.discounts.results) {
       // Get categories of fectched discounts
       const categories_lists = props.discounts.results.map(
@@ -137,12 +133,12 @@ const Home = (props) => {
                       </Link>
                     </h4>
                   </CategoryTitle>
-                  {props.discounts.results && (
+                  {/* {props.discounts.results && (
                     <CarouselFlex
                       type="category"
                       divId={category.toLowerCase()}
                       className="category-carousel-section"
-                    >
+                    >                      
                       {props.discounts.results.slice(0,4).map((discount, key) => (
                         <DiscountCard
                           key={key}
@@ -151,7 +147,7 @@ const Home = (props) => {
                         />
                       ))}
                     </CarouselFlex>
-                  )}
+                  )} */}
                 </CategorySection>
               ))}
             </>
@@ -310,7 +306,6 @@ const mapStateToProps = (state) => {
     user: state.userState.user,
     token: state.userState.token,
     discounts: state.discountState.discounts,
-    // categories: state.discountState.categories,
   };
 };
 
@@ -318,7 +313,6 @@ const mapDispatchToProps = (dispatch) => ({
   getDiscounts: () => {
     dispatch(getDiscountsAPI());
   },
-  getCategories: () => dispatch(getCategoriesAPI()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

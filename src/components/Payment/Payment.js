@@ -107,7 +107,7 @@ const Payment = (props) => {
       <Container>
         <Row>
             {props.payment ? (
-            <Paystack payment={props.payment}/>
+            <Paystack payment={props.payment} package_type={props.package_type}/>
             ) : (
             <div className={classess.container}>
               <form>

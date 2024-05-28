@@ -7,6 +7,7 @@ import Rightside from "./Rightside";
 import { getWishlistAPI } from "../../actions";
 import { formatDate, formatTime } from "../../utils/middleware";
 import DiscountCard from "../Discounts/DiscountCard";
+import { setPayment } from "../../actions";
 
 
 const Dashboard = (props) => {
@@ -35,6 +36,12 @@ const Dashboard = (props) => {
             };
         };
     };
+
+    useEffect(() => {
+        if (props.payment.paid) {
+            setPayment(null);
+            };
+    }, [props.payment]);
 
     useEffect(() => {
         if (props.wishlist){
@@ -240,6 +247,7 @@ const mapStateToProps = (state) => {
         user: state.userState.user,
         discounts: state.discountState.discounts,
         wishlist: state.discountState.wishlist,
+        payment: state.userState.payment,
     }
 };
   

@@ -11,7 +11,7 @@ import Loading from "../Shared/Loading";
 import Gallery from "../Gallery/Gallery";
 import { discountsData } from "../Assets/data";
 import { connect } from "react-redux";
-import photos from "../Assets/photos";
+import ReactPlayer from "react-player";
 import AvailablePackages from "../DiscountPackages/AvailablePackages";
 import AddToWishlist from "../Wishlist/AddToWishlist";
 import CustomerReview from "./CustomerReview";
@@ -30,6 +30,7 @@ const DiscountDetail = (props) => {
     const [packagesIsShown, setPackagesIsShown] = useState(false);
     const [organizerDiscounts, setOrganizerDiscounts] = useState();
     const [recomendedDiscounts, setRecomendedDiscounts] = useState();
+    const [showPopup, setShowPopup] = useState(false);
 
     const linkName = readMore ? 'Read Less':'Read More'
 
@@ -68,6 +69,13 @@ const DiscountDetail = (props) => {
         }        
       };
 
+    
+      useEffect(() => {
+        props.getDiscountReviews(discountId);
+        console.log("Discount Reviews >>> ");
+      }, [discountId]);
+
+
     useEffect(() => {
         // Get the current discount
         const getDiscount = () => { 
@@ -81,19 +89,20 @@ const DiscountDetail = (props) => {
         };
 
         // Get the discount media
-        if (!props.discount_media || (discount && props.discount_media.length > 0 && props.discount_media[0].discount != discount.url)){
+        if (!props.discount_media || (discount && props.discount_media.length > 0 && props.discount_media[0].discount !== discount.url)){
             props.getDiscountMedia(discountId);
-            console.log("Peeeeee Mail")
+            console.log("Getting Discount Media >>")
         };
 
         // Get the discount reviews
-        if (!props.reviews || (discount && props.reviews.length > 0 && props.reviews[0].discount != discount.url)){
-            props.getDiscountReviews(discountId);
-            console.log("Discount Reviews >>> ");
-        };
+        // if (!props.reviews || (discount && props.reviews.results.length > 0 && props.reviews.results[0].discount !== discount.url)){
+        //     props.getDiscountReviews(discountId);
+        //     console.log("Discount Reviews >>> ");
+        // };
 
         // Get organizer discounts
-        if ((!organizerDiscounts && discount) || (discount && discount.organizer.id != organizerDiscounts[0].organizer.id)){
+        if ((!organizerDiscounts && discount) || (discount && discount.organizer.id !== organizerDiscounts[0].organizer.id)){
+            console.log("Getting Organizer Discounts >>> ");
             getOrganizerDiscounts();
         }        
 
@@ -101,10 +110,10 @@ const DiscountDetail = (props) => {
         if ((!recomendedDiscounts && discount) || 
         (discount && recomendedDiscounts && recomendedDiscounts[0].categories.some(category => discount.categories.includes(category)))){
             getRecomendedDiscounts();
-            console.log("Recomended Discounts XXX");
-        };
+            console.log("Getting Recomended Discounts");
+        };        
         
-    }, [discountId, recomendedDiscounts, discount, props.discount_media, props.reviews]);
+    }, [discountId, recomendedDiscounts, discount, props.discount_media]); // 
 
     const contactButtonHandler = () => {
         setPackagesIsShown(true);
@@ -126,9 +135,18 @@ const DiscountDetail = (props) => {
         setReadMore(!readMore);
         let content = document.getElementById(id);
         if (content.style.maxHeight){
-            content.style.maxHeight = null;
+            // wait for the transition to finish
+            setTimeout(() => {
+                // set the max height to the given value
+                content.style.maxHeight = null;
+            }, 10);
+            
         } else {
-            content.style.maxHeight = content.scrollHeight + "px";
+            // wait for the transition to finish
+            setTimeout(() => {
+                // set the max height to the given value
+                content.style.maxHeight = content.scrollHeight + "px";
+            }, 10);            
         };
     };
 
@@ -195,7 +213,9 @@ const DiscountDetail = (props) => {
                             <b>Location: </b> 
                             <Colored> { discount.location } </Colored>                           
                         </p>
-                        {parse(discount.description)}                        
+                        <div id="discount-description">
+                            {parse(discount.description)}   
+                        </div>
                         <ReadMoreOrLess onClick={()=>{readMoreHandler("discount-description")}}>{linkName}</ReadMoreOrLess>
                     </Description>
                 </DiscountInfo>
@@ -203,27 +223,41 @@ const DiscountDetail = (props) => {
                 <ContactSection>
                     <ContactSectionContent>
                         <SectionTitle className="contact-sec">Contact Us</SectionTitle>
-                        <ContactButtons className="small">
-                            <ContactButton onClick={contactButtonHandler}>
-                                <img src="/images/icons/whatsapp.png" alt="WhatsApp" width="42" height="42"/>
-                            </ContactButton>
-                            <ContactButton onClick={contactButtonHandler}>
-                                <img src="/images/icons/Facebook.webp" alt="Facebook" width="42" height="42"/>
-                            </ContactButton>
-                            <ContactButton onClick={contactButtonHandler}>
-                                <img src="/images/icons/Instagram.png" alt="Instagram" width="42" height="42"/>
-                            </ContactButton>
-                        </ContactButtons>                            
+                        {discount.organizer.social_media_handles &&
+                            <ContactButtons className="small">
+                                <ContactButton href={`https://wa.me/${discount.organizer.phone_number}`} target="_blank">
+                                    <img src="/images/icons/whatsapp.png" alt="WhatsApp" width="42" height="42"/>
+                                </ContactButton>
+
+                                <ContactButton href={discount.organizer.social_media_handles.facebook} target="_blank">
+                                    <img src="/images/icons/Facebook.webp" alt="Facebook" width="42" height="42"/>
+                                </ContactButton>
+
+                                <ContactButton href={discount.organizer.social_media_handles.instagram} target="_blank">
+                                    <img src="/images/icons/Instagram.png" alt="Instagram" width="42" height="42"/>
+                                </ContactButton>
+                            </ContactButtons>  
+                        }                          
 
                         <ContactButtons>
-                            <PhoneButton>
+                            <PhoneButton 
+                                href={`tel:${discount.organizer.phone_number}`} target="__blank"
+                                onMouseEnter={()=>setShowPopup(true)}
+                                onMouseLeave={()=>setShowPopup(false)}
+                                style={{ position: 'relative' }}
+                            >
                                 <img src="/images/icons/phone-calling-w.svg" alt="website" width="15" height="15"/>
-                                <a href={`tel:${discount.organizer.phone_number}`} target="__blank"><b>Phone</b></a>
+                                <b>Phone</b>
+                                {showPopup && (
+                                    <PhoneToolTip>
+                                        <p>{discount.organizer.phone_number}</p>
+                                    </PhoneToolTip>
+                                )}
                             </PhoneButton>  
 
-                            <WebLinkButton>
-                                <img src="/images/icons/globe-v.svg" alt="website" width="14" height="14"/>
-                                <a href="#" target="__blank"><b>Website</b></a>
+                            <WebLinkButton href={discount.website_url} target="__blank">
+                                <img src="/images/icons/globe-v.svg" alt="website" width="14" height="14"/> 
+                                <b>Website</b>
                             </WebLinkButton>
 
                             {/* <AddToWishlist type="btn" discount={discount}/> */}
@@ -236,11 +270,11 @@ const DiscountDetail = (props) => {
             <AboutOrganiserAndMap>
                 <SectionContent>
                     <Map 
-                    id="mapIframe"
-                    style={{ backgroundImage: `url("/images/map.png")` }}
+                    id="mapIframe"                    
                     >
+                        {/* style={{ backgroundImage: `url("/images/map.png")` }} */}
                         {/* <MapImage src={discount.flyer}/> */}
-                        {/* {parse(discount.location)} */}
+                        {parse(discount.address)}
                     </Map>
                     <AboutOrganiser>
                         <Wrapper>
@@ -265,6 +299,19 @@ const DiscountDetail = (props) => {
                 </SectionContent>
             </AboutOrganiserAndMap>
 
+            {/* {props.discount_media && props.discount_media.length > 0 &&
+            <SectionWrapper>
+                <DiscountGalleryTitle>Discount Gallery</DiscountGalleryTitle>
+                <DiscountGallery>
+                    <GallerySection id="galery">
+                        <Gallery photos={props.discount_media} type={null} />
+                    </GallerySection>
+                    <LeftButton target="gallery" pos="0" />
+                    <RightButton target="gallery" pos="0" /> 
+                </DiscountGallery>
+            </SectionWrapper>
+            } */}
+
             {props.discount_media && props.discount_media.length > 0 &&
             <SectionWrapper>
                 <DiscountGalleryTitle>Discount Gallery</DiscountGalleryTitle>
@@ -283,10 +330,10 @@ const DiscountDetail = (props) => {
                     <SectionTitle>Customer Reviews</SectionTitle>
                     <ReviewSectionHeader>
                         <Left>
-                            <Rating>{discount.rate}</Rating>
+                            <Rating>{discount.average_rating }</Rating>
                             <Stars>
-                                <StarRating rating={discount.rate} showRate={false} />
-                                <p>1,430 Groupon Ratings</p>
+                                <StarRating rating={discount.average_rating } showRate={false} />
+                                <p>{discount.total_rating } ratings</p>
                             </Stars>
                         </Left>
                         <Right>
@@ -303,22 +350,22 @@ const DiscountDetail = (props) => {
                         
                         <div className="verified-badge">
                             <p><b>100% Verified Reviews</b></p>
-                            <p>All Groupon reviews are from people who have redeemed deals with this merchant. 
+                            <p>All reviews are from people who have redeemed deals with this merchant. 
                                 Review requests are sent by email or sms to customers who purchase the deal.
                             </p>
                         </div>
                     </ReviewVerificationInfo>
 
                     <CommentList>
-                        {props.reviews && props.reviews.length === 0 ? (
+                        {props.reviews && props.reviews.results.length === 0 ? (
                             <NoComments>There are no reviews yet.</NoComments>
                         ) : (
-                            <></> 
-                        )} 
-
-                        {props.reviews && props.reviews.results.slice().reverse().map((review, index) => (
-                            <CustomerReview className="customer-review" key={index} index={index} discount={discount} review={review}/>
-                        ))}  
+                        <>
+                            {props.reviews && props.reviews.results.slice().reverse().map((review, index) => (
+                                <CustomerReview className="customer-review" key={index} index={index} discount={discount} review={review}/>
+                            ))} 
+                        </> 
+                        )}                          
                     </CommentList>    
                 </ReviewSectionContent>          
             </CommentsSection>
@@ -629,7 +676,7 @@ const ContactButtons = styled.div`
     }
 `;
 
-const ContactButton = styled.button`
+const ContactButton = styled.a`
     display: inline-block;
     text-decoration: none;
     text-align: center;
@@ -639,11 +686,17 @@ const ContactButton = styled.button`
     /* border: 1px solid blue; */
     border-radius: 30px;
     outline: none;
-    cursor: default;
+    text-decoration: none;
+    &.active{
+        text-decoration: none;
+    }
 `;
 
-const WebLinkButton = styled.button`
-    display: inline-block;
+const WebLinkButton = styled.a`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
     width: 150px;
     height: 30px;
     margin: 10px;
@@ -653,42 +706,61 @@ const WebLinkButton = styled.button`
     border: 1px solid #67309b;
     color: #67309b;
     background-color: #fff;
+
     &>img{
         border: none;
         outline: none;
         margin-right: 5px;
     }
-    &>a{
-        color: #67309b;
+    &:hover,
+    &.active{
         text-decoration: none;
+        color: #67309b;
     }
 `;
 
-const PhoneButton = styled.button`
-    display: inline-block;
+const PhoneButton = styled.a`
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 150px;
     height: 30px;
     margin: 10px;
     border: none;
     outline: none;
+    text-decoration: none;
     border-radius: 30px;
     border: 1px solid #808080;
     color: #fff;
     background-color: #67309b;
-    cursor: default;
+    cursor: pointer;
 
     &>img{
         border: none;
         outline: none;
         margin-right: 5px;
-    }
-    &>a{
+    } 
+    &.active,
+    &:hover{
+        text-decoration: none;
         color: #fff;
-        text-decoration: none;
-    }    
-    &:hover,
-    &.active{
-        text-decoration: none;
+    }
+`;
+
+
+const PhoneToolTip = styled.div`
+    position: absolute;
+    top: -150%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #67309b;
+    border: 1px solid #67309b;
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 100;
+    p{
+        padding: 0;
+        margin: 0;
     }
 `;
 
@@ -770,6 +842,13 @@ const Like = styled.p`
 const Description = styled.div`
     margin: 10px 0;
     line-height: 1.75;
+
+    #discount-description{
+        max-height: 100px;
+        overflow: hidden;
+        transition: max-height 0.5s ease-out;
+        /* border: 1px solid black; */
+    }
     @media (max-width: 530px) {
     font-size: 13px;
     padding: 5px 0 5px 0;

@@ -1,34 +1,65 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import StarRating from "./StarRating";
+import {getLastPosted} from "../../utils/middleware";
+import { connect } from "react-redux";
+import {likeAndDislikeReviewAPI} from "../../actions/index";
 
 
 const CustomerReview = (props) => {
+    const [review, setReview] = useState(props.review);
+    const [enablebtn, setEnableBtn] = useState(true);
+
+    const handleLikeReview = () => {
+        let data = {...review, likes: review.likes+1}
+        setReview(data);
+        setEnableBtn(false);
+        console.log("Review Like Data ", data);
+        props.likeAndDislikeReview(data);
+    };
+
+    const handleDislikeReview = () => {
+        let data = {...review, dislikes: review.dislikes+1}
+        setReview(data);
+        setEnableBtn(false);
+        console.log("Review Dislike Data ", data);
+        props.likeAndDislikeReview(data);
+    };
+
   return (
     <Container index={props.index}>
         <Header>
-            <User><p>{props.review.user.charAt(0)}</p></User>
+            <User><p>{review.user.name.charAt(0)}</p></User>
             <Stars>
-                <p><b>{props.review.user}</b></p>
+                <p><b>{review.user.name}</b></p>
+                {review &&
                 <p>
-                    <img src="/images/icons/star-b.svg" alt="*" width="15" height="15"/> {props.review.rating} ratings &nbsp; 
-                    <img src="/images/icons/message-bubble-b.svg" alt="*" width="15" height="15"/> {props.review.likes} reviews
+                    <img src="/images/icons/star-b.svg" alt="*" width="15" height="15"/> {review.rating} stars &nbsp; 
+                    <img src="/images/icons/like-w-fill.svg" alt="*" width="15" height="15"/> {review.likes} &nbsp; 
+                    <img src="/images/icons/dislike-w-fill.svg" alt="*" width="15" height="15"/> {review.dislikes}
                 </p>
+                }        
             </Stars>
         </Header>
 
         <Wrapper>   
-            <StarRating rating={props.discount.rate} showRate={false} />
-            <DateTime>3 days ago</DateTime>
+            <StarRating rating={review.rating} showRate={false} />
+            <DateTime>{getLastPosted(review.date_created)}</DateTime>
         </Wrapper>   
 
         <Comment>
-            {props.review.comment}
+            {review.comment}
         </Comment> 
 
-        <HelpfulButton>
-            <img src="/images/icons/like.svg" alt="*" width="15" height="15"/> &nbsp; Helpful
-        </HelpfulButton>
+        <Wrapper>
+            <HelpfulButton onClick={handleLikeReview} disabled={!enablebtn}>
+                <img src="/images/icons/like.svg" alt="*" width="15" height="15"/> &nbsp; Helpful
+            </HelpfulButton> &nbsp;
+
+            <NotHelpfulButton onClick={handleDislikeReview} disabled={!enablebtn}>
+                <img src="/images/icons/dislike.svg" alt="*" width="14" height="14"/> &nbsp; Not Helpful
+            </NotHelpfulButton>
+        </Wrapper>
     </Container>
   );
 };
@@ -91,6 +122,23 @@ const HelpfulButton = styled.button`
     border-radius: 5px;
     padding: 5px;
     outline: none;
+    &:hover{
+        background-color: #e0e0e0;
+    }
 `;
 
-export default CustomerReview;
+const NotHelpfulButton = styled(HelpfulButton)``;
+
+// export default CustomerReview;
+
+const mapStateToProps = (state) => {
+    return {
+        // reviews: state.discountState.reviews
+    }
+};
+  
+const mapDispatchToProps = (dispatch) => ({
+    likeAndDislikeReview: (data) => {dispatch(likeAndDislikeReviewAPI(data))},
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(CustomerReview);

@@ -192,3 +192,43 @@ export function formatTime(inputTime) {
   
     return formattedTime;
 };  
+
+
+// write a function to return days past till now given a date in the format "2024-05-22T21:05:31.282889Z"
+export function getLastPosted(start) {
+    const date1 = new Date(start);
+
+    const currentDateStr = new Date().toISOString(); // Get the current date and time in ISO format
+    const date2 = new Date(currentDateStr);
+
+    // One day in milliseconds
+    const oneDay = 1000 * 60 * 60 * 24;
+
+    // one hour in milliseconds 
+    const oneHour = 1000 * 60 * 60;
+
+    // one minute in milliseconds 
+    const oneMinute = 1000 * 60;
+    
+    // Calculate the difference between the two dates
+    const differenceInTime = date2.getTime() - date1.getTime();
+
+    // Calculate the number of days
+    const differenceInDays = Math.round(differenceInTime / oneDay);
+
+    // Calculate the number of hours
+    const differenceInHours = Math.round(differenceInTime / oneHour);
+
+    // Calculate the number of hours
+    const differenceInMinutes = Math.round(differenceInTime / oneMinute);
+
+    if (differenceInDays > 0){
+        return `${differenceInDays} ${differenceInDays === 1 ? "day" : "days"} ago`;
+    }
+    else if (differenceInDays === 0 && differenceInHours > 0){
+        return `${differenceInHours} ${differenceInHours === 1 ? "hour" : "hours"} ago`;
+    }
+    else {
+        return `${differenceInMinutes} ${differenceInMinutes === 1 ? "minute" : "minutes"} ago`;
+    }
+};

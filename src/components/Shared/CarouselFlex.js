@@ -54,7 +54,7 @@ const ContentList = styled.div`
     padding: 10px 0px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between; 
+    /* justify-content: space-between;  */
 
     &.recomendations-carousel{
         justify-content: flex-start;
@@ -83,18 +83,25 @@ const ContentList = styled.div`
 const ListItem = styled.div` 
     position: relative;
     margin: 10px;
-    padding: 0 5px 10px 5px;
+    /* padding: 0 5px 10px 5px; */
     border-radius: 20px;
     cursor: pointer;
     overflow: hidden;
-    /* border: 1px solid blue; */
+
+    min-height: 300px;
+    /* border: 1px solid black; */
+    box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    }
 
     &:first-of-type {
-        padding: 0 5px 10px 0;
+        /* padding: 0 5px 10px 0; */
     }
 
     &:last-of-type {
-        padding: 0 0 10px 5px;
+        /* padding: 0 0 10px 5px; */
     }
 
     /* Adjust number of columns for different screen sizes */

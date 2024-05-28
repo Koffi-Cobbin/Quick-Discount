@@ -7,12 +7,12 @@ import StarRating from "./StarRating";
 // import AddToWishlist from "../Wishlist/AddToWishlist";
 
 const DiscountCard = (props) => {
-  const [slice, setSlice] = useState(false);
+  // const [slice, setSlice] = useState(false);
 
   const handleSlice = (data) => {
     if (data.length > 56) {
-      setSlice(true);
-      return data.slice(0, 50);
+      // setSlice(true);
+      return data.slice(0, 10);
     } else {
       return data;
     }
@@ -20,7 +20,7 @@ const DiscountCard = (props) => {
 
   return (
     <>
-    {props.discount &&
+    {props.discount && 
     <Card>
         <a href={`/discounts/${props.discount.id}`} >      
           <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }}/>
@@ -28,7 +28,7 @@ const DiscountCard = (props) => {
       <EventInfo>
         <Title eventTitle={props.discountCardStyles["title"]}>
           {handleSlice(props.discount.title)}
-          {slice && <span> ...</span>}
+          {/* {slice && <span> ...</span>} */}
         </Title>
 
         <PercentageDiscount>        
@@ -43,14 +43,14 @@ const DiscountCard = (props) => {
           <Date>
             <p>
               <span>{formatDate(props.discount.start_date, false)} 
-              <span style={{color: "#fa8128"}}><b> to </b></span> {formatDate(props.discount.end_date, false)}</span> 
+              <b> to </b>{formatDate(props.discount.end_date, false)}</span> 
             </p>
           </Date>
         </DateTimeWrapper>
 
 
           <SocialActions>
-            <Left><b>1,220</b></Left>
+            <Left><b>{props.discount.total_rating}</b></Left>
             <Right>
               <StarRating rating={props.discount.likes} showRate={true}/>
             </Right>
@@ -58,8 +58,8 @@ const DiscountCard = (props) => {
         </SocialActions>
       </EventInfo>
     </Card>
-   }</>
-  );
+    }
+   </>);
 };
 
 const Card = styled.div`  
@@ -72,15 +72,10 @@ const Card = styled.div`
   margin: 0 auto;  
   overflow: hidden;
   position: relative;
-  box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
 
   /* border: 1px solid red; */
   /* scroll-snap-align: center; */
   transition: all 0.3s;
-
-  &:hover {
-      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  }
 
   &:first-of-type {
     /* Allow users to fully scroll to the start */
@@ -127,8 +122,6 @@ const DateTimeWrapper = styled.div`
     display: flex;
     align-items: center;
   }
-
-  @media (max-width: 420px) {}
 `;
 
 const Date = styled.div`

@@ -44,7 +44,7 @@ const Paystack = (props) => {
   return (
     <Container>
       <h4>
-        Payment of <b>GH&#8373; {props.payment.amount}</b> for tickets
+        Payment of <b>GH&#8373; {props.payment.amount}</b> for {props.package_type} package.
       </h4>
       <PaystackButtonWrap>
         <PaystackButton

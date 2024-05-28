@@ -94,7 +94,7 @@ const Sidenav = styled.div`
     height: fit-content;
     position: absolute; 
     /* z-index: 1000;  */
-    top: 50px; 
+    top: 60px; 
     right: 0;
     background-color: #0B0705; 
     overflow-x: hidden; 

@@ -1,28 +1,24 @@
-// AddToWishlist.js
-import React, { useContext ,useState, useEffect } from "react";
+import React  from "react";
 import styled from "styled-components";
-import { connect } from "react-redux";
-import { addToWishlistAPI, removeFromWishlistAPI } from '../../actions';
-// import WishlistContext from "../../store/wishlist-context";
 
 
-const StarRating = ({ rating,  showRate}) => {
-  // Convert the float rating to a percentage for star fill color
-  const starPercentage = (rating / 5) * 100;
-
-  const quotient = Math.floor(rating);
-  const remainder = parseFloat((rating % 1).toFixed(1));
+const StarRating = (props) => {
+  const quotient = Math.floor(props.rating);
+  const remainder = parseFloat((props.rating % 1).toFixed(1));
   const remainderPercent = remainder*100;
-  const emptyStars = Math.floor(5-rating);
-
+  const emptyStars = Math.floor(5-props.rating);
+  
+  console.log("Rating ... ", props.rating);
+  console.log("Quotient... ", quotient);
+  console.log("EmptyStars... ", emptyStars);
 
   return (
     <RatingWrap className="star-rating-container">
-      {showRate &&
-        <RateValue className="float-value"><b>{rating.toFixed(1)}</b></RateValue>
+      {props.showRate &&
+        <RateValue className="float-value"><b>{props.rating.toFixed(1)}</b></RateValue>
       }
       <StarsWrap className="stars-wrapper">
-        {[...Array(quotient)].map((e, idx) => (
+        {quotient > 0 && [...Array(quotient)].map((e, idx) => (
           <Star>
             <svg 
               key={idx}
@@ -130,16 +126,4 @@ const Star = styled.div`
     // border: 1px solid black;
 `;
 
-const mapStateToProps = (state) => {
-    return {
-        user: state.userState.user,
-        discounts: state.discountState.discounts,
-    }
-};
-  
-const mapDispatchToProps = (dispatch) => ({
-    rate: (payload) => {dispatch(addToWishlistAPI(payload))}, 
-    unrate: (payload) => {dispatch(removeFromWishlistAPI(payload))},
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(StarRating);
+export default StarRating;
