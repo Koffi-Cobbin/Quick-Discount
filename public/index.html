@@ -36,30 +36,4 @@
   </body>
 
   <script src="https://js.paystack.co/v1/inline.js"></script> 
-  <!-- <script>
-    function payWithPayStack(){
-      let currency = "GHS";
-      let plan = "";
-      let ref = "payment.ref";
-      let obj = {
-        key: "paystack_pb_key",
-        email: "payment.email",
-        amount: "payment.amount",
-        ref: ref,
-        callback: function(response){
-          window.location.href = "verify-payment-url, payment.ref";
-        }
-      }
-
-      if (Boolean(currency)){
-        obj.currency = currency.toUpperCase();
-      }
-      if (Boolean(plan)){
-        obj.plan = plan;
-      }
-
-      var handler = PaystackPop.setup(obj);
-      handler.openIframe();
-    }
-  </script> -->
 </html>

@@ -67,9 +67,7 @@ const Dashboard = (props) => {
                             <DiscountCard
                                 key={discount.id}
                                 id={discount.id}
-                                type={discount.type}
                                 discount={discount}
-                                price={discount.price}
                                 showForm={false}
                             />
                         </GridItem>

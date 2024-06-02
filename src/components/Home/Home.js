@@ -15,10 +15,10 @@ import { getDiscountsAPI } from "../../actions";
 const Home = (props) => {
   const [categories, setCategories] = useState();
 
-
   useEffect(() => {
-    if (!props.discounts) {
+    if (!props.discounts.results) {
       props.getDiscounts();
+      console.log("Getting Discounts ...");
     };
 
     if (props.discounts.results) {
@@ -40,8 +40,10 @@ const Home = (props) => {
       let allCategories = [...categories_set];
       console.log("All categories ", allCategories);
       setCategories(allCategories);
-    }
-  }, [props.discounts]);
+    };
+    // props.getDiscounts();
+    console.log("Running Home.js useEffect ...");
+  }, [props]);
 
   const handleClickScroll = (id) => {
     const element = document.getElementById(id.toLowerCase() + "-section");
@@ -96,7 +98,7 @@ const Home = (props) => {
             id="filter"
             role="region"
             aria-label="categories-filter"
-            tabindex="0"
+            tabIndex="0"
           >
             {categories && (
               <>
@@ -133,7 +135,7 @@ const Home = (props) => {
                       </Link>
                     </h4>
                   </CategoryTitle>
-                  {/* {props.discounts.results && (
+                  {props.discounts.results && (
                     <CarouselFlex
                       type="category"
                       divId={category.toLowerCase()}
@@ -147,7 +149,7 @@ const Home = (props) => {
                         />
                       ))}
                     </CarouselFlex>
-                  )} */}
+                  )}
                 </CategorySection>
               ))}
             </>

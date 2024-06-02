@@ -3,9 +3,9 @@ import { useReducer } from 'react';
 import CartContext from './cart-context';
 
 const defaultCartState = {
-  items: localStorage.getItem('cartItems') ?  JSON.parse(localStorage.getItem('cartItems')) : [],
-  totalAmount: localStorage.getItem('totalAmount') ?
-  +JSON.parse(localStorage.getItem('totalAmount')) : 0,
+  items: sessionStorage.getItem('cartItems') ?  JSON.parse(sessionStorage.getItem('cartItems')) : [],
+  totalAmount: sessionStorage.getItem('totalAmount') ?
+  +JSON.parse(sessionStorage.getItem('totalAmount')) : 0,
 };
 
 
@@ -34,8 +34,8 @@ const cartReducer = (state = defaultCartState, action)  => {
       updatedItems = state.items.concat(action.item);
     }
 
-    localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-    localStorage.setItem('totalAmount', JSON.stringify(updatedTotalAmount));
+    sessionStorage.setItem('cartItems', JSON.stringify(updatedItems));
+    sessionStorage.setItem('totalAmount', JSON.stringify(updatedTotalAmount));
     return {
       items: updatedItems,
       totalAmount: updatedTotalAmount,
@@ -59,8 +59,8 @@ const cartReducer = (state = defaultCartState, action)  => {
       updatedItems[existingCartItemIndex] = updatedItem;
     }
 
-    localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-    localStorage.setItem('totalAmount', JSON.stringify(updatedTotalAmount));
+    sessionStorage.setItem('cartItems', JSON.stringify(updatedItems));
+    sessionStorage.setItem('totalAmount', JSON.stringify(updatedTotalAmount));
     return {
       items: updatedItems,
       totalAmount: updatedTotalAmount
@@ -68,8 +68,8 @@ const cartReducer = (state = defaultCartState, action)  => {
   }
 
   if(action.type === 'CLEAR'){ 
-    localStorage.setItem('cartItems', []);
-    localStorage.setItem('totalAmount', 0);
+    sessionStorage.setItem('cartItems', []);
+    sessionStorage.setItem('totalAmount', 0);
   }
     
   return defaultCartState;

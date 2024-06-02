@@ -16,7 +16,7 @@ import Discounts from "./components/Discounts/Discounts";
 import CreateDiscount from "./components/Discounts/CreateDiscount"; 
 import DiscountDetail from "./components/Discounts/DiscountDetail";
 import UpdateDiscount from "./components/Discounts/UpdateDiscount";
-import Modal from "./components/Shared/Modal";
+// import Modal from "./components/Shared/Modal";
 import Signup from "./components/Auth/Signup";
 import Login from "./components/Auth/Login";
 import ForgetPassword from "./components/Auth/ForgetPassword";

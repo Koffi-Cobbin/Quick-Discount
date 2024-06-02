@@ -12,7 +12,7 @@ const DiscountCard = (props) => {
   const handleSlice = (data) => {
     if (data.length > 56) {
       // setSlice(true);
-      return data.slice(0, 10);
+      return `${data.slice(0, 10)}...`;
     } else {
       return data;
     }
@@ -26,9 +26,8 @@ const DiscountCard = (props) => {
           <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }}/>
         </a>
       <EventInfo>
-        <Title eventTitle={props.discountCardStyles["title"]}>
+        <Title>
           {handleSlice(props.discount.title)}
-          {/* {slice && <span> ...</span>} */}
         </Title>
 
         <PercentageDiscount>        
@@ -39,7 +38,7 @@ const DiscountCard = (props) => {
           <span>{props.discount.location}</span>
         </Address>
 
-        <DateTimeWrapper dateTime={props.discountCardStyles["dateTime"]}>
+        <DateTimeWrapper>
           <Date>
             <p>
               <span>{formatDate(props.discount.start_date, false)} 
@@ -112,7 +111,7 @@ const Title = styled.h4`
   font-size: 20px;
   font-weight: 600;
   text-align: left;
-  max-height: 40px;
+  max-height: 45px;
   overflow: hidden;
   /* border: 1px solid black; */
 `;
