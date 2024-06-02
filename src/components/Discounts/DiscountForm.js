@@ -51,7 +51,9 @@ const DiscountForm = (props) => {
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
-  const [socialMediaHandles, setSocialMediaHandles] = useState(props.organizer ? props.organizer.social_media_handles : {whatsapp: " ", facebook: " ", instagram: " ", twitter: " "});
+  const [socialMediaHandles, setSocialMediaHandles] = useState(
+    props.organizer ? props.organizer.social_media_handles : {whatsapp: " ", facebook: " ", instagram: " ", twitter: " "}
+  );
   const [videoURL, setVideoURL] = useState("");
   const [websiteURL, setWebsiteUrl] = useState("");
   const [agreement, setAgreement] = useState("");
@@ -699,19 +701,6 @@ const DiscountForm = (props) => {
                     />
                   </div>
                 </AssetsArea>
-
-                <FormInputs>
-                  <div>
-                    <label>Discount Ad video link</label>
-                    <input
-                      type="text"
-                      value={videoURL}
-                      placeholder="https://www.youtube.com"
-                      onChange={(e) => validateUrl("video", e.target.value)}
-                    />
-                    {videoURLError && <p className="error">{videoURLError}</p>}
-                  </div>
-                </FormInputs>
               </FormContent>
               {readDiscountImages && readDiscountImages.length > 0 && (
                 <ImageGrid images={readDiscountImages} popImage={popImage} />
@@ -719,7 +708,20 @@ const DiscountForm = (props) => {
 
            
               <FormContent>
-              {props.organizer &&
+                <FormInputs>
+                    <div>
+                      <label>Discount Ad video link</label>
+                      <input
+                        type="text"
+                        value={videoURL}
+                        placeholder="https://www.youtube.com"
+                        onChange={(e) => validateUrl("video", e.target.value)}
+                      />
+                      {videoURLError && <p className="error">{videoURLError}</p>}
+                    </div>
+                  </FormInputs>
+                  
+                {props.organizer &&
                 <>
                 <label style={{textAlign: "left", color: "rgba(0, 0, 0, 0.6)"}}>Social Media Links</label>
                 <FormInputs>

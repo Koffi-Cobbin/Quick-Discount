@@ -129,7 +129,7 @@ const Navbar = (props) => {
                                         </span>
                                     </User>
                                 </NavLink>
-                                <div className="dropdown-content right">
+                                <div className="dropdown-content">
                                     <Link to="/dashboard">Dashboard</Link>
                                     <Link to="/logout">
                                         Logout
@@ -419,9 +419,6 @@ const NavList = styled.li`
         min-width: 160px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
-        &.right {
-            right: 0;
-        }
         /* Links inside the dropdown */
         &>a {
             background-color: #000;

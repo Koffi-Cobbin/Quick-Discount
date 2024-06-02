@@ -56,21 +56,21 @@ const Footer = (props) => {
             <Layout>
                 <LeftSide>
                     <h3><b>Sitemap</b></h3>
-                    <p>Quick links to all pages</p>
                     <p><a href="/">Home</a></p>                    
                     <p><a href="/discounts">Discounts</a></p>
-                    <p><a href="/help">Help</a></p>
-                    <p><a href="/signup">Sign up</a></p>
                     <p><a href="/post">Post</a></p>                   
+                    <p><a href="/help">Help</a></p>
+                    <p><a href="/login">Login</a></p>
+                    <p><a href="/signup">Sign up</a></p>
                 </LeftSide>
 
                 <Main>
                     <h3><b>Let's Vybe</b></h3>
-                    <p><a href="/">Twitter / X</a></p>                    
-                    <p><a href="/">Instagram</a></p>
-                    <p><a href="/">Facebook</a></p>
+                    <p><a href="https://x.com/quickdiscountgh">Twitter / X</a></p>                    
+                    <p><a href="https://www.instagram.com/quickdiscountgh?igsh=bGZpeWltb284NXJs">Instagram</a></p>
+                    <p><a href="https://x.com/quickdiscountgh">Facebook</a></p>
+                    <p><a href="https://www.tiktok.com/@quickdiscountgh">TikTok</a></p>
                     <p><a href="/">YouTube</a></p>
-                    <p><a href="/">Customer Support</a></p>
                 </Main>
 
                 <RightSide>                 
@@ -80,7 +80,7 @@ const Footer = (props) => {
                     <p>Ablekuma-Pokuase, Accra</p>
                     <p>Greater Accra Region</p>
                     <p>Call Us: +233559553056</p>
-                    <p>or <a href="mailto:admin@bestmall.com">Leave a mail</a></p>
+                    <p>or <a href="mailto:quickdiscountgh@gmail.com">Leave a mail</a></p>
                 </RightSide>
             </Layout>
             <Copyright>

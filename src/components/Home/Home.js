@@ -16,11 +16,11 @@ const Home = (props) => {
   const [categories, setCategories] = useState();
 
   useEffect(() => {
-    if (!props.discounts.results) {
-      props.getDiscounts();
-      console.log("Getting Discounts ...");
-    };
+    props.getDiscounts();
+    console.log("Getting Discounts ...");
+  }, []);
 
+  useEffect(() => {
     if (props.discounts.results) {
       // Get categories of fectched discounts
       const categories_lists = props.discounts.results.map(
@@ -41,9 +41,7 @@ const Home = (props) => {
       console.log("All categories ", allCategories);
       setCategories(allCategories);
     };
-    // props.getDiscounts();
-    console.log("Running Home.js useEffect ...");
-  }, [props]);
+  }, [props.discounts]);
 
   const handleClickScroll = (id) => {
     const element = document.getElementById(id.toLowerCase() + "-section");
@@ -86,9 +84,7 @@ const Home = (props) => {
 
       <Content>
         {props.discounts.results && 
-          <TopDiscounts 
-            discounts={props.discounts.results.slice(0,4)} 
-            discountCardStyles={discountCardStyles}/>}     
+          <TopDiscounts discounts={props.discounts.results.slice(0,4)} />}     
 
 
         <Section>
@@ -145,7 +141,6 @@ const Home = (props) => {
                         <DiscountCard
                           key={key}
                           discount={discount}
-                          discountCardStyles={discountCardStyles}
                         />
                       ))}
                     </CarouselFlex>

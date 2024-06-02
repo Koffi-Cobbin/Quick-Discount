@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 // import { Link } from "react-router-dom";
-import { useState } from "react";
+// import { useState } from "react";
 import { formatDate } from "../../utils/middleware";
 import StarRating from "./StarRating";
 // import AddToWishlist from "../Wishlist/AddToWishlist";
@@ -9,13 +9,29 @@ import StarRating from "./StarRating";
 const DiscountCard = (props) => {
   // const [slice, setSlice] = useState(false);
 
-  const handleSlice = (data) => {
-    if (data.length > 56) {
-      // setSlice(true);
-      return `${data.slice(0, 10)}...`;
-    } else {
+  const handleSlice = (data, size) => {
+    if (data.length <= size) {
       return data;
     }
+  
+    const words = data.split(' ');
+    let truncatedString = '';
+  
+    for (let i = 0; i < words.length; i++) {
+      if (truncatedString.length + words[i].length <= size) {
+        truncatedString += words[i] + ' ';
+      } else {
+        break;
+      }
+    }
+  
+    return `${truncatedString.trim()} ...`;
+
+    // if (data.length > size) {      
+    //   return `${data.slice(0, size)}...`;
+    // } else {
+    //   return data;
+    // }
   };
 
   return (
@@ -27,11 +43,11 @@ const DiscountCard = (props) => {
         </a>
       <EventInfo>
         <Title>
-          {handleSlice(props.discount.title)}
+          {handleSlice(props.discount.title, 50)}
         </Title>
 
         <PercentageDiscount>        
-          <p>{props.discount.percentage_discount}</p>
+          <p>{handleSlice(props.discount.percentage_discount, 30)}</p>
         </PercentageDiscount>
 
         <Address>
@@ -146,8 +162,9 @@ const PercentageDiscount = styled.p`
   color: #fa8128;
   text-align: left;
   font-weight: 600;
-  max-height: 42px;
+  max-height: 22px;
   overflow: hidden;
+  /* border: 1px solid black; */
 `;
 
 
@@ -163,12 +180,7 @@ const Address = styled.p`
 const SocialActions = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  /* border: 1px solid blue; */
-  /* @media (min-width: 1024px) {
-    flex-direction: column;
-    align-items: flex-start;
-  } */
+  justify-content: space-between;  
 `;
 
 const Left = styled.div``;

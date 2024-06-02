@@ -111,8 +111,6 @@ const RateValue = styled.div`
 const StarsWrap = styled.div`
     display: inline-block;
     position: relative;
-    /* border: 1px solid blue; */
-    /* justify-content: center; */
     font-size: 0; /* Remove space between inline-block elements */
 `;
 

@@ -35,9 +35,9 @@ const SideNav = (props) => {
 
             {props.user ? (
             <>
-                <Link onClick={props.close} className="tickets">
+                {/* <Link onClick={props.close} className="tickets">
                     <NavCartButton onClick={props.onShowCart} />
-                </Link>
+                </Link> */}
                 
                 <DrpdnWrap>
                     <User className="user-sm">
@@ -53,7 +53,7 @@ const SideNav = (props) => {
                             </span>
                         </span>
                     </User>
-                    <div className="dropdown-content right">
+                    <div className="dropdown-content">
                         <Link to="/dashboard" onClick={props.close}>
                             Dashboard
                         </Link>

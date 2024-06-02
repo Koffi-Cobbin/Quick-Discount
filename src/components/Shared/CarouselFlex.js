@@ -83,7 +83,7 @@ const ContentList = styled.div`
 const ListItem = styled.div` 
     position: relative;
     margin: 10px;
-    /* padding: 0 5px 10px 5px; */
+    min-width: 280px;
     border-radius: 20px;
     cursor: pointer;
     overflow: hidden;

@@ -19,7 +19,6 @@ const TopDiscounts = (props) => {
             <DiscountCard
               key={key}
               discount={discount}
-              discountCardStyles={props.discountCardStyles}
             />
           ))}
       </CarouselFlex>

@@ -5,7 +5,8 @@ import {
     SET_USER_ORDER, 
     SET_PAYMENT, 
     SET_USER_NOTIFICATIONS,
-    SET_USER_TICKETS
+    SET_USER_TICKETS,
+    SET_USER_IS_FOLLOWER
 } from "../actions/actionType";
 
 
@@ -17,6 +18,7 @@ const INITIAL_STATE = {
     payment: JSON.parse(sessionStorage.getItem('payment')),
     tickets: JSON.parse(sessionStorage.getItem('user-tickets')),
     notifications: JSON.parse(sessionStorage.getItem('user-notifications')),
+    is_follower: JSON.parse(sessionStorage.getItem('user-is-following')),
 };
 
 
@@ -29,7 +31,8 @@ const userReducer = (state = INITIAL_STATE, action) => {
                 sessionStorage.removeItem('payment');
                 sessionStorage.removeItem('user-order');
                 sessionStorage.removeItem('user-notifications');
-                sessionStorage.removeItem('user-discounts');
+                sessionStorage.removeItem('user-tickets');
+                sessionStorage.removeItem('user-is-following');
             }
             else {sessionStorage.setItem('user', JSON.stringify(action.user));}
             return {
@@ -69,6 +72,13 @@ const userReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 notifications: action.notifications
+            };
+
+        case SET_USER_IS_FOLLOWER:
+            sessionStorage.setItem('user-is-following', JSON.stringify(action.is_follower));
+            return {
+                ...state,
+                is_follower: action.is_follower
             };
 
         case SET_PAYMENT:

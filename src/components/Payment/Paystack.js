@@ -68,6 +68,7 @@ const Paystack = (props) => {
 const Container = styled.div`
   text-align: center;
   min-height: 50vh;
+  margin: 0 auto;
   h4 {
     b {
       color: #fa8128;
@@ -77,10 +78,10 @@ const Container = styled.div`
 `;
 
 const PaystackButtonWrap = styled.div`
-  background-color: blue;
   padding: 10px;
   width: fit-content;
   color: #fff;
+  border: 3px solid blue;
   border-radius: 10px;
   margin: 0 auto;
 `;

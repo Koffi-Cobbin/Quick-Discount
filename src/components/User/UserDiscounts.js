@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import DiscountPackage from "../DiscountPackages/DiscountPackage/DiscountPackage";
 import { connect } from "react-redux";
+import DiscountCard from "../Discounts/DiscountCard";
 
 
 const UserDiscounts = (props) => {
@@ -9,23 +9,20 @@ const UserDiscounts = (props) => {
     return (
         <Container>
             <Section>
-                <Title>Packages </Title>
+                <Title>Discounts </Title>
                 {props.discounts && props.discounts.results.length > 0 ?
                 <DiscountGrid>
                   {props.discounts.results.map((discount) => (
                     <GridItem>
-                        <DiscountPackage
+                        <DiscountCard
                             key={discount.id}
-                            id={discount.id}
-                            type={discount.package_type}
-                            price={discount.price}
-                            showForm={false}
+                            discount={discount}
                         />
                     </GridItem>
                   ))}
                 </DiscountGrid>
                 :
-                <Message>You have no discount packages.</Message>
+                <Message>You have no discounts.</Message>
                 }
             </Section> 
         </Container>

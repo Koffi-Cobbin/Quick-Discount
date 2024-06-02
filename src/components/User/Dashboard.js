@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import DiscountPackage from "../DiscountPackages/DiscountPackage/DiscountPackage";
 import Rightside from "./Rightside";
 import { getWishlistAPI } from "../../actions";
 import { formatDate, formatTime } from "../../utils/middleware";
@@ -38,7 +37,7 @@ const Dashboard = (props) => {
     };
 
     useEffect(() => {
-        if (props.payment.paid) {
+        if (props.payment && props.payment.paid) {
             setPayment(null);
             };
     }, [props.payment]);
@@ -66,7 +65,6 @@ const Dashboard = (props) => {
                         <GridItem>
                             <DiscountCard
                                 key={discount.id}
-                                id={discount.id}
                                 discount={discount}
                                 showForm={false}
                             />

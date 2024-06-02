@@ -4,6 +4,7 @@ import {
   SET_USER,
   SET_USER_TOKEN,
   SET_USER_ORDER,
+  SET_USER_IS_FOLLOWER,
   SET_LOADING_STATUS,
   SET_DISCOUNTS,
   SET_DISCOUNT_PACKAGES,
@@ -53,6 +54,11 @@ export const setUserOrder = (payload) => ({
 export const setUserNotifications = (payload) => ({
   type: SET_USER_NOTIFICATIONS,
   notifications: payload,
+});
+
+export const setUserIsFollower = (payload) => ({
+  type: SET_USER_IS_FOLLOWER,
+  is_follower: payload,
 });
 
 export const setPayment = (payload) => ({
@@ -1290,6 +1296,37 @@ export function getAnalyticsAPI(organizer_id) {
   };
 }
 
+
+// -------------------------------------------------------
+// ----------------- IS USER A FOLLOWER ------------------
+
+export function isUserFollowerAPI(organizer_id) {
+  return (dispatch, getState) => {
+    const url = `${BASE_URL}/discounts/organizer/followers/verify/-1/${organizer_id}/`;    
+    const state = getState();
+    const authToken = state.userState.token.access;
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json", 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      }
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response.json();
+      })
+      .then((data) => {
+          console.log("Is User Following? ... ", data);
+          dispatch(setUserIsFollower(data));
+      })
+      .catch((errorMessage) => {
+        console.log(errorMessage);
+      });
+  };
+}
 
 // ------------------------------
 // ------ FORGET PASSWORD -------

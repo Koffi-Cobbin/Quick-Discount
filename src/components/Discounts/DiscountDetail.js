@@ -3,41 +3,38 @@ import parse from 'html-react-parser';
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import axios from "axios";
 
-import SuggestedDiscountCard from "./SuggestedDiscountCard";
 // import CarouselSection from "../Shared/CarouselSection";
 import { LeftButton, RightButton} from "../Shared/CarouselControls";
 import Loading from "../Shared/Loading";
 import Gallery from "../Gallery/Gallery";
-import { discountsData } from "../Assets/data";
 import { connect } from "react-redux";
 import ReactPlayer from "react-player";
-import AvailablePackages from "../DiscountPackages/AvailablePackages";
 import AddToWishlist from "../Wishlist/AddToWishlist";
 import CustomerReview from "./CustomerReview";
 import StarRating from "./StarRating";
-import CarouselSection from "../Shared/CarouselSection";
 import CarouselFlex from "../Shared/CarouselFlex";
 import DiscountCard from "./DiscountCard";
-import { formatDate, formatTime } from "../../utils/middleware";
-import { getDiscountMediaAPI, getDiscountReviewsAPI } from "../../actions";
+import { formatDate } from "../../utils/middleware";
+import { getDiscountMediaAPI, getDiscountReviewsAPI, isUserFollowerAPI, setUserIsFollower } from "../../actions";
 
 
 const DiscountDetail = (props) => {
     let { discountId } = useParams();
     const [discount, setDiscount] = useState();
     const [readMore,setReadMore] = useState(false);
-    const [packagesIsShown, setPackagesIsShown] = useState(false);
     const [organizerDiscounts, setOrganizerDiscounts] = useState();
     const [recomendedDiscounts, setRecomendedDiscounts] = useState();
     const [showPopup, setShowPopup] = useState(false);
+    const [play, setPlay] = useState(false);
 
     const linkName = readMore ? 'Read Less':'Read More'
 
     // Other discounts from organizer: filter all discounts
     const getOrganizerDiscounts = () => {
         const newOrganizerDiscounts= props.discounts.results.filter((discount_item) => {
-          return ((discount_item.id != discount.id) && (discount_item.organizer.id == discount.organizer.id))
+          return ((discount_item.id !== discount.id) && (discount_item.organizer.id === discount.organizer.id))
         });
         if (newOrganizerDiscounts.length > 0){
             setOrganizerDiscounts(newOrganizerDiscounts);
@@ -49,7 +46,7 @@ const DiscountDetail = (props) => {
     // Other discounts: filter all discounts for two discounts sharing same category as this discount
     const getRecomendedDiscounts = () => {
         const newRecomendedDiscounts= props.discounts.results.filter((discount_item) => {
-          return ((discount_item.id != discount.id) &&
+          return ((discount_item.id !== discount.id) &&
           (discount_item.categories.some((category) => {
             // Create an empty Set to store unique values
             var categories_list = [];
@@ -70,42 +67,50 @@ const DiscountDetail = (props) => {
       };
 
     
-      useEffect(() => {
-        props.getDiscountReviews(discountId);
-        console.log("Discount Reviews >>> ");
-      }, [discountId]);
-
-
+    //   GET DISCOUNT
     useEffect(() => {
         // Get the current discount
         const getDiscount = () => { 
             let discount = props.discounts.results.find(obj => obj.id === +discountId);
             console.log("Current Discount", discount);
             setDiscount(discount);
+
+            // Check if user follows organizer of current discount
+            props.isUserFollowing(discount.organizer.id);
           }; 
         
         if (!discount || (discount && discount.id !== +discountId)){
-            getDiscount();
+            getDiscount();            
         };
+        }, [discount]);
 
-        // Get the discount media
+    
+    //   GET DISCOUNT REVIEWS
+    useEffect(() => {
+        props.getDiscountReviews(discountId);
+        console.log("Discount Reviews >>> ");
+        }, [discountId]);
+
+
+    //   GET DISCOUNT MEDIA
+    useEffect(() => {
         if (!props.discount_media || (discount && props.discount_media.length > 0 && props.discount_media[0].discount !== discount.url)){
             props.getDiscountMedia(discountId);
             console.log("Getting Discount Media >>")
         };
+        }, [props.discount_media]);
 
-        // Get the discount reviews
-        // if (!props.reviews || (discount && props.reviews.results.length > 0 && props.reviews.results[0].discount !== discount.url)){
-        //     props.getDiscountReviews(discountId);
-        //     console.log("Discount Reviews >>> ");
-        // };
-
-        // Get organizer discounts
+    
+    //   GET ORGANIZER DISCOUNT 
+    useEffect(() => {
         if ((!organizerDiscounts && discount) || (discount && discount.organizer.id !== organizerDiscounts[0].organizer.id)){
             console.log("Getting Organizer Discounts >>> ");
             getOrganizerDiscounts();
-        }        
+        }  
+        }, [organizerDiscounts]);
 
+
+    useEffect(() => {  
         // Get the recomended discounts
         if ((!recomendedDiscounts && discount) || 
         (discount && recomendedDiscounts && recomendedDiscounts[0].categories.some(category => discount.categories.includes(category)))){
@@ -113,15 +118,7 @@ const DiscountDetail = (props) => {
             console.log("Getting Recomended Discounts");
         };        
         
-    }, [discountId, recomendedDiscounts, discount, props.discount_media]); // 
-
-    const contactButtonHandler = () => {
-        setPackagesIsShown(true);
-    };
-    
-    const hidePackagesHandler = () => {
-        setPackagesIsShown(false);
-    };
+    }, [recomendedDiscounts]); // 
 
     const getDiscountURL = () => {
         let url = window.location.href;
@@ -149,6 +146,75 @@ const DiscountDetail = (props) => {
             }, 10);            
         };
     };
+
+    // follow organizer
+    const followOrganizerHandler = () => {
+        // send post request to discounts/organizer/followers/add/
+        axios.post('/discounts/organizer/followers/add/', {
+            user: props.user,
+            organizer: discount.organizer
+            })
+            .then(response => {
+                if (response.data.success) {
+                    setUserIsFollower(response.data);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                });
+        };
+
+    // unfollow organizer
+    const unfollowOrganizerHandler = () => {
+        // send delete request to discounts/organizer/followers/delete/<int:pk>/
+        axios.delete(`/discounts/organizer/followers/delete/${props.is_follower.id}/`, {
+            data: {
+                user: props.user,
+                organizer: discount.organizer
+                }
+            })
+            .then(response => {
+                if (response.data.success) {
+                    setUserIsFollower(response.data);
+                    }
+                })
+            .catch(error => {
+                console.log(error);
+                });
+        };
+
+    // handle follow
+    const handleFollow = async () => {
+        if (props.is_follower) {
+            unfollowOrganizerHandler();
+            } 
+        else {
+            followOrganizerHandler();
+            }
+    };
+
+
+    useEffect(() => {
+        const handleScroll = (event) => {
+            const videoSection = document.getElementById('video-section');
+            const rect = videoSection.getBoundingClientRect();
+            const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+            const inView = rect.top <= viewHeight && rect.bottom >= 0;
+            if (inView) {
+                setPlay(true);
+                } 
+            else {
+                setPlay(false);
+                }
+        };
+    
+        window.addEventListener("scroll", handleScroll);
+    
+        return () => {
+          window.removeEventListener("scroll", handleScroll);
+        };
+      }, []);
+
 
     const discountCardStyles = {
         card: { margin: "0 auto", width: "80%" },
@@ -179,12 +245,11 @@ const DiscountDetail = (props) => {
         <>
         {discount ? (
         <Container>
-            {packagesIsShown && <AvailablePackages discount={discount} onClose={hidePackagesHandler} /> }
             <DiscountImageWrapper>
                 <DiscountImage imgUrl={discount.flyer}/>
                 {/* <ImageOverlay /> */}
                 <ShareDiscount onClick={getDiscountURL}>
-                    <img src="/images/icons/share-w.svg" /> 
+                    <img src="/images/icons/share-w.svg" alt=""/> 
                 </ShareDiscount>
             </DiscountImageWrapper>
 
@@ -194,7 +259,7 @@ const DiscountDetail = (props) => {
                     <Title>
                         <b>{ discount.title} &nbsp;</b>                        
                         <Like>
-                            <img src="/images/icons/like.svg" />
+                            <img src="/images/icons/like.svg" alt=""/>
                             <span>{discount.likes}</span>
                         </Like>
                     </Title>
@@ -221,21 +286,33 @@ const DiscountDetail = (props) => {
                 </DiscountInfo>
 
                 <ContactSection>
+                    <SectionTitle className="contact-sec">Contact Us</SectionTitle>
                     <ContactSectionContent>
-                        <SectionTitle className="contact-sec">Contact Us</SectionTitle>
                         {discount.organizer.social_media_handles &&
                             <ContactButtons className="small">
+                                {discount.organizer.social_media_handles.whatsapp &&
                                 <ContactButton href={`https://wa.me/${discount.organizer.phone_number}`} target="_blank">
                                     <img src="/images/icons/whatsapp.png" alt="WhatsApp" width="42" height="42"/>
                                 </ContactButton>
+                                }
 
+                                {discount.organizer.social_media_handles.facebook &&
                                 <ContactButton href={discount.organizer.social_media_handles.facebook} target="_blank">
                                     <img src="/images/icons/Facebook.webp" alt="Facebook" width="42" height="42"/>
                                 </ContactButton>
+                                }
 
+                                {discount.organizer.social_media_handles.instagram &&
                                 <ContactButton href={discount.organizer.social_media_handles.instagram} target="_blank">
                                     <img src="/images/icons/Instagram.png" alt="Instagram" width="42" height="42"/>
                                 </ContactButton>
+                                }
+
+                                {discount.organizer.social_media_handles.twitter &&
+                                <ContactButton href={discount.organizer.social_media_handles.twitter} target="_blank">
+                                    <img src="/images/icons/twitter.svg" alt="Twitter" width="42" height="42"/>
+                                </ContactButton>
+                                }
                             </ContactButtons>  
                         }                          
 
@@ -277,9 +354,9 @@ const DiscountDetail = (props) => {
                         {parse(discount.address)}
                     </Map>
                     <AboutOrganiser>
-                        <Wrapper>
+                        <Wrapper className="about-organizer">
                             <OrganiserProfile>
-                                <img src="/images/1.jpg"/>
+                                <img src="/images/1.jpg" alt=""/>
                             </OrganiserProfile>
                             <div>
                                 <h4>{discount.organizer.name}</h4>
@@ -292,29 +369,31 @@ const DiscountDetail = (props) => {
                         <OrganiserInfo>
                             <p>{discount.organizer.description}</p>
                         </OrganiserInfo>
-                        <OrganiserButtons>                            
-                            <FollowButton href={discount.organizer.website_url}>Follow</FollowButton>
+                        <OrganiserButtons>   
+                            {props.is_follower ?                    
+                            <FollowButton href="#" onClick={handleFollow}>Unfollow</FollowButton>
+                            :
+                            <FollowButton href="#" onClick={handleFollow}>Follow</FollowButton>
+                            }
                         </OrganiserButtons>
                     </AboutOrganiser>
                 </SectionContent>
             </AboutOrganiserAndMap>
 
-            {/* {props.discount_media && props.discount_media.length > 0 &&
+            {discount.video_url &&
             <SectionWrapper>
-                <DiscountGalleryTitle>Discount Gallery</DiscountGalleryTitle>
-                <DiscountGallery>
-                    <GallerySection id="galery">
-                        <Gallery photos={props.discount_media} type={null} />
-                    </GallerySection>
-                    <LeftButton target="gallery" pos="0" />
-                    <RightButton target="gallery" pos="0" /> 
-                </DiscountGallery>
+                <VideoWrap id="video-section">
+                    <ReactPlayer 
+                        width={"100%"} 
+                        url={discount.video_url} 
+                        playing={play}/>
+                </VideoWrap>
             </SectionWrapper>
-            } */}
+            }
 
             {props.discount_media && props.discount_media.length > 0 &&
             <SectionWrapper>
-                <DiscountGalleryTitle>Discount Gallery</DiscountGalleryTitle>
+                <DiscountGalleryTitle>Gallery</DiscountGalleryTitle>
                 <DiscountGallery>
                     <GallerySection id="galery">
                         <Gallery photos={props.discount_media} type={null} />
@@ -370,7 +449,7 @@ const DiscountDetail = (props) => {
                 </ReviewSectionContent>          
             </CommentsSection>
 
-            {recomendedDiscounts &&
+            {recomendedDiscounts && recomendedDiscounts.length > 0 &&
             <SuggestedDiscounts>
                 <RecomendedDiscounts
                     key="recomended-section"
@@ -387,21 +466,18 @@ const DiscountDetail = (props) => {
                         </h4>
                     </SuggestedDiscountsTitle>
 
-                    {recomendedDiscounts && (
                     <CarouselFlex    
                         divId="recomended"    
                         type="category" 
                         classId="recomendations"                  
                     >
-                        {recomendedDiscounts.slice(0, 2).map((discount, key) => (
+                        {recomendedDiscounts.slice(0, 4).map((discount, key) => (
                         <DiscountCard
                             key={key}
                             discount={discount}
-                            discountCardStyles={discountCardStyles}
                         />
                         ))}
                     </CarouselFlex>
-                    )}
                 </RecomendedDiscounts>
             </SuggestedDiscounts>
             }
@@ -442,9 +518,25 @@ const Container = styled.div`
 const Wrapper = styled.div`
     display: flex;
     align-items: center;
+    justify-content: center;
     font-weight: 600;
     /* border: 1px solid black; */
+    &.about-organizer{
+        @media only screen and (min-width: 621px) and (max-width: 1200px) {
+            flex-wrap: wrap;
+        }
+    }
 `;
+
+
+const VideoWrap = styled.div`
+    margin-top: 8px;
+    width: 100%;
+    display: block;
+    position: relative;
+    background-color: #f9fafb;
+`;
+
 
 const DiscountImageWrapper = styled.div`
     width: 100%;
@@ -641,25 +733,30 @@ const Address = styled.div`
 
 const ContactSection = styled.div`
     width: 20%;
-    /* border: 1px solid yellow; */
-    display: flex;
-    flex-direction: row-reverse;
-    @media (max-width: 620px) {
-        width: 100%;
-        flex-direction: row;
-    }
-`;
-
-const ContactSectionContent = styled.div`
-    width: 170px;
-    margin-top: 30px;
+    /* border: 1px solid yellow;     */
+    /* flex-direction: row-reverse; */
     &>h4{
         text-align: center;
-        // margin: 0;
+        margin: 30px auto;
         padding: 0;
     }
     @media (max-width: 620px) {
         width: 100%;
+        &>h4{
+            margin: 0 auto;
+        }
+    }
+`;
+
+const ContactSectionContent = styled.div`
+    /* margin-top: 30px; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* border: 1px solid black; */
+
+    @media (max-width: 620px) {
+        /* width: 100%; */
         margin-top: 0;
     }
 `;
@@ -697,9 +794,10 @@ const WebLinkButton = styled.a`
     justify-content: center;
     align-items: center;
     text-decoration: none;
-    width: 150px;
+    width: 80%;
+    max-width: 150px;
     height: 30px;
-    margin: 10px;
+    margin: 10px auto;
     border: none;
     outline: none;
     border-radius: 30px;
@@ -723,9 +821,10 @@ const PhoneButton = styled.a`
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 150px;
+    width: 80%;
+    max-width: 150px;
     height: 30px;
-    margin: 10px;
+    margin: 10px auto;
     border: none;
     outline: none;
     text-decoration: none;
@@ -929,6 +1028,9 @@ const OrganiserProfile = styled.div`
     border-radius: 50%;
     border: 2px solid #E5E4E2;
   }
+  @media only screen and (min-width: 621px) and (max-width: 1200px) {
+        width: 100%;
+    }
 `;
 
 const OrganiserButtons = styled.div`
@@ -1057,13 +1159,15 @@ const mapStateToProps = (state) => {
         wishlist: state.discountState.wishlist,
         discounts: state.discountState.discounts,
         discount_media: state.discountState.discount_media,
-        reviews: state.discountState.reviews
+        reviews: state.discountState.reviews,
+        is_follower: state.userState.is_follower
     }
 };
   
 const mapDispatchToProps = (dispatch) => ({
     getDiscountMedia: (discount_id) => {dispatch(getDiscountMediaAPI(discount_id))},
     getDiscountReviews: (discount_id) => {dispatch(getDiscountReviewsAPI(discount_id))},
+    isUserFollowing: (organizer_id) => {dispatch(isUserFollowerAPI(organizer_id))},
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DiscountDetail);

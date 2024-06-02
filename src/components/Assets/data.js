@@ -68,6 +68,7 @@ export const discountsData = {
           {name: "instagram", socialMediaURL: "#"}
         ],
         website_url: "http://www.hisensegh.com/",
+        url: "https://youtu.be/z65zuK3VzM0?si=Gx5yrm0t894ZqFxh"
       },
       images: [
         "/images/1.jpg",
