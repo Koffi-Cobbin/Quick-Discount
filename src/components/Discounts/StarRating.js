@@ -8,9 +8,9 @@ const StarRating = (props) => {
   const remainderPercent = remainder*100;
   const emptyStars = Math.floor(5-props.rating);
   
-  console.log("Rating ... ", props.rating);
-  console.log("Quotient... ", quotient);
-  console.log("EmptyStars... ", emptyStars);
+  // console.log("Rating ... ", props.rating);
+  // console.log("Quotient... ", quotient);
+  // console.log("EmptyStars... ", emptyStars);
 
   return (
     <RatingWrap className="star-rating-container">

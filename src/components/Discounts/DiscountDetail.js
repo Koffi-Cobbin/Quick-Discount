@@ -43,7 +43,7 @@ const DiscountDetail = (props) => {
         }          
       };
 
-    // Other discounts: filter all discounts for two discounts sharing same category as this discount
+    // Other discounts: filter all discounts for discounts sharing same category as this discount
     const getRecomendedDiscounts = () => {
         const newRecomendedDiscounts= props.discounts.results.filter((discount_item) => {
           return ((discount_item.id !== discount.id) &&
@@ -76,7 +76,9 @@ const DiscountDetail = (props) => {
             setDiscount(discount);
 
             // Check if user follows organizer of current discount
-            props.isUserFollowing(discount.organizer.id);
+            if (props.user){
+                props.isUserFollowing(discount.organizer.id);
+            };
           }; 
         
         if (!discount || (discount && discount.id !== +discountId)){
@@ -107,18 +109,18 @@ const DiscountDetail = (props) => {
             console.log("Getting Organizer Discounts >>> ");
             getOrganizerDiscounts();
         }  
-        }, [organizerDiscounts]);
+        }, [discount]);
 
 
     useEffect(() => {  
         // Get the recomended discounts
-        if ((!recomendedDiscounts && discount) || 
-        (discount && recomendedDiscounts && recomendedDiscounts[0].categories.some(category => discount.categories.includes(category)))){
+        // (discount && recomendedDiscounts && recomendedDiscounts[0].categories.some(category => discount.categories.includes(category)))){
+        if (!recomendedDiscounts && discount){
             getRecomendedDiscounts();
             console.log("Getting Recomended Discounts");
         };        
         
-    }, [recomendedDiscounts]); // 
+    }, [discount]); // 
 
     const getDiscountURL = () => {
         let url = window.location.href;
@@ -209,37 +211,12 @@ const DiscountDetail = (props) => {
         };
     
         window.addEventListener("scroll", handleScroll);
+        console.log("Running scroll ...");
     
         return () => {
           window.removeEventListener("scroll", handleScroll);
         };
       }, []);
-
-
-    const discountCardStyles = {
-        card: { margin: "0 auto", width: "80%" },
-        bgImage: { height: "110px" },
-        eventInfo: { paddingMd: "20px", height: "115px" },
-        title: { fontSizeSm: "13px", fontSizeMd: "15px", fontSizeL: "18px" },
-        fontSizes: { fontSizeSm: "12px", fontSizeMd: "12px", fontSizeL: "15.5px" },
-        dateTime: {
-          md: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          },
-          xsm: {},
-        },
-        time: {},
-        eventStatus: {},
-        locationStyle: {},
-        attendeesSlots: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        },
-        slots: {},
-      };
 
     return (
         <>
@@ -471,10 +448,10 @@ const DiscountDetail = (props) => {
                         type="category" 
                         classId="recomendations"                  
                     >
-                        {recomendedDiscounts.slice(0, 4).map((discount, key) => (
+                        {recomendedDiscounts.slice(0, 4).map((recomendedDiscount, key) => (
                         <DiscountCard
                             key={key}
-                            discount={discount}
+                            discount={recomendedDiscount}
                         />
                         ))}
                     </CarouselFlex>

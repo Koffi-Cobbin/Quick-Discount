@@ -13,5 +13,5 @@ export const PHONE_VALIDATION_API_KEY = '002f7a9d4a47437b857b0f0429466817';
 
 
 // "http://localhost:5000";
-export const BASE_URL = "http://localhost:5000";
+export const BASE_URL = "https://kofficobbin.pythonanywhere.com";
 // "https://kofficobbin.pythonanywhere.com";
