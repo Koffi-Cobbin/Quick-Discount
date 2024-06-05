@@ -2,9 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
-import { signOutAPI, logOutAPI } from "../../../actions";
-
-import NavCartButton from "../NavCartButton";
+import { logOutAPI } from "../../../actions";
+import Search from "./Search";
 
 const Navbar = (props) => {
 
@@ -15,6 +14,8 @@ const Navbar = (props) => {
     const toggleDropdown = (id) => {
         document.getElementById(id).classList.toggle("show current");
     };
+
+    // 
 
     return (
         <Container style={props.style} id="top">
@@ -40,9 +41,7 @@ const Navbar = (props) => {
                 </SearchEntryDisplay>
 
                 <SearchWrapper>
-                    <Search>
-                        <input type="text" placeholder="Search" />
-                    </Search>
+                    <Search homeSearch={props.homeSearch} />
                 </SearchWrapper>
 
                 <Menu id="sidenav">
@@ -168,7 +167,7 @@ const Container = styled.div`
     z-index: 1000;
     padding: 5px 0;
     padding-top: 10px;    
-    overflow: hidden;
+    /* overflow: hidden; */
     font-family: Inter, 'Roboto', sans-serif;
     background-color: #fa8128;
     backdrop-filter: blur(10);
@@ -282,9 +281,13 @@ const SearchEntryDisplay = styled.div`
 
 const SearchWrapper = styled.div`
     position: relative;
+    width: 400px;
+    @media (max-width: 1020px) {
+        display: none;
+    }
 `;
 
-const Search = styled.div`
+const Search2 = styled.div`
     padding: 0;
     margin: 0;
     /* border: 1px solid blue; */
@@ -310,10 +313,6 @@ const Search = styled.div`
     }
     @media (min-width: 769px) {
         min-width: 300px;
-    }
-
-    @media (max-width: 1020px) {
-        display: none;
     }
 `;
 

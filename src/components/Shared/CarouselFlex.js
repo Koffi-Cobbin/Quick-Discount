@@ -83,6 +83,7 @@ const ContentList = styled.div`
 const ListItem = styled.div` 
     position: relative;
     margin: 10px;
+    background-color: #fff;
     /* min-width: 200px; */
     border-radius: 20px;
     cursor: pointer;

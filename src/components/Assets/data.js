@@ -29,52 +29,53 @@ export const dateFilters = ["Today", "This week", "This month", "Next month"];
 export const discountsData = {
   results: [
     {
-      id: 1,
-      url: "http://test/url1",
-      title: "Hisense X'Mas Promo",
-      percentage_discount: "20% on all products",
-      description: `
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-            Duis ut mollis lacus, cursus blandit purus. Integer nec sollicitudin sapien. 
-            Cras odio mi, mollis vel porttitor id, iaculis nec sapien. Cras aliquet risus nibh.
-            Donec hendrerit augue id lobortis pharetra. Vivamus tempus commodo augue. 
-            Suspendisse volutpat urna quis rhoncus semper. Fusce vel tellus faucibus, 
-            lobortis diam in, facilisis leo. Curabitur in arcu ac mauris tempor luctus non 
-            vel magna. Suspendisse commodo pharetra faucibus. Vestibulum pharetra eros id 
-            lorem interdum, eu efficitur quam iaculis. Mauris eros sapien, dictum vitae sem in, 
-            ultricies pellentesque nibh. Donec eu nulla tellus. Donec semper quis mauris nec 
-            dapibus. Duis placerat elit vel ante rhoncus, vel porttitor purus accumsan.
-        `,
-      location: "Hisense Showrooms",
-      start_date: "2024-12-26",
-      end_date: "2024-12-31",
-      flyer: "/images/4.jpg",
-      status: "live",
-      likes: "902",
-      rate: 4.2,
-      categories: [{ name: "Electronics" }, { name: "Restaurants" }],
-      organizer: {
-        id: 1,
-        name: "Hisense Ghana",
-        description: `
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Duis ut mollis lacus, cursus blandit purus. Integer nec sollicitudin sapien. 
-                Cras odio mi, mollis vel porttitor id, iaculis nec sapien.
-            `,
-        phone_number: "0987654321",
-        social_media_handles: [
-          {name: "whatsapp", socialMediaURL: "#"},
-          {name: "facebook", socialMediaURL: "#"},
-          {name: "instagram", socialMediaURL: "#"}
-        ],
-        website_url: "http://www.hisensegh.com/",
-        url: "https://youtu.be/z65zuK3VzM0?si=Gx5yrm0t894ZqFxh"
+      "url": "http://localhost:5000/discounts/1/",
+      "id": 1,
+      "title": "aaa aaaaaa aaaa a a a aaaaa aa a a aaaaaa aaaaa aaaa aaa",
+      "organizer": {
+          "url": "http://localhost:5000/discounts/organizers/1/",
+          "id": 1,
+          "name": "Hisense Ghana",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. \n                Duis ut mollis lacus, cursus blandit purus. Integer nec sollicitudin sapien. \n                Cras odio mi, mollis vel porttitor id, iaculis nec sapien.",
+          "phone_number": "1234567890",
+          "email": "mytestmaillab@gmail.com",
+          "location": "",
+          "social_media_handles": {
+              "whatsapp": " ",
+              "facebook": " ",
+              "instagram": " ",
+              "twitter": " "
+          },
+          "created_by": "http://localhost:5000/users/2/",
+          "followers": 0
       },
-      images: [
-        "/images/1.jpg",
-        "/images/2.jpg",
+      "flyer": "http://res.cloudinary.com/thehivecloudstorage/image/upload/v1715603433/ztsw2vocl4kdljgvfetc.jpg",
+      "description": "Suspendisse volutpat urna quis rhoncus semper. Fusce vel tellus faucibus, \r\n            lobortis diam in, facilisis leo. Curabitur in arcu ac mauris tempor luctus non \r\n            vel magna. Suspendisse commodo pharetra faucibus. Vestibulum pharetra eros id \r\n            lorem interdum, eu efficitur quam iaculis. Mauris eros sapien, dictum vitae sem in, \r\n            ultricies pellentesque nibh. Donec eu nulla tellus. Donec semper quis mauris nec \r\n            dapibus. Duis placerat elit vel ante rhoncus, vel porttitor purus accumsan.",
+      "package_type": "daily",
+      "percentage_discount": "10% discount on all products",
+      "start_date": "2024-06-02",
+      "end_date": "2024-06-02",
+      "start_time": "13:38:12",
+      "end_time": "13:56:46",
+      "categories": [
+          {
+              "url": "http://localhost:5000/discounts/categories/2/",
+              "id": 2,
+              "name": "Electronics"
+          }
       ],
-    },
+      "created_by": "http://localhost:5000/users/2/",
+      "video_url": "https://youtu.be/z65zuK3VzM0?si=Gx5yrm0t894ZqFxh",
+      "website_url": "http://www.hisensegh.com/",
+      "location": "Hisense Showrooms",
+      "address": "Lorem ipsum dolor",
+      "agreement": "agreed",
+      "likes": 0,
+      "status": "pending",
+      "is_active": true,
+      "average_rating": null,
+      "total_rating": 0
+  },
     {
       id: 2,
       url: "http://test/url2",

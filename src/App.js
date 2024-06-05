@@ -98,6 +98,7 @@ function App(props) {
                   style={{backgroundColor : 'transparent'}}
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
+                  homeSearch={true}
                 />,
                 <Home />,
               ]}

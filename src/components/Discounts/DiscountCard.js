@@ -81,12 +81,15 @@ const Card = styled.div`
   /* width: 270px;
   height: 300px; */
   width: 100%;
-  height: fit-content;
+  height: 100%;
   border-radius: 20px;
   background-color: #fff;
   margin: 0 auto;  
   overflow: hidden;
   position: relative;
+
+  display: flex;
+  flex-direction: column;
 
   /* border: 1px solid red; */
   /* scroll-snap-align: center; */
@@ -118,6 +121,8 @@ const EventInfo = styled.div`
   padding: 12px;
   font-size: 16px;
   font-family: Lato, 'Roboto', sans-serif;
+  /* css to occupy remaining height of parent */
+  flex: 1;
   /* border: 1px solid blue; */
 `;
 
@@ -143,6 +148,7 @@ const Date = styled.div`
   text-align: left;
   align-items: center;  
   display: flex;
+  margin-bottom: 12px;
   p {
     span {
       width: 100px;
@@ -181,6 +187,11 @@ const SocialActions = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;  
+  /* css to position content at the bottom of parent */
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  right: 12px;
 `;
 
 const Left = styled.div``;

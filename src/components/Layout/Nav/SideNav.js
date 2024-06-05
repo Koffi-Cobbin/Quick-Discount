@@ -1,24 +1,34 @@
 import React from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import NavCartButton from "../NavCartButton";
+import Search from "./Search";
 
 
 const SideNav = (props) => {
+    const [scrollTop, setScrollTop] = useState(0);
+    
+    useEffect(() => {
+        const handleScroll = (event) => {
+            setScrollTop(window.scrollY);
+          };
+      
+          window.addEventListener("scroll", handleScroll);
+      
+          return () => {
+            window.removeEventListener("scroll", handleScroll);
+          };
+    }, [])
+
     return (
         <Container>
-        <Sidenav width={props.width}>
+        <Sidenav style={{ top: scrollTop > 100 ? "0" : "60px" }}>
             <CloseBtn onClick={props.close}>&times;</CloseBtn>
 
-            <SearchEntry id="search-display" className="search-display">
-                <div>
-                    <input type="text" placeholder="Search" />
-                    <SearchButton>
-                        <img src="/images/icons/search-icon-w.svg" alt="" />
-                    </SearchButton> 
-                </div>
-            </SearchEntry>
+            <SearchWrapper>
+                <Search homeSearch={props.homeSearch} styling={{zIndex: "1"}}  closeNav={props.close}/>
+            </SearchWrapper>
 
             <Link to="/" onClick={props.close}>
                 <span>Home</span>
@@ -93,14 +103,13 @@ const Container = styled.div`
 const Sidenav = styled.div`
     height: fit-content;
     position: absolute; 
-    /* z-index: 1000;  */
-    top: 60px; 
+    /* top: 60px;  */
     right: 0;
     background-color: #0B0705; 
-    overflow-x: hidden; 
     padding-top: 10px; 
     transition: 0.5s; 
-    width: ${props => props.width};
+    width: 100%;
+    /* border: 1px solid #fff; */
 
     a {
         text-align: left;
@@ -123,7 +132,7 @@ const Sidenav = styled.div`
   
 const CloseBtn = styled.button`
     position: absolute;
-    top: 0;
+    top: 10px;
     right: 15px;
     font-size: 36px;
     line-height: 25px;
@@ -133,40 +142,11 @@ const CloseBtn = styled.button`
     background-color: transparent;
 `;
 
-const SearchEntry = styled.div`
-    margin-top: 30px;
+const SearchWrapper = styled.div`
+    margin-top: 40px;
     padding: 0 8px;
-    & div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 5px 0;
-        position: relative;
-        overflow: hidden;
-        font-family: Lato, 'Roboto', sans-serif;
-        border:  1px solid white;
-        border-radius: 4px;
-        & input {
-            padding: 0 30px 0 4px;
-            color: #fff;
-            width: 100%;
-        }
-    }
 `;
 
-const SearchButton = styled.button`
-    font-size: 0px;
-    img {
-        position: absolute;
-        border: none;
-        outline: none;
-        box-sizing: none;
-        background-color: transparent;
-        width: 15px;
-        top: 7px;
-        right: 5px; 
-    }
-`;
 
 const DrpdnWrap = styled.div`
     padding: 8px 20px;

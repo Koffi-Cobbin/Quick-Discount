@@ -14,7 +14,7 @@ const StarRating = (props) => {
 
   return (
     <RatingWrap className="star-rating-container">
-      {props.showRate &&
+      {props.showRate && quotient !== 0 &&
         <RateValue className="float-value"><b>{props.rating.toFixed(1)}</b></RateValue>
       }
       <StarsWrap className="stars-wrapper">
