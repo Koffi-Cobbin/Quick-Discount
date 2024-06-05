@@ -23,7 +23,8 @@ import {
   SET_USER_NOTIFICATIONS,
   SET_CART_ITEMS,
   SET_ANALYTICS,
-  SET_WISH_LIST
+  SET_WISH_LIST,
+  SET_SEARCH_RESULT
 } from "./actionType";
 import db from "../firebase";
 import { BASE_URL } from "../utils/constants";
@@ -149,6 +150,11 @@ export const setWishlist = (payload) => ({
 export const setAnalytics = (payload) => ({
   type: SET_ANALYTICS,
   analytics: payload,
+});
+
+export const setSearchResult = (payload) => ({
+  type: SET_SEARCH_RESULT,
+  search_result: payload,
 });
 
 // -----------------------------

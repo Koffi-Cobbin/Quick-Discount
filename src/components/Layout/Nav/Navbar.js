@@ -1,4 +1,4 @@
-import React from "react";
+import React,  { useState } from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
@@ -6,6 +6,7 @@ import { logOutAPI } from "../../../actions";
 import Search from "./Search";
 
 const Navbar = (props) => {
+    const [pressedEnter, setPressedEnter] = useState(false);
 
     const toggleSearch = () => {
         document.getElementById("search-display").classList.toggle("show");
@@ -15,7 +16,28 @@ const Navbar = (props) => {
         document.getElementById(id).classList.toggle("show current");
     };
 
-    // 
+    // Add KeyDown event to search input
+    const addSearchEvent = () => {
+        let searchInputWrap = document.getElementsByClassName("wrapper")[0];
+        // let searchInputWrap = searchInputWraps[searchInputWraps.length - 1];
+        console.error('Found main nav search input wrapper... ', searchInputWrap);        
+        
+        // get nested child input element of searchInputWrap
+        if (searchInputWrap) {
+            const input = searchInputWrap.querySelector('input');
+            input.setAttribute("id", "searchInput");
+            console.error('Found search input... ', input);
+            // Add onEnterKey event listener to input
+            input.addEventListener('keydown', function (e) {
+                // console.log("Keypress Function Activated...");
+                if (e.key === 'Enter') {
+                    setPressedEnter(true);
+                };
+            });
+          } else {
+            console.error('Element not found');
+          }
+      };
 
     return (
         <Container style={props.style} id="top">
@@ -41,7 +63,10 @@ const Navbar = (props) => {
                 </SearchEntryDisplay>
 
                 <SearchWrapper>
-                    <Search homeSearch={props.homeSearch} />
+                    <Search 
+                        homeSearch={props.homeSearch} 
+                        pressedEnter={pressedEnter}
+                        addSearchEvent={addSearchEvent}/>
                 </SearchWrapper>
 
                 <Menu id="sidenav">

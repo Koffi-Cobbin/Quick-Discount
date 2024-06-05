@@ -8,6 +8,7 @@ import Search from "./Search";
 
 const SideNav = (props) => {
     const [scrollTop, setScrollTop] = useState(0);
+    const [pressedEnter, setPressedEnter] = useState(false);
     
     useEffect(() => {
         const handleScroll = (event) => {
@@ -21,13 +22,49 @@ const SideNav = (props) => {
           };
     }, [])
 
+
+    const getInputValue = () => {
+        //   Get input value
+        const inputValue = document.querySelector("#searchInput").value;
+        console.log('Input value:', inputValue);
+    };
+
+
+    const addSearchEvent = () => {
+        let searchInputWraps = document.getElementsByClassName("wrapper");
+        let searchInputWrap = searchInputWraps[searchInputWraps.length - 1];
+        console.error('Found search input wrapper... ', searchInputWrap);        
+        
+        // get nested child input element of searchInputWrap
+        if (searchInputWrap) {
+            const input = searchInputWrap.querySelector('input');
+            input.setAttribute("id", "searchInput");
+            console.error('Found search input... ', input);
+            // Add onEnterKey event listener to input
+            input.addEventListener('keydown', function (e) {
+                // console.log("Keypress Function Activated...");
+                if (e.key === 'Enter') {
+                    setPressedEnter(true);
+                };
+            });
+          } else {
+            console.error('Element not found');
+          }
+      };
+
+
     return (
         <Container>
         <Sidenav style={{ top: scrollTop > 100 ? "0" : "60px" }}>
             <CloseBtn onClick={props.close}>&times;</CloseBtn>
 
             <SearchWrapper>
-                <Search homeSearch={props.homeSearch} styling={{zIndex: "1"}}  closeNav={props.close}/>
+                <Search 
+                    homeSearch={props.homeSearch} 
+                    styling={{zIndex: "1"}} 
+                    closeNav={props.close} 
+                    pressedEnter={pressedEnter}
+                    addSearchEvent={addSearchEvent}/>
             </SearchWrapper>
 
             <Link to="/" onClick={props.close}>

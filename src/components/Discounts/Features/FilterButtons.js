@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { discountsData, locations, dateFilters } from "../../Assets/data";
+import { connect } from "react-redux";
+import { locations, dateFilters } from "../../Assets/data";
 
-const FilterButtons = ({ 
-    filterEvents, 
-    setfilteredEvents, 
-    categories, 
-    checkedInputs
-  }) => {
+const FilterButtons = ( props ) => {
   const [curentCategory, setCurentCategory] = useState("All");
 
-  let newCheckedInputs = checkedInputs;
+  let newCheckedInputs =  props.checkedInputs;
 
   const checkInputChangeHandler = (id) => {
     let elem = document.getElementById(id);
@@ -36,7 +32,7 @@ const FilterButtons = ({
 
   const handleFilter = () => {
     console.log(newCheckedInputs);
-    filterEvents(newCheckedInputs);
+    props.filterEvents(newCheckedInputs);
   };
 
   // const reset = () => {
@@ -56,7 +52,7 @@ const FilterButtons = ({
               backgroundColor: curentCategory==="All" ? "#0000FF" : "#E5E4E2",
               color: curentCategory==="All" ? "white" : "black"
             }}
-            onClick={() => setfilteredEvents(discountsData)}
+            onClick={() =>  props.setfilteredEvents(props.discounts.results)}
           >
           All
         </button>
@@ -71,7 +67,7 @@ const FilterButtons = ({
 
           <div id="category" className="dropdown-content">
             {/* <input type="text" placeholder="Search.." id="myInput" onKeyUp="filterFunction()" /> */}
-            {categories.map((category, id) => {
+            { props.categories.map((category, id) => {
               return (
                 <label htmlFor={id} key={id}>
                   <input 
@@ -83,7 +79,7 @@ const FilterButtons = ({
                   {category.name}
                 </label>
                 // <a
-                //   onClick={() => filterEvents(category)}
+                //   onClick={() =>  props.filterEvents(category)}
                 //   key={id}
                 // >
                 //   {category}
@@ -118,7 +114,7 @@ const FilterButtons = ({
           </div>
         </Dropdown>
 
-        <Dropdown>
+        {/* <Dropdown>
           <button onClick={() => toggleDropdown("date")} className="dropbtn">
             <select>
               <option>Date</option>
@@ -141,7 +137,7 @@ const FilterButtons = ({
               );
               })}
           </div>
-        </Dropdown>
+        </Dropdown> */}
 
         <button className="filter-btn" onClick={handleFilter}>
           <img src="/images/icons/filter-b.svg" alt="Filter" height="19"/>
@@ -252,4 +248,14 @@ const Dropdown = styled.div`
   .show {display:block;}
 `;
 
-export default FilterButtons;
+
+const mapStateToProps = (state) => {
+  return {
+      discounts: state.discountState.discounts,
+  }
+};
+
+const mapDispatchToProps = (dispatch) => ({
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(FilterButtons);

@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../utils/constants";
+import { setSearchResult } from "../../../actions";
 
 const Search = (props) => {
 
@@ -11,44 +12,49 @@ const Search = (props) => {
     // note: the id field is mandatory
     const items = props.discounts.results;
 
-    // let search_query = "";
-    let search_results = [];
+    useEffect(() => {
+        props.addSearchEvent();
+      }, []);
 
-    const onEnter = (event) => {
-        if (event.key === "Enter") {
-            console.log('You pressed Enter!');
 
-            // send get request to searchUrl with keywords then get response
-            async function fetchResponse(searchUrl, keywords) {
-                try {
-                    const response = await fetch(`${searchUrl}?keywords=${keywords}`);
-                    if (!response.ok) {
-                        throw new Error("Network response was not OK");
-                    }
-                    const responseBody = await response.json();
-                    console.log("Search results from API ... ", responseBody);
-                } catch (error) {
-                    console.error("There was a problem with your fetch request: ", error);
+    const search = (search_query) => {
+        // send get request to searchUrl with keywords then get response
+        async function fetchResponse(searchUrl, search_query) {
+            try {
+                const response = await fetch(`${searchUrl}?keywords=${search_query}`);
+                if (!response.ok) {
+                    throw new Error("Network response was not OK");
                 }
-            };
+                const responseBody = await response.json();
+                props.set_search_result(responseBody);
+                console.log("Search results from API ... ", responseBody);
+                navigate(`/discounts`);
+                if (props.closeNav) {
+                    props.closeNav();
+                }
+            } catch (error) {
+                console.error("There was a problem with your fetch request: ", error);
+            }
+        };
 
-            const searchUrl = `${BASE_URL}/search/`;
+        const searchUrl = `${BASE_URL}/search/`;
 
-            console.log("Search query ... ");
-            console.log("Search Results ... ");
+        console.log("Search query ... ", search_query);
 
-            // if (search_results.length < 1 && query_string.length > 0) {
-            //     fetchResponse(searchUrl, query_string);
-            // };
-        }
+        fetchResponse(searchUrl, search_query);
     };
 
 
-    const handleOnSearch = (keywords, results) => {
+    const handleOnSearch = (search_query, results) => {
         // onSearch will have as the first callback parameter
         // the string searched and for the second the results.
-        console.log("You searched for ... ", keywords);
+        console.log("You searched for ... ", search_query);
         console.log("Found this ... ", results);
+        
+        // send API search request if Enter is pressed
+        if (props.pressedEnter && search_query.length > 0){
+            search(search_query);
+        }
     };
 
 
@@ -116,7 +122,6 @@ const Search = (props) => {
 };
 
 
-
 const mapStateToProps = (state) => {
     return {
         discounts: state.discountState.discounts,
@@ -125,6 +130,9 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
+    set_search_result: (payload) => {
+        dispatch(setSearchResult(payload));
+      },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Search);

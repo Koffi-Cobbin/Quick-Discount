@@ -7,7 +7,7 @@ import DiscountCard from "./DiscountCard";
 import FilterButtons from "./Features/FilterButtons";
 import Loading from "../Shared/Loading";
 import Pagination from "../Pagination/Pagination";
-import { getDiscountsAPI, getCategoriesAPI } from "../../actions";
+import { getDiscountsAPI, getCategoriesAPI, setSearchResult } from "../../actions";
 
 
 const Discounts = (props) => {
@@ -24,6 +24,25 @@ const Discounts = (props) => {
     setfilteredEvents(newFilteredEvents);
   };
 
+  const getDiscountsCategories = (discounts) => {
+    const categories_lists = discounts.map((discount) => discount.categories);
+    console.log("AAA ", categories_lists);
+    // Create an empty Set to store unique values
+    const categories_set = new Set();
+  
+    // Loop through each sub-list in A and add its elements to the resultSet
+    categories_lists.forEach(subList => {
+      subList.forEach(category => {
+        categories_set.add(category);
+      });
+    });
+    // Unpack the set into a list
+    const categories = [...categories_set];
+    setCategories(categories);
+  };
+
+
+  // Setting filtered events for all discounts
   useEffect(() => {
     const filterEventsOnLoad = () => { 
         if (catId) {
@@ -31,43 +50,28 @@ const Discounts = (props) => {
         }
         if (props.discounts.results) {
           setfilteredEvents(props.discounts.results);
-
-          const categories_lists = props.discounts.results.map((discount) => discount.categories);
-          console.log("AAA ", categories_lists);
-          // Create an empty Set to store unique values
-          const categories_set = new Set();
-        
-          // Loop through each sub-list in A and add its elements to the resultSet
-          categories_lists.forEach(subList => {
-            subList.forEach(category => {
-              categories_set.add(category);
-            });
-          });
-          // Unpack the set into a list
-          const categories = [...categories_set];
-          setCategories(categories);
-          console.log("bbbbbb ", props.discounts.results);
+          getDiscountsCategories(props.discounts.results); 
+          console.log("Filtering all discounts...");         
         }
       }; 
     filterEventsOnLoad();
   }, [props.discounts]);
 
-  const discountCardStyles = {
-    card: {margin: "0 auto", width: '80%'},
-    bgImage: {height: "110px"},
-    eventInfo: {paddingMd: "20px", height: "115px"},
-    title: {fontSizeSm: "13px", fontSizeMd: "15px", fontSizeL: "18px"},
-    fontSizes: {fontSizeSm: "12px", fontSizeMd: "12px", fontSizeL: "15.5px"},
-    dateTime: {
-      md: {display: "flex", alignItems: "center", justifyContent: "space-between"}, 
-      xsm: {}
-    },
-    time: {},
-    eventStatus: {},
-    locationStyle: {},
-    attendeesSlots: {display: "flex", alignItems: "center", justifyContent: "space-between"},
-    slots: {}
-  }
+
+  // Setting filtered events for searched discounts
+  useEffect(() => {
+    const filterSearchResult = () => { 
+        if (props.search_result.length > 0) {
+          setfilteredEvents(props.search_result);
+          getDiscountsCategories(props.search_result);          
+          console.log("Filtering search result...");
+          // clear search result after setting filtered events 
+          props.set_search_result([]);
+        }
+      }; 
+    filterSearchResult();
+  }, [props.search_result]);
+
 
   return (
     <Wrapper>
@@ -90,8 +94,7 @@ const Discounts = (props) => {
                   <FilteredItem>
                     <DiscountCard 
                       key={key} 
-                      discount={discount} 
-                      discountCardStyles={discountCardStyles} />
+                      discount={discount} />
                   </FilteredItem>
                 ))
               }
@@ -119,6 +122,7 @@ const Container = styled.div`
   max-width: 100%;
   margin: 0 auto;
   border-top: 1px solid white;
+  /* border: 1px solid black; */
 
   @media (min-width: 768px) {
     width: 75%;
@@ -180,9 +184,10 @@ const FlexWrap = styled.div`
 
 const FilteredEvents = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  grid-template-rows: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-rows: repeat(auto-fill, minmax(300px, 1fr));
   grid-gap: 20px 10px;
+  padding: 10px;
   /* border: 1px solid black; */
 
   @media (min-width: 500px) {
@@ -191,17 +196,19 @@ const FilteredEvents = styled.div`
   
   @media (min-width: 700px) {
     grid-auto-columns: calc(calc(100% / 3) - 20px);
-    grid-gap: 30px 30px;
+    grid-gap: 20px 20px;
   }
   
   @media (min-width: 1100px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     grid-auto-columns: calc(25% - 30px);
+    grid-gap: 30px 30px;
   }
 `;
 
 const FilteredItem = styled.div`
   position: relative;
-  min-width: 250px;
+  /* min-width: 250px; */
   border-radius: 20px;
   /* border: 1px solid black; */
   cursor: pointer;
@@ -218,12 +225,16 @@ const mapStateToProps = (state) => {
       token: state.userState.token,
       discounts: state.discountState.discounts,
       categories: state.discountState.categories,
+      search_result: state.discountState.search_result,
   }
 };
 
 const mapDispatchToProps = (dispatch) => ({
   getEvents: () => {dispatch(getDiscountsAPI())}, 
   getCategories: () => dispatch(getCategoriesAPI()),  
+  set_search_result: (payload) => {
+    dispatch(setSearchResult(payload));
+  },
 });
   
 export default connect(mapStateToProps, mapDispatchToProps)(Discounts);
