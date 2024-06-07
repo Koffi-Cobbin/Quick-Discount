@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
-import { locations, dateFilters } from "../../Assets/data";
+import { cities, dateFilters } from "../../Assets/data";
 
 const FilterButtons = ( props ) => {
   const [curentCategory, setCurentCategory] = useState("All");
@@ -31,7 +31,7 @@ const FilterButtons = ( props ) => {
   };
 
   const handleFilter = () => {
-    console.log(newCheckedInputs);
+    console.log("newCheckedInputs ", newCheckedInputs);
     props.filterEvents(newCheckedInputs);
   };
 
@@ -98,7 +98,7 @@ const FilterButtons = ( props ) => {
           </button>
 
           <div id="location" className="dropdown-content">
-            {locations.map((location, id) => {
+            {cities.map((location, id) => {
               return (
                 <label for={id} key={id}>
                   <input 
@@ -185,8 +185,13 @@ const Wrapper = styled.div`
 
     &:hover,
     &.active{
+      color: #FFF;
       background-color: #0000FF;
-      color: white;
+
+      & select {
+        color: #FFF;
+      }
+
       &.filter-btn {
         background-color: #fa8128;
       }
@@ -200,20 +205,7 @@ const Wrapper = styled.div`
 const Dropdown = styled.div`
   position: relative;
   display: inline-block;
-
-  /* The search field */
-  /* & #myInput {
-    box-sizing: border-box;
-    font-size: 16px;
-    padding: 14px 16px;
-    border: none;
-    border-bottom: 1px solid #ddd;
-    background-color: #000;
-    opacity: 0.8;
-    color: #FFF;
-    max-width: 160px;
-    &:focus {outline: 3px solid #ddd;}
-  } */
+  
   & .dropdown-content {
     display: none;
     position: absolute;
@@ -227,14 +219,16 @@ const Dropdown = styled.div`
     z-index: 1;
     float: right;
 
-    & label, a {
+    & label {
       display: flex; 
+      justify-content: flex-start;
+      align-items: center;
+      flex-wrap: nowrap;
       color: #FFF;
       padding: 5px 16px;
       text-decoration: none;
       margin-left: 0;
-      align-items: start;
-      justify-content: flex-start;
+      /* border: 1px solid #fff; */
 
       & input{
         margin-right: 3px;

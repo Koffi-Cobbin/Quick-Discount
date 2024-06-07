@@ -8,6 +8,7 @@ import FilterButtons from "./Features/FilterButtons";
 import Loading from "../Shared/Loading";
 import Pagination from "../Pagination/Pagination";
 import { getDiscountsAPI, getCategoriesAPI, setSearchResult } from "../../actions";
+// import { locations } from "../../Assets/data";
 
 
 const Discounts = (props) => {
@@ -18,10 +19,26 @@ const Discounts = (props) => {
 
   const filterEvents = (checkedInputs) => {
     setCheckInputs(checkedInputs);
-    const newFilteredEvents= props.discounts.results.filter((discount) => {
-      return  checkedInputs["cat"].some(category => discount.categories.filter(cat => cat.name).includes(category))
-    });
-    setfilteredEvents(newFilteredEvents);
+    let filteredEventsByCheckedInputs = [];
+
+    // filter by categories
+    if (checkedInputs.cat.length > 0) {
+      filteredEventsByCheckedInputs = props.discounts.results.filter((discount) => {
+        return checkedInputs["cat"].some(category => discount.categories.map(cat => cat.name).includes(category));
+      });
+      console.log("Inside cat: ", filteredEventsByCheckedInputs);
+    };
+
+    // filter by location
+    if (checkedInputs.loc.length > 0) {
+      filteredEventsByCheckedInputs = filteredEventsByCheckedInputs.filter((discount) => {
+        return checkedInputs["loc"].some(location => discount.location.toLowerCase().includes(location.toLowerCase()));
+      });
+      console.log("Inside loc: ", filteredEventsByCheckedInputs);
+    };
+
+    setfilteredEvents(filteredEventsByCheckedInputs);
+    console.log("newFilteredEvents ", filteredEventsByCheckedInputs);
   };
 
   const getDiscountsCategories = (discounts) => {
@@ -89,8 +106,9 @@ const Discounts = (props) => {
               </FlexWrap>
           </Section>  
           <FilteredEvents>
-              {
-                filteredEvents.map((discount, key) => (
+            {filteredEvents.length > 0 ? (
+              <>
+              {filteredEvents.map((discount, key) => (
                   <FilteredItem>
                     <DiscountCard 
                       key={key} 
@@ -98,6 +116,10 @@ const Discounts = (props) => {
                   </FilteredItem>
                 ))
               }
+              </>
+            ) : (
+              <Message>No discounts found.</Message>
+            )}
           </FilteredEvents>
           <Wrapper>
             {props.discounts && <Pagination next={props.discounts.next}/>}
@@ -217,6 +239,10 @@ const FilteredItem = styled.div`
   &:hover {
       box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
   }
+`;
+
+const Message = styled.div`
+    text-align: center;
 `;
 
 const mapStateToProps = (state) => {

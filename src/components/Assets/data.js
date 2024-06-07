@@ -16,12 +16,42 @@ export const imageSliders = [
   },
 ];
 
-export const locations = [
+export const locations = {
+  "Accra": "Greater Accra, Accra",
+  "Cape Coast": "Central, Cape Coast",
+  "Kumasi": "Ashanti, Kumasi",
+  "Damongo": "Savannah, Damongo",
+  "Tamale": "Northern, Tamale",
+  "Techiman": "Bono East, Techiman",
+  "Koforidua": "Eastern, Koforidua",
+  "Wa": "Upper West, Wa",
+  "Takoradi": "Western, Takoradi",
+  "Ho": "Volta, Ho",
+  "Nalerigu": "North-East, Nalerigu",
+  "Bolgatanga": "Upper East, Bolgatanga",
+  "Dambai": "Oti, Dambai",
+  "Goaso": "Ahafo, Goaso",
+  "Sunyani": "Brong Ahafo, Sunyani",
+  "Wiawso": "Western North, Wiawso"
+};
+
+export const cities = [
   "Accra",
   "Cape Coast",
   "Kumasi",
+  "Damongo",
   "Tamale",
+  "Techiman",
   "Koforidua",
+  "Wa",
+  "Takoradi",
+  "Ho",
+  "Nalerigu",
+  "Bolgatanga",
+  "Dambai",
+  "Goaso",
+  "Sunyani",
+  "Wiawso"
 ];
 
 export const dateFilters = ["Today", "This week", "This month", "Next month"];

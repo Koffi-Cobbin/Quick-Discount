@@ -66,11 +66,12 @@ const Footer = (props) => {
 
                 <Main>
                     <h3><b>Let's Vybe</b></h3>
-                    <p><a href="https://x.com/quickdiscountgh">Twitter / X</a></p>                    
-                    <p><a href="https://www.instagram.com/quickdiscountgh?igsh=bGZpeWltb284NXJs">Instagram</a></p>
-                    <p><a href="https://x.com/quickdiscountgh">Facebook</a></p>
-                    <p><a href="https://www.tiktok.com/@quickdiscountgh">TikTok</a></p>
-                    <p><a href="/">YouTube</a></p>
+                    <p><a href="https://wa.me/+233598972791" target="_blank" rel="noreferrer">WhatsApp</a></p>  
+                    <p><a href="https://x.com/quickdiscountgh" target="_blank" rel="noreferrer">Twitter / X</a></p>                    
+                    <p><a href="https://www.instagram.com/quickdiscountgh?igsh=bGZpeWltb284NXJs" target="_blank" rel="noreferrer">Instagram</a></p>
+                    <p><a href="https://web.facebook.com/people/Quick-Discount-Gh/61558936265288/" target="_blank" rel="noreferrer">Facebook</a></p>
+                    <p><a href="https://www.tiktok.com/@quickdiscountgh" target="_blank" rel="noreferrer">TikTok</a></p>
+                    <p><a href="https://www.youtube.com/channel/UCD33fbhaEHeK5rgfC-eWveg" target="_blank" rel="noreferrer">YouTube</a></p>
                 </Main>
 
                 <RightSide>                 
