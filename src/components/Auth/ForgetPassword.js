@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { forgetPasswordAPI, setLoading, setLoadingMessage } from "../../actions";
 import { isEmailValid } from "../../utils/middleware";
+import { useNavigate } from "react-router-dom";
 
 
 const ForgetPassword = (props) => {
@@ -11,44 +12,51 @@ const ForgetPassword = (props) => {
     // ERRORS
     const [emailError, setEmailError] = useState("");
 
-    const validateEmail = (value) => { 
+    const navigate = useNavigate();
+
+    const validateEmail = (value) => {
         setEmail(value);
         let emailRes = isEmailValid(value);
         setEmailError(emailRes[1] ? emailRes[1] : "");
-    }; 
+    };
 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-    
+
         if (e.target !== e.currentTarget) {
-          return;
+            return;
         }
-    
+
         const payload = {
-          email: email
+            email: email
         };
-    
+
         props.forgetPassword(payload);
-      }
+    }
 
     useEffect(() => {
-    }, []);
+        if (props.loading_message) {
+            if (props.loading_message === "Check mail to reset password") {
+                navigate("/login");
+            }
+        }
+    }, [props.loading_message]);
 
     return (
         <Container>
-             <Section>
+            <Section>
                 <FormSection>
                     <Form>
-                        <p>Input email you registered with to send password reset link.</p>
-                        <form> 
+                        <h3>Forgot Password</h3>
+                        <form>
                             <div className="inputbox-wrap">
                                 <div className="inputbox">
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         value={email}
                                         onChange={(e) => validateEmail(e.target.value)}
-                                        required="required" 
+                                        required="required"
                                     />
                                     <span>Email</span>
                                 </div>
@@ -56,26 +64,23 @@ const ForgetPassword = (props) => {
                             </div>
 
                             <div className="inputbox">
-                                <input 
-                                    type="button" 
-                                    value="submit" 
+                                <input
+                                    type="button"
+                                    value="submit"
                                     onClick={handleSubmit}
                                     disabled={!email ? true : false}
                                 />
                             </div>
-                        </form>  
+                        </form>
                     </Form>
-
                 </FormSection>
             </Section>
-
         </Container>
     );
 };
 
 const Container = styled.div`
     padding: 0px;
-    margin-top: 50px;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -100,8 +105,9 @@ const Form = styled.div`
     border-radius: 10px;
     margin: 20px;
     /* border: 1px solid green; */
-    & p{
-        padding: 5px 0 10px 0;
+    & h3{
+        text-align: left;
+        margin-bottom: 30px;
     }
     & .inputbox-wrap {
         & p {
@@ -168,6 +174,7 @@ const mapStateToProps = (state) => {
     return {
         user: state.userState.user,
         errors: state.appState.errors,
+        loading_message: state.appState.loading_message,
     }
 };
 
@@ -177,7 +184,7 @@ const mapDispatchToProps = (dispatch) => ({
     closeLoader: () => {
         dispatch(setLoadingMessage(null));
         dispatch(setLoading(false));
-      },
+    },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ForgetPassword);

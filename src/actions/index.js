@@ -210,7 +210,6 @@ export function signUpAPI(data) {
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setErrors(data.errors));
-          dispatch(setLoading(false));
         }
       })
       .catch((errorMessage) => {
@@ -283,18 +282,12 @@ export function loginAPI(payload) {
               password: payload.password,
             })
             );
-            // dispatch(setUserToken(data.data.token));
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setErrors({ login: data.errors }));
-          dispatch(setLoading(false));
         }
       })
       .catch((errorMessage) => {
-        // --------TO BE REMOVED---------
-        // dispatch(setUser(userData));
-        // console.log("user_data ...");
-        // ------------------------------
         console.log(errorMessage);
       });
   };
@@ -359,11 +352,9 @@ export function userUpdateAPI(payload) {
           let user_data = data.user_data;
           user_data['organizer_detail'] = organizer_detail;
           dispatch(setUser(user_data));
-          dispatch(setLoading(false));
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setErrors({ login: data.errors }));
-          dispatch(setLoading(false));
         }
       })
       .catch((errorMessage) => {
@@ -537,12 +528,10 @@ export function deleteDiscountAPI(discount_id) {
           dispatch(getOrganizerDiscountsAPI(organizer_id));
         } else if (data.failed) {
           console.log(data.errors);
-          dispatch(setLoading(false));
         }
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
-        dispatch(setLoading(false));
       });
   };
 };
@@ -607,10 +596,6 @@ export function getDiscountsAPI() {
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
-        // --------TO BE REMOVED---------
-        // dispatch(setDiscounts(discountsData));
-        // console.log("Discounts ...");
-        // ------------------------------
         dispatch(setLoading(false));
       });
   };
@@ -1342,7 +1327,7 @@ export function forgetPasswordAPI(payload) {
     dispatch(setLoading(true));
     dispatch(setErrors(null));
 
-    const url = `${BASE_URL}/users/forgetpassword/`;
+    const url = `${BASE_URL}/users/password-reset/`;
 
     fetch(url, {
       method: "POST",
@@ -1353,21 +1338,15 @@ export function forgetPasswordAPI(payload) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("login data ", data);        
+        console.log("reset password data ", data);        
         if (data.success) {
-          dispatch(setUser(data.user_data));
-          console.log("user login email ", data.user_data.email);
-        } else if (data.failed) {
-          console.log(data.errors);
-          dispatch(setErrors({ forget_password: data.errors }));
-          dispatch(setLoading(false));
+          dispatch(setLoadingMessage("Check mail to reset password"));
+        } else if (data.error) {
+          console.log(data.error);
+          dispatch(setLoadingMessage(data.error));
         }
       })
       .catch((errorMessage) => {
-        // --------TO BE REMOVED---------
-        // dispatch(setUser(userData));
-        // console.log("Forget password failed ...");
-        // ------------------------------
         console.log(errorMessage);
       });
   };

@@ -170,7 +170,7 @@ const DiscountForm = (props) => {
   // UseEffect to set form entries 
   useEffect(() => {
     if (props.categories) {
-      setAllCategories(props.categories.results);
+      setAllCategories(props.categories);
     } else {
       props.getCategories();
     };
@@ -1147,6 +1147,7 @@ const FormInputs = styled.div`
   }
   select#categories {
     height: fit-content;
+    /* color: #000; */
   }
   textarea {
     width: 100%;

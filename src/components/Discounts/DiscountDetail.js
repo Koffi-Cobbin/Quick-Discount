@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import parse from 'html-react-parser';
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
@@ -18,18 +19,22 @@ import CarouselFlex from "../Shared/CarouselFlex";
 import DiscountCard from "./DiscountCard";
 import { formatDate } from "../../utils/middleware";
 import { getDiscountMediaAPI, getDiscountReviewsAPI, isUserFollowerAPI, setUserIsFollower } from "../../actions";
+import { BASE_URL } from "../../utils/constants";
 
 
 const DiscountDetail = (props) => {
     let { discountId } = useParams();
     const [discount, setDiscount] = useState();
     const [readMore,setReadMore] = useState(false);
+    const [showReadMore,setShowReadMore] = useState(false);
     const [organizerDiscounts, setOrganizerDiscounts] = useState();
     const [recomendedDiscounts, setRecomendedDiscounts] = useState();
     const [showPopup, setShowPopup] = useState(false);
     const [play, setPlay] = useState(false);
 
     const linkName = readMore ? 'Read Less':'Read More'
+
+    const navigate = useNavigate();
 
     // Other discounts from organizer: filter all discounts
     const getOrganizerDiscounts = () => {
@@ -64,6 +69,13 @@ const DiscountDetail = (props) => {
         } else{
             setRecomendedDiscounts(null);
         }        
+      };
+
+
+    //   Check if description is overflowing
+    const isOverflown = () => {
+        let element = document.getElementById("discount-description");
+        return setShowReadMore(element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth);
       };
 
     
@@ -118,7 +130,7 @@ const DiscountDetail = (props) => {
         if (!recomendedDiscounts && discount){
             getRecomendedDiscounts();
             console.log("Getting Recomended Discounts");
-        };        
+        };      
         
     }, [discount]); // 
 
@@ -151,8 +163,9 @@ const DiscountDetail = (props) => {
 
     // follow organizer
     const followOrganizerHandler = () => {
-        // send post request to discounts/organizer/followers/add/
-        axios.post('/discounts/organizer/followers/add/', {
+        const searchUrl = `${BASE_URL}/discounts/organizer/followers/add/`;
+
+        axios.post(searchUrl, {
             user: props.user,
             organizer: discount.organizer
             })
@@ -168,8 +181,9 @@ const DiscountDetail = (props) => {
 
     // unfollow organizer
     const unfollowOrganizerHandler = () => {
-        // send delete request to discounts/organizer/followers/delete/<int:pk>/
-        axios.delete(`/discounts/organizer/followers/delete/${props.is_follower.id}/`, {
+        const searchUrl = `${BASE_URL}/discounts/organizer/followers/delete/${props.is_follower.id}/`;
+
+        axios.delete(searchUrl, {
             data: {
                 user: props.user,
                 organizer: discount.organizer
@@ -190,9 +204,11 @@ const DiscountDetail = (props) => {
         if (props.is_follower) {
             unfollowOrganizerHandler();
             } 
-        else {
-            followOrganizerHandler();
-            }
+        else if (props.user) {
+            followOrganizerHandler();            
+        } else {
+            navigate(`/login`);
+        }
     };
 
 
@@ -208,6 +224,8 @@ const DiscountDetail = (props) => {
             else {
                 setPlay(false);
                 }
+            // Is description overflowing?
+            isOverflown();
         };
     
         window.addEventListener("scroll", handleScroll);
@@ -258,7 +276,9 @@ const DiscountDetail = (props) => {
                         <div id="discount-description">
                             {parse(discount.description)}   
                         </div>
+                        {showReadMore &&
                         <ReadMoreOrLess onClick={()=>{readMoreHandler("discount-description")}}>{linkName}</ReadMoreOrLess>
+                        }
                     </Description>
                 </DiscountInfo>
 
@@ -472,6 +492,7 @@ const Container = styled.div`
   color: rgba(0, 0, 0, 0.6);
   text-align: left;
   background: #fff;
+  /* border: 1px solid red; */
   /* font-family: Inter, 'Roboto', sans-serif; */
 
   @media (min-width: 768px) {
@@ -512,6 +533,7 @@ const VideoWrap = styled.div`
     display: block;
     position: relative;
     background-color: #f9fafb;
+    /* border: 1px solid blue; */
 `;
 
 
@@ -519,8 +541,12 @@ const DiscountImageWrapper = styled.div`
     width: 100%;
     height: 50vh;
     /* background: black; */
-    margin-top: 80px; /* -7 */
+    /* border: 1px solid black; */
+    margin-top: 80px;
     position: relative;
+    @media (max-width: 768px) {
+        margin-top: 60px; 
+    }
 `;
 
 const ImageOverlay = styled.div`
@@ -680,9 +706,9 @@ const Title = styled.h1`
     align-items: baseline;
     /* justify-content: space-between; */
 
-  @media (max-width: 768px) {
-    font-size: 20px; 
-    }
+  /* @media (max-width: 768px) {
+    font-size: 24px; 
+    } */
 `;
 
 const DateTimeWrapper = styled.div`
@@ -926,7 +952,7 @@ const Description = styled.div`
         /* border: 1px solid black; */
     }
     @media (max-width: 530px) {
-    font-size: 13px;
+    font-size: 16px;
     padding: 5px 0 5px 0;
   }
 `;
@@ -1122,6 +1148,7 @@ const GallerySection = styled.div`
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   padding: 20px 10px;
+  position: relative;
   /* border: 1px solid red; */
 
   &::-webkit-scrollbar {

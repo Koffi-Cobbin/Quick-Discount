@@ -23,7 +23,6 @@ const Dropzone = (props) => {
 
   useEffect(() => {
     setBgImage(props.bgImage);
-    // "tboqq6nb0yjvrhqntdqe.jpg"
     }, [props.bgImage]);
 
   return (

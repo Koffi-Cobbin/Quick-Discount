@@ -157,7 +157,7 @@ const Login = (props) => {
                                     disabled={!((password && email) || (password && contact)) ? true : false}
                                 />
                             </div>
-                            <ForgetPassword><NavLink to="/forgetpassword">Forget password?</NavLink></ForgetPassword>
+                            <ForgetPassword><NavLink to="/forgetpassword">Forgot password?</NavLink></ForgetPassword>
                         </form>
                         <hr/>
                         <CreateAccount>New here?<NavLink to="/signup">Create account </NavLink></CreateAccount>  

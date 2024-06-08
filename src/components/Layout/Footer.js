@@ -80,7 +80,7 @@ const Footer = (props) => {
                     </div>
                     <p>Ablekuma-Pokuase, Accra</p>
                     <p>Greater Accra Region</p>
-                    <p>Call Us: +233559553056</p>
+                    <p>Call Us: <a href="tel:+233598972791">+233598972791</a></p>
                     <p>or <a href="mailto:quickdiscountgh@gmail.com">Leave a mail</a></p>
                 </RightSide>
             </Layout>
