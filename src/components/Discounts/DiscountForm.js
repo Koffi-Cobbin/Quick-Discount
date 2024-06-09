@@ -4,7 +4,7 @@ import parse from 'html-react-parser';
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { createId } from "@paralleldrive/cuid2";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Editor from "./Features/Editor";
 import Dropzone from "./Features/Dropzone";
@@ -24,6 +24,7 @@ import {
   getDiscountPackagesAPI,
   deleteDiscountMediaAPI,
   deleteDiscountPackageAPI,
+  setPreviousUrl
 } from "../../actions";
 import { packageOptionsData } from "../Assets/data";
 import Payment from "../Payment/Payment";
@@ -82,6 +83,7 @@ const DiscountForm = (props) => {
   // const package_options = ["daily", "weekly", "monthly"];
 
   const navigate = useNavigate();
+  const current_url = useLocation();
 
   const scrollUp = () => {
     const element = document.getElementById("top");
@@ -166,6 +168,13 @@ const DiscountForm = (props) => {
       setReadDiscountFlyer(reader.result);
     };
   };
+
+
+  // set current url as url to return to when action triggers login
+  useEffect(() => {
+    props.setUrl(current_url.pathname);
+  }, []);
+
 
   // UseEffect to set form entries 
   useEffect(() => {
@@ -1275,6 +1284,7 @@ const mapDispatchToProps = (dispatch) => ({
   getDiscountMedia: (discount_id) => {dispatch(getDiscountMediaAPI(discount_id))},
   deleteDiscountPackage: (package_id) => {dispatch(deleteDiscountPackageAPI(package_id))},
   deleteDiscountMedia: (media_id) => {dispatch(deleteDiscountMediaAPI(media_id))},
+  setUrl: (url) => dispatch(setPreviousUrl(url)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DiscountForm);

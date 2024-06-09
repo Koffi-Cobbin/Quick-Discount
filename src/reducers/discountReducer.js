@@ -6,7 +6,8 @@ import { SET_DISCOUNTS,
     SET_DISCOUNT_PACKAGES,
     SET_DISCOUNT_MEDIA,
     SET_DISCOUNT_REVIEWS,
-    SET_SEARCH_RESULT
+    SET_SEARCH_RESULT,
+    USER_DISCOUNT_LIKE
  } from "../actions/actionType";
 
 export const initState = {
@@ -27,6 +28,8 @@ export const initState = {
     JSON.parse(sessionStorage.getItem('reviews')) : null, 
     search_result: sessionStorage.getItem('search_result') ?
     JSON.parse(sessionStorage.getItem('search_result')) : [],  
+    user_discount_like: sessionStorage.getItem('user_discount_like') ?
+    JSON.parse(sessionStorage.getItem('user_discount_like')) : null
 }
 
 const discountReducer = (state = initState, action) => {
@@ -87,6 +90,13 @@ const discountReducer = (state = initState, action) => {
                 ...state,
                 wishlist: action.wishlist
             };
+
+        case USER_DISCOUNT_LIKE:
+            sessionStorage.setItem('user_discount_like', JSON.stringify(action.user_discount_like));
+            return {
+                ...state,
+                user_discount_like: action.user_discount_like
+                };
 
         case SET_SEARCH_RESULT:
             sessionStorage.setItem('search_result', JSON.stringify(action.search_result));

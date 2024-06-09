@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import parse from 'html-react-parser';
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
@@ -18,7 +18,16 @@ import StarRating from "./StarRating";
 import CarouselFlex from "../Shared/CarouselFlex";
 import DiscountCard from "./DiscountCard";
 import { formatDate } from "../../utils/middleware";
-import { getDiscountMediaAPI, getDiscountReviewsAPI, isUserFollowerAPI, setUserIsFollower } from "../../actions";
+import { 
+    getDiscountsAPI,
+    getDiscountMediaAPI, 
+    getDiscountReviewsAPI, 
+    isUserFollowerAPI, 
+    setUserIsFollower,
+    isDiscountLikedByUserAPI,
+    setUserDiscountLike,
+    setPreviousUrl
+} from "../../actions";
 import { BASE_URL } from "../../utils/constants";
 
 
@@ -31,10 +40,14 @@ const DiscountDetail = (props) => {
     const [recomendedDiscounts, setRecomendedDiscounts] = useState();
     const [showPopup, setShowPopup] = useState(false);
     const [play, setPlay] = useState(false);
+    const [following, setFollowing] = useState(false);
+    const [liked, setLiked] = useState(false);
+    // const [disableLike, setDisableLike] = useState(false);
 
     const linkName = readMore ? 'Read Less':'Read More'
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Other discounts from organizer: filter all discounts
     const getOrganizerDiscounts = () => {
@@ -83,20 +96,29 @@ const DiscountDetail = (props) => {
     useEffect(() => {
         // Get the current discount
         const getDiscount = () => { 
-            let discount = props.discounts.results.find(obj => obj.id === +discountId);
-            console.log("Current Discount", discount);
-            setDiscount(discount);
+            if (!props.discounts.results){
+                props.getDiscounts();
+            }
+            else {
+                let current_discount = props.discounts.results.find(obj => obj.id === +discountId);
+                console.log("Current Discount", current_discount);
+                setDiscount(current_discount);
 
-            // Check if user follows organizer of current discount
-            if (props.user){
-                props.isUserFollowing(discount.organizer.id);
-            };
+                if (current_discount && props.authToken){
+                    // Check if user follows organizer of current discount
+                    props.isUserFollowing(current_discount.organizer.id);
+                    props.isDiscountLikedByUser(current_discount.id)
+                }                
+                
+                // set current url as url to return to when action triggers login
+                props.setUrl(location.pathname);
+            }
           }; 
         
-        if (!discount || (discount && discount.id !== +discountId)){
+        if (!discount || (discount && discount.id !== +discountId) || (discount && props.authToken)){
             getDiscount();            
         };
-        }, [discount]);
+        }, [discountId, props.discounts, props.authToken]);
 
     
     //   GET DISCOUNT REVIEWS
@@ -134,6 +156,20 @@ const DiscountDetail = (props) => {
         
     }, [discount]); // 
 
+
+    // SET FOLLOWING
+    useEffect(() => {
+        setFollowing(props.is_follower);
+        }, [props.is_follower]);
+
+    // SET liked on discount
+    useEffect(() => {
+        if (props.user_discount_like){
+            setLiked(true);
+            props.set_user_discount_like(null);
+        }
+        }, [props.user_discount_like]);
+
     const getDiscountURL = () => {
         let url = window.location.href;
         navigator.clipboard.writeText(url);
@@ -164,14 +200,21 @@ const DiscountDetail = (props) => {
     // follow organizer
     const followOrganizerHandler = () => {
         const searchUrl = `${BASE_URL}/discounts/organizer/followers/add/`;
+        console.log("Bearer ", props.authToken);
 
         axios.post(searchUrl, {
-            user: props.user,
-            organizer: discount.organizer
+                organizer_pk: discount.organizer.id
+            },
+            { headers: {
+                'Accept': "application/json", 
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${props.authToken}`,
+              }
             })
             .then(response => {
-                if (response.data.success) {
-                    setUserIsFollower(response.data);
+                if (response.data) {
+                    props.isFollower(response.data);
+                    console.log("Follow response ", response.data);
                 }
             })
             .catch(error => {
@@ -184,14 +227,15 @@ const DiscountDetail = (props) => {
         const searchUrl = `${BASE_URL}/discounts/organizer/followers/delete/${props.is_follower.id}/`;
 
         axios.delete(searchUrl, {
-            data: {
-                user: props.user,
-                organizer: discount.organizer
+                headers: {
+                    Authorization: `Bearer ${props.authToken}`,
                 }
             })
             .then(response => {
-                if (response.data.success) {
-                    setUserIsFollower(response.data);
+                // if response status is 204
+                if (response.status === 204) {
+                    console.log("Unfollow response ", response.data);
+                    props.isFollower(null);
                     }
                 })
             .catch(error => {
@@ -202,10 +246,72 @@ const DiscountDetail = (props) => {
     // handle follow
     const handleFollow = async () => {
         if (props.is_follower) {
+            setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers-1}});
             unfollowOrganizerHandler();
             } 
         else if (props.user) {
+            setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers+1}});
             followOrganizerHandler();            
+        } else {
+            navigate(`/login`);
+        }
+    };
+
+
+    // like discount
+    const likeDiscount = () => {
+        const searchUrl = `${BASE_URL}/discounts/likes/add/`;
+        axios.post(searchUrl, {
+                discount_id: discount.id
+            },
+            { headers: {
+                'Accept': "application/json", 
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${props.authToken}`,
+            }
+            })
+            .then(response => {
+                if (response.data) {
+                    setLiked(true);
+                    console.log("Like response ", response.data);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                });
+            };
+
+
+    // dislike discount (TODO: Exclude this function to allow for only likes)
+    const dislikeDiscount = () => {
+        const searchUrl = `${BASE_URL}/discounts/likes/delete/${liked.id}/`;
+        axios.delete(searchUrl, {
+            headers: {
+                Authorization: `Bearer ${props.authToken}`,
+            }
+        })
+        .then(response => {
+            if (response.status === 204) {
+                console.log("Dislike response ", response.data);
+                setLiked(false);
+                // props.set_user_discount_like(null);
+                }
+            })
+        .catch(error => {
+            console.log(error);
+            });
+        };
+
+
+    // handle like
+    const handleLike = async () => {
+        // if (liked) {
+        //     setDiscount({...discount, likes: discount.likes-1});
+        //     dislikeDiscount();
+        //     } 
+        if (!liked && props.user) {
+            setDiscount({...discount, likes: discount.likes+1});
+            likeDiscount();            
         } else {
             navigate(`/login`);
         }
@@ -253,7 +359,7 @@ const DiscountDetail = (props) => {
                 <DiscountInfo>
                     <Title>
                         <b>{ discount.title} &nbsp;</b>                        
-                        <Like>
+                        <Like disabled={liked} onClick={handleLike}>
                             <img src="/images/icons/like.svg" alt=""/>
                             <span>{discount.likes}</span>
                         </Like>
@@ -357,8 +463,9 @@ const DiscountDetail = (props) => {
                             </OrganiserProfile>
                             <div>
                                 <h4>{discount.organizer.name}</h4>
-                                <Followers>
-                                    <span>1.2K</span> &nbsp;Followers
+                                <Followers> 
+                                    <span>{discount.organizer.followers}</span> &nbsp; 
+                                    {discount.organizer.followers === 1 ? 'Follower' : 'Followers'}
                                 </Followers>
                             </div>
                         </Wrapper>                        
@@ -367,10 +474,10 @@ const DiscountDetail = (props) => {
                             <p>{discount.organizer.description}</p>
                         </OrganiserInfo>
                         <OrganiserButtons>   
-                            {props.is_follower ?                    
-                            <FollowButton href="#" onClick={handleFollow}>Unfollow</FollowButton>
-                            :
-                            <FollowButton href="#" onClick={handleFollow}>Follow</FollowButton>
+                            {following ?                    
+                                <FollowButton onClick={handleFollow}>Unfollow</FollowButton>
+                                :
+                                <FollowButton onClick={handleFollow}>Follow</FollowButton>
                             }
                         </OrganiserButtons>
                     </AboutOrganiser>
@@ -577,9 +684,9 @@ const DiscountImage = styled.div`
 const ShareDiscount = styled.button`
     position: absolute;
     z-index: 1;
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.7);
     top: 84%;
-    left: 85%;
+    right: 2%;
     border: none;
     outline: none;
     padding: 10px;
@@ -920,17 +1027,18 @@ const Packageed = styled.p``;
 
 const Location = styled.p``;
 
-const Like = styled.p`
+const Like = styled.button`
   padding: 2px;
-  height: 20px;
+  height: 25px;
   display: flex;
   align-items: center;
   color: #fa8128;
   font-size: 14px;
+  cursor: pointer;
 
   img {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     margin-right: 8px;
     padding: 3px;
     border: none;
@@ -1045,9 +1153,8 @@ const OrganiserButtons = styled.div`
 `;
 
 
-const FollowButton = styled.a`
+const FollowButton = styled.button`
     display: inline-block;
-    text-decoration: none;
     text-align: center;
     width: 100px;
     padding: 5px 0;
@@ -1162,16 +1269,23 @@ const mapStateToProps = (state) => {
         user: state.userState.user,
         wishlist: state.discountState.wishlist,
         discounts: state.discountState.discounts,
+        user_discount_like: state.discountState.user_discount_like,
         discount_media: state.discountState.discount_media,
         reviews: state.discountState.reviews,
-        is_follower: state.userState.is_follower
+        is_follower: state.userState.is_follower,
+        authToken: state.userState.token ? state.userState.token.access : null
     }
 };
   
 const mapDispatchToProps = (dispatch) => ({
+    getDiscounts: () => {dispatch(getDiscountsAPI())},
     getDiscountMedia: (discount_id) => {dispatch(getDiscountMediaAPI(discount_id))},
     getDiscountReviews: (discount_id) => {dispatch(getDiscountReviewsAPI(discount_id))},
     isUserFollowing: (organizer_id) => {dispatch(isUserFollowerAPI(organizer_id))},
+    isFollower: (payload) => {dispatch(setUserIsFollower(payload))},
+    isDiscountLikedByUser: (discount_id) => {dispatch(isDiscountLikedByUserAPI(discount_id))},
+    setUrl: (url) => dispatch(setPreviousUrl(url)), 
+    set_user_discount_like: (payload) => dispatch(setUserDiscountLike(payload)), 
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DiscountDetail);

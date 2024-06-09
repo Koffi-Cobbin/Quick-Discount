@@ -58,7 +58,7 @@ const Footer = (props) => {
                     <h3><b>Sitemap</b></h3>
                     <p><a href="/">Home</a></p>                    
                     <p><a href="/discounts">Discounts</a></p>
-                    <p><a href="/post">Post</a></p>                   
+                    <p><a href="/discounts/add">Post</a></p>                   
                     <p><a href="/help">Help</a></p>
                     <p><a href="/login">Login</a></p>
                     <p><a href="/signup">Sign up</a></p>

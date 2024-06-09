@@ -24,7 +24,8 @@ import {
   SET_CART_ITEMS,
   SET_ANALYTICS,
   SET_WISH_LIST,
-  SET_SEARCH_RESULT
+  SET_SEARCH_RESULT,
+  USER_DISCOUNT_LIKE
 } from "./actionType";
 import db from "../firebase";
 import { BASE_URL } from "../utils/constants";
@@ -60,6 +61,11 @@ export const setUserNotifications = (payload) => ({
 export const setUserIsFollower = (payload) => ({
   type: SET_USER_IS_FOLLOWER,
   is_follower: payload,
+});
+
+export const setUserDiscountLike = (payload) => ({
+  type: USER_DISCOUNT_LIKE,
+  user_discount_like: payload,
 });
 
 export const setPayment = (payload) => ({
@@ -1293,7 +1299,7 @@ export function getAnalyticsAPI(organizer_id) {
 
 export function isUserFollowerAPI(organizer_id) {
   return (dispatch, getState) => {
-    const url = `${BASE_URL}/discounts/organizer/followers/verify/-1/${organizer_id}/`;    
+    const url = `${BASE_URL}/discounts/organizer/followers/verify/0/${organizer_id}/`;    
     const state = getState();
     const authToken = state.userState.token.access;
 
@@ -1312,6 +1318,39 @@ export function isUserFollowerAPI(organizer_id) {
       .then((data) => {
           console.log("Is User Following? ... ", data);
           dispatch(setUserIsFollower(data));
+      })
+      .catch((errorMessage) => {
+        console.log(errorMessage);
+      });
+  };
+}
+
+
+
+// --------------------------------------------------------------
+// ----------------- IS DISCOUNT LIKED BY USER ------------------
+
+export function isDiscountLikedByUserAPI(discount_id) {
+  return (dispatch, getState) => {
+    const url = `${BASE_URL}/discounts/likes/verify/0/${discount_id}/`;    
+    const state = getState();
+    const authToken = state.userState.token.access;
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json", 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      }
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        else return response.json();
+      })
+      .then((data) => {
+          console.log("Is Discount liked by user? ... ", data);
+          dispatch(setUserDiscountLike(data));
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
