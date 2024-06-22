@@ -13,7 +13,9 @@ const Navbar = (props) => {
       };
 
     const toggleDropdown = (id) => {
-        document.getElementById(id).classList.toggle("show current");
+        let elem = document.getElementById(id);
+        elem.classList.toggle("show");
+        elem.classList.toggle("current");
     };
 
     // Add KeyDown event to search input
@@ -85,7 +87,7 @@ const Navbar = (props) => {
                         </NavList>
 
                         <NavList className="dropdown">
-                            <NavLink onClick={() => toggleDropdown("events-drpdwn")} >
+                            <NavLink to="/discounts" onClick={() => toggleDropdown("events-drpdwn")} >
                                 <span>
                                     Discounts &nbsp;
                                     <img src="/images/icons/down-arrow-w.svg" alt="" />
@@ -102,7 +104,7 @@ const Navbar = (props) => {
                         </NavList>
 
                         <NavList className="dropdown">
-                            <NavLink onClick={() => toggleDropdown("help-drpdwn")}>
+                            <NavLink to="/help" onClick={() => toggleDropdown("help-drpdwn")}>
                                 <span>
                                     Help &nbsp;
                                     <img src="/images/icons/down-arrow-w.svg" alt="" />

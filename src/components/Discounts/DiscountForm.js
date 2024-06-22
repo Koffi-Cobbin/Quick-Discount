@@ -1154,6 +1154,9 @@ const FormInputs = styled.div`
     padding: 0 12px;
     margin-bottom: 20px;
   }
+  /* select[multiple]:focus option:checked {
+    background: red linear-gradient(0deg, red 0%, red 100%);
+  } */
   select#categories {
     height: fit-content;
     /* color: #000; */

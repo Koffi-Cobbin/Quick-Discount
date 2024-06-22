@@ -65,9 +65,9 @@ const DiscountCard = (props) => {
 
 
           <SocialActions>
-            <Left><b>{props.discount.total_rating}</b></Left>
+            <Left><b>{props.discount.likes}</b></Left>
             <Right>
-              <StarRating rating={props.discount.likes} showRate={true}/>
+              <StarRating rating={props.discount.total_rating} showRate={true}/>
             </Right>
             {/* <AddToWishlist type="icon" discount={props.discount} /> */}
         </SocialActions>

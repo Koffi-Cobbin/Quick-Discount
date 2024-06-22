@@ -14,6 +14,9 @@ import { getDiscountsAPI } from "../../actions";
 
 const Home = (props) => {
   const [categories, setCategories] = useState();
+  // top discounts
+  const [topDiscounts, setTopDiscounts] = useState();
+
 
   useEffect(() => {
     props.getDiscounts();
@@ -40,6 +43,10 @@ const Home = (props) => {
       let allCategories = [...categories_set];
       console.log("All categories ", allCategories);
       setCategories(allCategories);
+
+      // a function to get all discounts with most likes as topDiscounts
+      const top_discounts = props.discounts.results.sort((a, b) => b.likes - a.likes).slice(0, 4);
+      setTopDiscounts(top_discounts);
     };
   }, [props.discounts]);
 
@@ -51,31 +58,6 @@ const Home = (props) => {
     }
   };
 
-  const discountCardStyles = {
-    card: { margin: "0 auto", width: "80%" },
-    bgImage: { height: "120px" },
-    eventInfo: { paddingMd: "20px", height: "115px" },
-    title: { fontSizeSm: "13px", fontSizeMd: "15px", fontSizeL: "18px" },
-    fontSizes: { fontSizeSm: "12px", fontSizeMd: "12px", fontSizeL: "15.5px" },
-    dateTime: {
-      md: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      },
-      xsm: {},
-    },
-    time: {},
-    eventStatus: {},
-    locationStyle: {},
-    attendeesSlots: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    slots: {},
-  };
-
   return (
     <Container>
       <>
@@ -83,9 +65,8 @@ const Home = (props) => {
       </>
 
       <Content>
-        {props.discounts.results && 
-          <TopDiscounts discounts={props.discounts.results.slice(0,4)} />}     
-
+        {topDiscounts && 
+          <TopDiscounts discounts={topDiscounts} />}     
 
         <Section>
           <LeftButton target="filter" pos='0'/>
@@ -136,13 +117,17 @@ const Home = (props) => {
                       type="category"
                       divId={category.toLowerCase()}
                       className="category-carousel-section"
-                    >                      
-                      {props.discounts.results.slice(0,4).map((discount, key) => (
+                    >           
+                      {/* get discounts that belong to current category  */}
+                      {props.discounts.results.filter(
+                      (discount) =>
+                        discount.categories.map(cat => cat.name).includes(category)
+                      ).slice(0,4).map((discount, key) => (
                         <DiscountCard
-                          key={key}
-                          discount={discount}
+                        key={key}
+                        discount={discount}
                         />
-                      ))}
+                        ))}
                     </CarouselFlex>
                   )}
                 </CategorySection>

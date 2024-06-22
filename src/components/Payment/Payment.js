@@ -8,7 +8,7 @@ import Row from "../UI/Row";
 import Column from "../UI/Column";
 import Paystack from "./Paystack";
 import CartContext from "../../store/cart-context";
-import { checkoutAPI, setUserOrder, setPayment } from "../../actions";
+import { checkoutAPI, setUserOrder } from "../../actions";
 import { isContactValid, isEmailValid } from "../../utils/middleware";
 
 
@@ -238,7 +238,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
   checkout: (payload) => dispatch(checkoutAPI(payload)),
   clearOrder: () => dispatch(setUserOrder(null)),
-  clearPayment: () => dispatch(setPayment(null)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Payment);

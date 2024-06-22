@@ -490,6 +490,9 @@ const DiscountDetail = (props) => {
                     <ReactPlayer 
                         width={"100%"} 
                         url={discount.video_url} 
+                        controls={true}
+                        muted={true}
+                        volume={0.2}
                         playing={play}/>
                 </VideoWrap>
             </SectionWrapper>

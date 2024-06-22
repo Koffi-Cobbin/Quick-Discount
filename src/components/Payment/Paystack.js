@@ -3,8 +3,9 @@ import { PaystackButton } from "react-paystack";
 import styled from "styled-components";
 import { useState, useContext, useEffect } from "react";
 import { connect } from "react-redux";
-import { verifyPaymentAPI } from "../../actions";
+import { verifyPaymentAPI, setPayment } from "../../actions";
 import { useNavigate } from "react-router-dom";
+
 
 const Paystack = (props) => {
   // Paystack configuration
@@ -36,6 +37,7 @@ const Paystack = (props) => {
   useEffect(() => {
     // navigate to /dashboard if payment is made
     if (props.payment.paid) {
+      props.clearPayment();
       navigate("/dashboard");
       };
   }, [props.payment]);
@@ -95,6 +97,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
   verifyPayment: (payload) => dispatch(verifyPaymentAPI(payload)),
+  clearPayment: () => dispatch(setPayment(null)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Paystack);
