@@ -11,7 +11,9 @@ export const EMAIL_REG_EXP       = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
 export const PHONE_VALIDATION_API_URL = 'https://phonevalidation.abstractapi.com/v1/'
 export const PHONE_VALIDATION_API_KEY = '002f7a9d4a47437b857b0f0429466817';
 
+export const STAFF_EMAIL = "eugenenaasante@gmail.com";
+
 
 // "http://localhost:5000";
-export const BASE_URL = "https://kofficobbin.pythonanywhere.com";
-// "https://kofficobbin.pythonanywhere.com";
+export const BASE_URL = "https://quickdiscount.pythonanywhere.com";
+// "https://quickdiscount.pythonanywhere.com";

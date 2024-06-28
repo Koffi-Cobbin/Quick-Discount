@@ -28,7 +28,7 @@ import {
   USER_DISCOUNT_LIKE
 } from "./actionType";
 import db from "../firebase";
-import { BASE_URL } from "../utils/constants";
+import { BASE_URL, STAFF_EMAIL } from "../utils/constants";
 import * as messages from "../utils/messages";
 import { userData, discountsData, discountReviewsData, categoriesData, discountMediaData } from "../components/Assets/data";
 
@@ -434,7 +434,7 @@ export function createDiscountAPI(formData) {
           
           dispatch(
             sendMail({            
-              "toEmail": "mytestmaillab@gmail.com",
+              "toEmail": `${STAFF_EMAIL}`,
               "fromEmail": JSON.parse(formData.get('payload'))['organizer_data']['email'],
               "username": JSON.parse(formData.get('payload'))['organizer_data']['name'],
               "subject": "Discount Registration", 

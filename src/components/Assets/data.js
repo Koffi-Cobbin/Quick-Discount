@@ -112,16 +112,16 @@ export const discountsData = {
       title: "Valentine Sale",
       percentage_discount: "15% on all products",
       description: `
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-            Duis ut mollis lacus, cursus blandit purus. Integer nec sollicitudin sapien. 
-            Cras odio mi, mollis vel porttitor id, iaculis nec sapien. Cras aliquet risus nibh.
-            Donec hendrerit augue id lobortis pharetra. Vivamus tempus commodo augue. 
-            Suspendisse volutpat urna quis rhoncus semper. Fusce vel tellus faucibus, 
-            lobortis diam in, facilisis leo. Curabitur in arcu ac mauris tempor luctus non 
-            vel magna. Suspendisse commodo pharetra faucibus. Vestibulum pharetra eros id 
-            lorem interdum, eu efficitur quam iaculis. Mauris eros sapien, dictum vitae sem in, 
-            ultricies pellentesque nibh. Donec eu nulla tellus. Donec semper quis mauris nec 
-            dapibus. Duis placerat elit vel ante rhoncus, vel porttitor purus accumsan.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+        Duis ut mollis lacus, cursus blandit purus. Integer nec sollicitudin sapien. 
+        Cras odio mi, mollis vel porttitor id, iaculis nec sapien. Cras aliquet risus nibh.
+        Donec hendrerit augue id lobortis pharetra. Vivamus tempus commodo augue. 
+        Suspendisse volutpat urna quis rhoncus semper. Fusce vel tellus faucibus, 
+        lobortis diam in, facilisis leo. Curabitur in arcu ac mauris tempor luctus non 
+        vel magna. Suspendisse commodo pharetra faucibus. Vestibulum pharetra eros id 
+        lorem interdum, eu efficitur quam iaculis. Mauris eros sapien, dictum vitae sem in, 
+        ultricies pellentesque nibh. Donec eu nulla tellus. Donec semper quis mauris nec 
+        dapibus. Duis placerat elit vel ante rhoncus, vel porttitor purus accumsan.
         `,
       location: "Furniture City, Spintex",
       start_date: "2024-02-11",
