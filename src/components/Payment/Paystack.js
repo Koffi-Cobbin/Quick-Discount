@@ -1,21 +1,27 @@
 import React from "react";
 import { PaystackButton } from "react-paystack";
 import styled from "styled-components";
-import { useState, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { connect } from "react-redux";
-import { verifyPaymentAPI, setPayment } from "../../actions";
 import { useNavigate } from "react-router-dom";
+import { verifyPaymentAPI, 
+  setLoadingMessage, 
+  setCreateDiscountStatus,
+  setLoading,
+  setPayment
+ } from "../../actions";
+import * as messages from "../../utils/messages";
 
 
 const Paystack = (props) => {
+  const navigate = useNavigate();
+
   // Paystack configuration
   const publicKey = props.payment.public_key;
   const amount = `${parseFloat(props.payment.amount).toFixed(2) * 100}`;
   const email = props.payment.email;
   const currency = "GHS"; // Currency code
   const reference = props.payment.ref_code;
-
-  const navigate = useNavigate();
 
   const extraData = {
     firstName: "John",
@@ -35,11 +41,18 @@ const Paystack = (props) => {
   };
 
   useEffect(() => {
-    // navigate to /dashboard if payment is made
     if (props.payment.paid) {
+      props.showLoader();
+      props.showSuccessMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE);
+      console.log("PAYMENT VERIFIED");
+      
+      // clear payment from local storage if payment is made to allow for adding new discounts.
       props.clearPayment();
-      navigate("/dashboard");
-      };
+
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 5000);   
+    };
   }, [props.payment]);
 
 
@@ -96,8 +109,11 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
+  showLoader: () => dispatch(setLoading(true)),
   verifyPayment: (payload) => dispatch(verifyPaymentAPI(payload)),
   clearPayment: () => dispatch(setPayment(null)),
+  showSuccessMessage: (message) => dispatch(setLoadingMessage(message)),
+  resetCreateDiscountStatus: () => dispatch(setCreateDiscountStatus(null)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Paystack);

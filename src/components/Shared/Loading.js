@@ -9,7 +9,7 @@ const Loading = (props) => {
     <>
         <Container>
           <Content>
-            <span className="close-popup" onClick={props.close}>&times;</span>
+            <span className="close-popup" onClick={() => props.close(props.loading_message)}>&times;</span>
             {props.loading_message ? (
               <>{props.loading_message}</>
               ) : (
@@ -87,7 +87,7 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  close: () => {
+  close: (loading_message=null) => {
     dispatch(setLoadingMessage(null));
     dispatch(setLoading(false));
   },

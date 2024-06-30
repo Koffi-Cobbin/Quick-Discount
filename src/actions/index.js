@@ -250,7 +250,7 @@ export const getUserTokenAPI = (payload) => (dispatch) => {
       if (wishlist && wishlist.length > 0){
         let wishlist_ids = wishlist.filter(discount => discount.id);
         dispatch(addToWishlistAPI({discount_ids: wishlist_ids}))
-      }
+      }      
       dispatch(getOrganizerAPI());
     })
     .catch((error) => {
@@ -321,9 +321,11 @@ export function sendMail(payload) {
       })
       .then((data) => {
         console.log("Mail Response ", data);
+        dispatch(setLoading(false));
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
+        dispatch(setLoading(false));
       });
   };
 }
@@ -426,7 +428,7 @@ export function createDiscountAPI(formData) {
       .then((data) => {
         if (data.success) {
           dispatch(setCreateDiscountStatus(true));
-          dispatch(setLoadingMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE));
+          // dispatch(setLoadingMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE));
           console.log("DISCOUNT Success mail message ", data.message);
           console.log("FormData ", formData);
           console.log("FormData ", formData.get('payload'));
@@ -1205,6 +1207,7 @@ export function getOrganizerAPI(organizer_id=null) {
         else{
           console.log("New organizer ", data);
           dispatch(setOrganizer(data));
+          dispatch(setLoading(false));
         }
       })
       .catch((errorMessage) => {

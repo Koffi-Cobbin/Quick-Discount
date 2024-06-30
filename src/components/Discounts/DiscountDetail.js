@@ -246,7 +246,8 @@ const DiscountDetail = (props) => {
     // handle follow
     const handleFollow = async () => {
         if (props.is_follower) {
-            setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers-1}});
+            setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers === 0 ?  0 : discount.organizer.followers - 1}});
+
             unfollowOrganizerHandler();
             } 
         else if (props.user) {
@@ -502,7 +503,7 @@ const DiscountDetail = (props) => {
             <SectionWrapper>
                 <DiscountGalleryTitle>Gallery</DiscountGalleryTitle>
                 <DiscountGallery>
-                    <GallerySection id="galery">
+                    <GallerySection id="gallery">
                         <Gallery photos={props.discount_media} type={null} />
                     </GallerySection>
                     <LeftButton target="gallery" pos="0" />

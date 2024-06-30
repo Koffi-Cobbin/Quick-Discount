@@ -1,12 +1,10 @@
-import React, {useRef} from "react";
+import React from "react";
 import styled from "styled-components";
-import parse from 'html-react-parser';
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { createId } from "@paralleldrive/cuid2";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import Editor from "./Features/Editor";
 import Dropzone from "./Features/Dropzone";
 import ImageGrid from "./Features/ImageGrid";
 import {
@@ -19,17 +17,13 @@ import {
   getCategoriesAPI, 
   createDiscountAPI,
   updateDiscountAPI,
-  setCreateDiscountStatus,
   getDiscountMediaAPI, 
   getDiscountPackagesAPI,
   deleteDiscountMediaAPI,
   deleteDiscountPackageAPI,
   setPreviousUrl
 } from "../../actions";
-import { packageOptionsData } from "../Assets/data";
 import Payment from "../Payment/Payment";
-// import CreateDiscountSuccess from "./CreateDiscountSuccess";
-// import CreateDiscountFailed from "./CreateDiscountFailed";
 
 
 const DiscountForm = (props) => {
@@ -77,8 +71,6 @@ const DiscountForm = (props) => {
   const [socialMediaHandlesURLError, setSocialMediaHandlesURLError] = useState(
     {whatsappError: "", facebookError: "", instagramError: "", twitterError: ""}
   );
-
-  // const priceInputRef = useRef(null);
 
   // const package_options = ["daily", "weekly", "monthly"];
 
@@ -238,13 +230,6 @@ const DiscountForm = (props) => {
         ...acceptedFiles,
       ]);
     };
-
-    // Package options
-    // if (packageOptionsData){
-    //   const updatedOption = {...packageOptionsData.results[0]};
-    //   updatedOption.quantity = 1;
-    //   setPackageOption(updatedOption);  
-    // };
 
   }, [props.categories, props.discount, props.discount_media, props.discount_packages]);
 
@@ -521,16 +506,6 @@ const DiscountForm = (props) => {
 
   return (
     <>
-      {/* {(props.createDiscountStatus || props.createDiscountStatus===false) ? (
-      <>
-      { props.createDiscountStatus ? (
-          <CreateDiscountSuccess />
-        ) : (
-          <CreateDiscountFailed />
-        )
-      }
-      </>
-    ) : ( */}
       <Container>
         <Content>
           <Header>
@@ -1270,7 +1245,6 @@ const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
     categories: state.discountState.categories,
-    createDiscountStatus: state.discountState.createDiscountStatus,
     organizer: state.organizerState.organizer,
     discounts: state.organizerState.discounts,
     discount_packages: state.discountState.discount_packages,
@@ -1281,8 +1255,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
   postDiscount: (formData) => dispatch(createDiscountAPI(formData)),
   updateDiscount: ({formData, discount_id}) => dispatch(updateDiscountAPI({formData, discount_id})),
-  getCategories: () => dispatch(getCategoriesAPI()),
-  resetCreateDiscountStatus: () => dispatch(setCreateDiscountStatus(null)),
+  getCategories: () => dispatch(getCategoriesAPI()),  
   getDiscountPackages: () => {dispatch(getDiscountPackagesAPI())},
   getDiscountMedia: (discount_id) => {dispatch(getDiscountMediaAPI(discount_id))},
   deleteDiscountPackage: (package_id) => {dispatch(deleteDiscountPackageAPI(package_id))},

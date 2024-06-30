@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { googleAuth, signUpAPI } from "../../actions";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { isEmailValid, isPasswordValid, isContactValid } from "../../utils/middleware";
 
 
@@ -16,6 +16,8 @@ const Signup = (props) => {
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [contactError, setContactError] = useState("");
+
+    const navigate = useNavigate();
 
 
     const validateEmail = (value) => { 
@@ -35,6 +37,16 @@ const Signup = (props) => {
         let contactRes = isContactValid(value);
         setContactError(contactRes[1] ? contactRes[1] : "");
     }; 
+    
+
+    const handleRedirect = (url) => {
+        if (url){
+            navigate(url);
+        }
+        else{
+            navigate('/');
+        }
+      };
 
     const handleSignup = (e) => {
         e.preventDefault();
@@ -69,11 +81,23 @@ const Signup = (props) => {
                 setContactError(props.errors.contact[0]);
             }
         }
-        }, [props.errors]);
+    }, [props.errors]);
+
+    useEffect(() => {
+        if (props.user){
+            handleRedirect('/');
+        }
+        else if (props.activate_user) {
+            setTimeout(() => {
+                handleRedirect('/login');
+            }, 5000);            
+        }
+    }, [props.user, props.activate_user]);
+
 
     return (
         <Container>
-            {(props.user || props.activate_user) && <Navigate to='/' />}
+            {/* {(props.user || props.activate_user) && <Navigate to='/' />} */}
             <Section>
                 <FormSection>
                     <Form>
@@ -336,6 +360,7 @@ const mapStateToProps = (state) => {
         user: state.userState.user,
         activate_user: state.userState.activate_user,
         errors: state.appState.errors,
+        previous_url: state.appState.previous_url,
     }
 };
 

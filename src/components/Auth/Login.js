@@ -79,7 +79,7 @@ const Login = (props) => {
             }
         }
         if (props.user){
-            props.closeLoader();
+            // props.closeLoader();
             handleRedirect(props.previous_url);
         }
     }, [props.errors, props.user, props.previous_url]);
@@ -387,10 +387,10 @@ const ForgetPassword = styled.div`
 
 const mapDispatchToProps = (dispatch) => ({
     signIn: (payload) => dispatch(loginAPI(payload)),
-    closeLoader: () => {
-        dispatch(setLoadingMessage(null));
-        dispatch(setLoading(false));
-      },
+    // closeLoader: () => {
+    //     dispatch(setLoadingMessage(null));
+    //     dispatch(setLoading(false));
+    //   },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
