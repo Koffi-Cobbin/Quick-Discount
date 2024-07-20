@@ -12,8 +12,8 @@ export const SIGNUP_FAILED_MESSAGE =   <>
 export const CREATE_DISCOUNT_SUCCESS_MESSAGE =   <>
 <img src="/images/icons/tick-circle.svg" />
 <p style={{color: "green"}}>
-    Your event details have been successfully submited. 
-    Quick Events review team would reach out to you via the email you provided
+    Your discount details have been successfully submited. 
+    Quick Discounts review team would reach out to you via the email you provided
     in less than 24hrs.
 </p>
 </>

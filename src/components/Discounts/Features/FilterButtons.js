@@ -73,10 +73,10 @@ const FilterButtons = ( props ) => {
                   <input 
                     type="checkbox" 
                     id={`cat-${id}`} 
-                    value={category.name}
+                    value={category}
                     onChange={()=> checkInputChangeHandler(`cat-${id}`)}
                     />
-                  {category.name}
+                  {category}
                 </label>
                 // <a
                 //   onClick={() =>  props.filterEvents(category)}

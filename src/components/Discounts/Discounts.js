@@ -50,12 +50,13 @@ const Discounts = (props) => {
     // Loop through each sub-list in A and add its elements to the resultSet
     categories_lists.forEach(subList => {
       subList.forEach(category => {
-        categories_set.add(category);
+        categories_set.add(category.name);
       });
     });
     // Unpack the set into a list
-    const categories = [...categories_set];
-    setCategories(categories);
+    const categories_set_list = [...categories_set];
+    console.log("BBB ", categories_set_list);
+    setCategories(categories_set_list);
   };
 
 

@@ -141,7 +141,14 @@ const DiscountForm = (props) => {
     }
     else {
       updatedSocialMediaHandles[key] = social_media_url;
-      let urlRes = isValidURL(social_media_url);
+      let urlRes;
+      
+      if (key !== "whatsapp"){
+        urlRes = isValidURL(social_media_url);
+      }
+      else {
+        urlRes = isContactValid(social_media_url) || isValidURL(social_media_url);
+      }
       updatedSocialMediaHandlesURLError[`${key}Error`] = urlRes ? "" : "Invalid url";
     }
     setSocialMediaHandles(updatedSocialMediaHandles);
@@ -324,6 +331,20 @@ const DiscountForm = (props) => {
     let updatedDiscountPackage = discountPackages.filter((option) => option.type === package_type)[0];
     updatedDiscountPackage.quantity = 1;
     setPackageOption(updatedDiscountPackage);
+
+    // set endDate to startDate plus 24hrs if package_type is daily
+    if (package_type === "daily") {
+      let endDate = new Date(new Date(startDate).getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      setEndDate(endDate);
+      } 
+    else if (package_type === "weekly") {
+      let endDate = new Date(new Date(startDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      setEndDate(endDate);
+      }
+    else if (package_type === "monthly") {
+      let endDate = new Date(new Date(startDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      setEndDate(endDate);
+      }
   };
 
   const handleQuantityChange = (quantity) => {
@@ -359,6 +380,16 @@ const DiscountForm = (props) => {
   const handlePostDiscount = () => {
     // e.preventDefault();
 
+    // remove entries with no value or spaces in socialMediaHandles
+    // for key and value in object if value is empty or space, remove entry
+    const filteredSocialMediaHandles = Object.entries(socialMediaHandles).reduce((acc, [key, value]) => {
+      if (value !== "" && value !== " ") {
+        acc[key] = value;
+        }
+        return acc;
+        }, {});
+
+    console.log("Filtered Social Media Handles ", filteredSocialMediaHandles);
     // if (e.target !== e.currentTarget) {
     //   return;
     // }
@@ -385,7 +416,7 @@ const DiscountForm = (props) => {
         description: organizerDescription,
         email: email,
         phone_number: phoneNumber,
-        social_media_handles: socialMediaHandles,
+        social_media_handles: filteredSocialMediaHandles,
       },
       package_data: {
         type: packageOption.type,

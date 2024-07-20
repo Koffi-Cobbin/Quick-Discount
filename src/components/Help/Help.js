@@ -29,6 +29,9 @@ function Help() {
               <li>
                 <a href="#payment">Payment</a>
               </li>
+              <li>
+                <a href="#location">Adding Google Location</a>
+              </li>
             </ul>
           </nav>
         </div>
@@ -139,6 +142,47 @@ function Help() {
                     </p>
                 </li>
             </ol>
+          </section> 
+
+          <section id="location">
+            <h2>Step-by-Step Guide: Adding Your Location on Google Maps</h2>
+            <p>Follow these simple steps to add your location on Google Maps and copy the embedding link:</p>
+
+            <ol>
+                <li>
+                    <h3>Open Google Maps</h3>
+                    <p>Launch your web browser and go to <a href="https://www.google.com/maps" target="_blank">https://www.google.com/maps</a>.</p>
+                </li>
+
+                <li>
+                    <h3>Search for Your Location</h3>
+                    <p>Use the search bar at the top left corner of the screen to find your location. You can enter your address or specific keywords related to your location.</p>
+                </li>
+
+                <li>
+                    <h3>Pin Your Location</h3>
+                    <p>Once you've found your location on the map, click on it. A red pin will appear, marking your spot.</p>
+                </li>
+
+                <li>
+                    <h3>Access the Share Option</h3>
+                    <p>Click on the red pin to reveal a pop-up card with details about your location. In the card, you'll find a "Share" option. Click on it.</p>
+                </li>
+
+                <li>
+                    <h3>Generate the Embedding Link</h3>
+                    <p>In the "Share this place" window, click on the "Embed a map" tab. You can customize the map size and copy the embedding HTML code as needed.</p>
+                </li>
+
+                <li>
+                    <h3>Copy the Embedding Link</h3>
+                    <p>Locate the embedding HTML code, which will include an <b>iframe</b> element. Copy the entire iframe code and paste it into Google location field in the event creation form.</p>
+                </li>
+            </ol>
+
+            <p>Congratulations! You've successfully added your location on Google Maps and copied the embedding link.</p>
+
+            <p>Feel free to reach out if you have any questions or need further assistance.</p>
           </section> 
         </div>
       </div>
