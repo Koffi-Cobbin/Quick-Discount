@@ -54,6 +54,7 @@ const Section = styled.div`
             margin-right: 10px;
             border-radius: 5px;
             padding: 7px 10px;
+            text-decoration: none;
             &:hover{
                 text-decoration: none;
             };

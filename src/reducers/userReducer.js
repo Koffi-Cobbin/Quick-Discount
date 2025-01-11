@@ -11,9 +11,9 @@ import {
 
 
 const INITIAL_STATE = {
-    user: JSON.parse(sessionStorage.getItem('user')),
+    user: JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user')),
     activate_user: false,
-    token: JSON.parse(sessionStorage.getItem('user-token')),
+    token: JSON.parse(sessionStorage.getItem('user-token') || localStorage.getItem('user-token')),
     order: JSON.parse(sessionStorage.getItem('user-order')),
     payment: JSON.parse(sessionStorage.getItem('payment')),
     tickets: JSON.parse(sessionStorage.getItem('user-tickets')),
@@ -27,14 +27,23 @@ const userReducer = (state = INITIAL_STATE, action) => {
         case SET_USER:
             if (action.user===null){
                 sessionStorage.removeItem('user');
+                localStorage.removeItem('user')
                 sessionStorage.removeItem('user-token');
+                localStorage.removeItem('user-token');
                 sessionStorage.removeItem('payment');
                 sessionStorage.removeItem('user-order');
                 sessionStorage.removeItem('user-notifications');
                 sessionStorage.removeItem('user-tickets');
                 sessionStorage.removeItem('user-is-following');
             }
-            else {sessionStorage.setItem('user', JSON.stringify(action.user));}
+            else {
+                if (action.user.rememberMe){
+                    localStorage.setItem('user', JSON.stringify(action.user));
+                }
+                else{
+                    sessionStorage.setItem('user', JSON.stringify(action.user));
+                }
+            }
             return {
                 ...state,
                 user: action.user
@@ -47,7 +56,12 @@ const userReducer = (state = INITIAL_STATE, action) => {
             };
 
         case SET_USER_TOKEN:
-            sessionStorage.setItem('user-token', JSON.stringify(action.token));
+            if (action.user.rememberMe){
+                localStorage.setItem('user-token', JSON.stringify(action.token));
+            }
+            else{
+                sessionStorage.setItem('user-token', JSON.stringify(action.token));
+            };            
             return {
                 ...state,
                 token: action.token

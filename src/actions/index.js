@@ -267,6 +267,11 @@ export function loginAPI(payload) {
     dispatch(setLoading(true));
     dispatch(setErrors(null));
 
+    const login_payload = {
+      email: payload.email,
+      contact: payload.contact,
+      password: payload.password   
+    }
     const url = `${BASE_URL}/users/login/`;
 
     fetch(url, {
@@ -274,14 +279,17 @@ export function loginAPI(payload) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(login_payload),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log("login data ", data);        
         if (data.success) {
-          dispatch(setUser(data.user_data));
-          console.log("user login email ", data.user_data.email);
+          let user_data = {
+            ...data.user_data,
+            rememberMe: payload.rememberMe
+          }
+          dispatch(setUser(user_data));
           dispatch(
             getUserTokenAPI({
               email: data.user_data.email,

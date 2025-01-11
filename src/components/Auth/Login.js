@@ -14,6 +14,7 @@ const Login = (props) => {
     const [contact, setContact] = useState("");
     const [password, setPassword] = useState("");
     const [loginChoice, setLoginChoice] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
     // ERRORS
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
@@ -49,6 +50,16 @@ const Login = (props) => {
         setContactError(contactRes[1] ? contactRes[1] : "");
     }; 
 
+    const checkInputChangeHandler = (id) => {
+        let elem = document.getElementById(id);
+    
+        if (elem.checked) {
+          setRememberMe(true);
+        }
+        else {
+            setRememberMe(false);
+        }
+    };
 
     const handleLogin = (e) => {
         e.preventDefault();
@@ -61,6 +72,7 @@ const Login = (props) => {
           email: email,
           contact: contact,
           password: password,
+          rememberMe: rememberMe,
         };
     
         props.signIn(payload);
@@ -157,7 +169,18 @@ const Login = (props) => {
                                     disabled={!((password && email) || (password && contact)) ? true : false}
                                 />
                             </div>
-                            <ForgetPassword><NavLink to="/forgetpassword">Forgot password?</NavLink></ForgetPassword>
+                            <ForgetPassword>
+                                <div>
+                                    <input 
+                                    type="checkbox" 
+                                    id="rememberMe" 
+                                    onChange={()=> checkInputChangeHandler("rememberMe")}
+                                    /> 
+                                    Remember Me
+                                </div>
+                                
+                                <NavLink to="/forgetpassword">Forgot password?</NavLink>
+                            </ForgetPassword>
                         </form>
                         <hr/>
                         <CreateAccount>New here?<NavLink to="/signup">Create account </NavLink></CreateAccount>  
@@ -185,7 +208,7 @@ const Container = styled.div`
 
 const CreateAccount = styled.div`
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
 `;
 
 const Section = styled.section`
@@ -381,8 +404,20 @@ const mapStateToProps = (state) => {
 };
 
 const ForgetPassword = styled.div`
+    display: flex;
+    justify-content: space-between;
     padding-top: 10px;
-    text-align: right;
+    flex-wrap: wrap;
+    
+    div{
+        display: flex;
+        align-items: center;
+    }
+    #rememberMe{
+        width: 15px;
+        height: 15px;
+        margin-right: 5px;
+    }
 `;
 
 const mapDispatchToProps = (dispatch) => ({
