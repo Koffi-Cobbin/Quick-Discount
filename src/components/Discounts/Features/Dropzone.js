@@ -26,7 +26,7 @@ const Dropzone = (props) => {
     }, [props.bgImage]);
 
   return (
-    <Container className="container">
+    <Container className="container" isEmpty={props.isEmpty}>
         <div {...getRootProps({ className: "dropzone" })}>
           {props.filename ? (
           <ImagePreview 
@@ -75,13 +75,14 @@ const Container = styled.div`
     width: 100%;
     text-align: center;
     padding: 20px;
-    border: 2px rgba(0, 0, 0, 0.15) dashed;
+    border: 2px dashed ${({ isEmpty }) => (isEmpty ? 'red' : 'rgba(0, 0, 0, 0.15)')};
     margin: auto;
     margin-bottom: 20px;
     &:hover {
       cursor: pointer;
     }
 `;
+
 
 const ImagePreview = styled.div`
   width: 100%;

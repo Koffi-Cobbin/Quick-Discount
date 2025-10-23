@@ -81,7 +81,7 @@ const Footer = (props) => {
                     <p>Ablekuma-Pokuase, Accra</p>
                     <p>Greater Accra Region</p>
                     <p>Call Us: <a href="tel:+233598972791">+233598972791</a></p>
-                    <p>or <a href="mailto:quickdiscountgh@gmail.com">Leave a mail</a></p>
+                    <p><a href="mailto:quickdiscountgh@gmail.com" className="footer-mail">Leave a mail</a></p>
                 </RightSide>
             </Layout>
             <Copyright>
@@ -152,6 +152,11 @@ const RightSide = styled.div`
         &>img{
             width: 200px;
         }        
+    }
+    & .footer-mail{
+        border: 1px solid white;
+        padding: 2px 5px;
+        border-radius: 5px;       
     }
     @media (max-width: 480px) {
         text-align: center;

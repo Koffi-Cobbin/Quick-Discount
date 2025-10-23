@@ -54,6 +54,7 @@ const DiscountForm = (props) => {
   const [agreement, setAgreement] = useState("");
 
   const [allCategories, setAllCategories] = useState(); // Categories from API
+  const [enableNext, setEnableNext] = useState(false);
   const [enableSubmit, setEnableSubmit] = useState(false);
   const [filename, setFilename] = useState("");
   const [discountPackages, setDiscountPackages] = useState();
@@ -71,8 +72,40 @@ const DiscountForm = (props) => {
   const [socialMediaHandlesURLError, setSocialMediaHandlesURLError] = useState(
     {whatsappError: "", facebookError: "", instagramError: "", twitterError: ""}
   );
+  const [isFlyerEmpty, setIsFlyerEmpty] = useState(false);
 
   // const package_options = ["daily", "weekly", "monthly"];
+
+  const allInputIDs = [
+    "discountTitle",
+    "discountDescription",
+    "percentageDiscount",
+    "organizerName",
+    "organizerDescription",
+    "email",
+    "phoneNumber",
+    "categories",
+    "location",
+    "address",
+    // handle images separately
+    "discountFlyer",
+    "readDiscountFlyer",
+    "discountImages",
+    "readDiscountImages",
+
+    "videoURL",
+    "websiteURL",
+
+    // handle social media handles separately
+    "socialMediaHandles",
+
+    "agreement",
+
+    // handle packageOption separately
+
+    "startDate",
+    "endDate"
+  ];
 
   const navigate = useNavigate();
   const current_url = useLocation();
@@ -84,13 +117,112 @@ const DiscountForm = (props) => {
     }
   };
 
+
+  // ------------------------------
+  // EMPTY FIELD CHECKER
+  // ------------------------------
+  const checkEmptyFields = (idArray) => { 
+    let hasEmpty = false;
+
+    idArray.forEach(id => {     
+      // handle special cases
+
+      if (id === "discountFlyer"){
+        if (!discountFlyer){
+          setIsFlyerEmpty(true);
+          hasEmpty = true;
+          return;
+        }
+        else {
+          setIsFlyerEmpty(false);
+        }
+      }
+
+      const element = document.getElementById(id);
+      if (!element) return; // skip if element not found
+
+      const value = element.value?.trim();
+
+      // Reset border before checking
+      element.style.border = '';
+
+      const tag = element.tagName?.toLowerCase();
+      const type = element.type?.toLowerCase();
+
+      // Checkboxes
+      if (type === "checkbox") {
+        if (!element.checked) {
+          element.style.border = '1px solid red';
+          hasEmpty = true;
+        }
+        return;
+      }
+
+      // Multiple selects
+      if (tag === "select" && element.multiple) {
+        if (element.selectedOptions.length === 0) {
+          element.style.border = '1px solid red';
+          hasEmpty = true;
+        }
+        return;
+      }
+
+      // File inputs
+      if (type === "file") {
+        if (!element.files || element.files.length === 0) {
+          element.style.border = '1px solid red';
+          hasEmpty = true;
+        }
+        return;
+      }
+
+      // Default (text inputs, textareas, single selects)
+      if (value === "" || value === null || value === undefined) {
+        element.style.border = '1px solid red';
+        hasEmpty = true;
+      }
+    });
+
+    return !hasEmpty; // returns true if all fields are filled
+  }
+
+
+  const firstPageEnteriesCheck = () => {
+    const requiredFields = [
+    "discountTitle",
+    "discountDescription", 
+    "percentageDiscount",
+    "organizerName",
+    "organizerDescription",
+    "email",
+    "phoneNumber",
+    "categories",
+    "location",
+    "discountFlyer",
+    "socialMediaHandles",
+    "agreement"
+    ];
+
+    const isValid = checkEmptyFields(requiredFields);
+    setEnableNext(isValid);
+    console.log(isValid ? "First page filled!" : "Missing required fields");
+  };
+
   const handleNext = () => {
-    setNext(!next);
+    if (!enableNext){
+      firstPageEnteriesCheck();
+      setNext(!next);
+    }
+    
+    if (!next && enableNext){
+      setNext(!next);
+    }
     if (prev){
       setPrev(!prev);
     }
     scrollUp();
   };
+
 
   const handlePrev = () => {
     setPrev(!prev);
@@ -459,32 +591,84 @@ const DiscountForm = (props) => {
   };
 
   useEffect(() => {
-    const isAllEntriesFilled = async () => {
-      if (
-        discountTitle &&
-        discountDescription &&
-        percentageDiscount &&
-        organizerName &&
-        organizerDescription &&
-        email &&
-        phoneNumber &&
-        discountCategories &&
-        packageOption &&
-        location &&
-        // address &&
-        startDate &&
-        endDate &&
-        discountFlyer &&
-        socialMediaHandles &&
-        agreement
-      ) {
-        setEnableSubmit(true);
-        console.log("FILLED!");
-      } else {
-        setEnableSubmit(false);
-      }
-    };
-    isAllEntriesFilled();
+
+    // const checkEmptyFields = (idArray) => { 
+    //   let hasEmpty = false;
+
+    //   idArray.forEach(id => {
+    //     const element = document.getElementById(id);
+    //     if (!element) return; // skip if element not found
+
+    //     const value = element.value?.trim();
+
+    //     // Reset border before checking
+    //     element.style.border = '';
+
+    //     // Check emptiness (for textareas, inputs, and selects)
+    //     if (value === '' || value === null || value === undefined) {
+    //       element.style.border = '2px solid red';
+    //       hasEmpty = true;
+    //     }
+    //   });
+
+    //   return !hasEmpty; // returns true if all fields are filled
+    // }
+
+
+    // const isFirstPageEnteriesFilled = async () => {
+    //   const requiredFields = [
+    //   discountTitle,
+    //   discountDescription, 
+    //   percentageDiscount,
+    //   organizerName,
+    //   organizerDescription,
+    //   email,
+    //   phoneNumber,
+    //   discountCategories,
+    //   location,
+    //   discountFlyer,
+    //   socialMediaHandles,
+    //   agreement
+    //   ];
+
+    //   const isValid = checkEmptyFields(requiredFields);
+    //   setEnableNext(isValid);
+    //   console.log(isValid ? "First page filled!" : "Missing required fields");
+    // };
+
+    // All entries filled check
+    // const isAllEntriesFilled = async () => {
+    //   const requiredFields = [
+    //   "discountTitle",
+    //   "discountDescription",
+    //   "percentageDiscount", 
+    //   "organizerName",
+    //   "organizerDescription",
+    //   "email",
+    //   "phoneNumber",
+    //   "categories",
+    //   "packageOption",
+    //   "location",     
+    //   "startDate",
+    //   "endDate",
+    //   "discountFlyer",
+    //   "socialMediaHandles",
+    //   "agreement",
+    //   "username",
+    //   "contact"
+    //   ];
+    //   // address,
+
+    //   const isValid = checkEmptyFields(requiredFields);
+    //   if (isValid) {
+    //     setEnableSubmit(true);
+    //     console.log("FILLED!");
+    //   } else {
+    //     setEnableSubmit(false);
+    //   }
+    // };
+    // isFirstPageEnteriesFilled();
+    // isAllEntriesFilled();
   }, [
     discountTitle,
     discountDescription,
@@ -521,6 +705,7 @@ const DiscountForm = (props) => {
     setEndTime("");
     setLocation("");
     setSocialMediaHandles([]);
+    setEnableNext(false);
     setEnableSubmit(false);
     setEmailError("");
     setDiscountCategories([]);
@@ -554,6 +739,7 @@ const DiscountForm = (props) => {
                 <FormInputs>
                   <label>Discount Title</label>
                   <input
+                    id="discountTitle"
                     type="text"
                     value={discountTitle}
                     onChange={(e) => setDiscountName(e.target.value)}
@@ -567,7 +753,7 @@ const DiscountForm = (props) => {
                 <FormInputs>
                   <label>Description</label>
                   <textarea 
-                      id="w3review" 
+                      id="discountDescription" 
                       name="w3review" 
                       rows="4" 
                       cols="30"
@@ -582,6 +768,7 @@ const DiscountForm = (props) => {
                 <FormInputs>
                   <label>Percentage Discount</label>
                   <input
+                    id="percentageDiscount"
                     type="text"
                     value={percentageDiscount}
                     onChange={(e) => setPercentageDiscount(e.target.value)}
@@ -597,16 +784,17 @@ const DiscountForm = (props) => {
                     <>
                       <label>Name of Organiser</label>
                       <input
+                        id="organizerName"
                         type="text"
                         value={organizerName}
                         onChange={(e) => setOrganizerName(e.target.value)}
                         required
                       />
 
-                      <label for="about-organizer">About the Organizer</label>
+                      <label for="organizerDescription">About the Organizer</label>
                       <textarea
-                        id="about-organizer"
-                        name="about-organizer"
+                        id="organizerDescription"
+                        name="organizerDescription"
                         value={organizerDescription}
                         onChange={(e) =>
                           setOrganizerDescription(e.target.value)
@@ -616,6 +804,7 @@ const DiscountForm = (props) => {
 
                       <label>Email</label>
                       <input
+                        id="email"
                         type="email"
                         value={email}
                         onChange={(e) => validateEmail(e.target.value)}
@@ -625,6 +814,7 @@ const DiscountForm = (props) => {
 
                       <label>Phone Number</label>
                       <input
+                        id="phoneNumber"
                         type="tel"
                         value={phoneNumber}
                         onChange={(e) => validateContact(e.target.value)}
@@ -665,6 +855,7 @@ const DiscountForm = (props) => {
                 <FormInputs>
                   <label for="location">Location </label>
                   <input
+                    id="location"
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
@@ -681,6 +872,7 @@ const DiscountForm = (props) => {
                     </Link>
                   </label>
                   <input
+                    id="address"
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
@@ -690,7 +882,7 @@ const DiscountForm = (props) => {
 
               <FormContent>
                 <AssetsArea>
-                  <div>
+                  <div id="flyer">
                     <label>Upload Discount Flyer</label>
                     <Dropzone
                       onDrop={flyerImageHandler}
@@ -701,6 +893,7 @@ const DiscountForm = (props) => {
                       preview={true}
                       filename={filename}
                       bgImage={readDiscountFlyer}
+                      isEmpty={isFlyerEmpty}
                       error={imageError.flyer && imageError.flyer}
                     />
                   </div>
@@ -727,6 +920,7 @@ const DiscountForm = (props) => {
                     <div>
                       <label>Discount Ad video link</label>
                       <input
+                        id="videoURL"
                         type="text"
                         value={videoURL}
                         placeholder="https://www.youtube.com"
@@ -755,6 +949,7 @@ const DiscountForm = (props) => {
 
                         <div>
                           <input
+                            id="instagram"
                             type="text"
                             value={socialMediaHandles.instagram}
                             onChange={(e) => socialMediaChangeHandler("instagram", e.target.value)}
@@ -778,6 +973,7 @@ const DiscountForm = (props) => {
 
                         <div>
                           <input
+                            id="facebook"
                             type="text"
                             value={socialMediaHandles.facebook}
                             onChange={(e) => socialMediaChangeHandler("facebook", e.target.value)}
@@ -801,6 +997,7 @@ const DiscountForm = (props) => {
 
                         <div>
                           <input
+                            id="whatsapp"
                             type="text"
                             value={socialMediaHandles.whatsapp}
                             onChange={(e) => socialMediaChangeHandler("whatsapp", e.target.value)}
@@ -824,6 +1021,7 @@ const DiscountForm = (props) => {
 
                         <div>
                           <input
+                            id="twitter"
                             type="text"
                             value={socialMediaHandles.twitter}
                             onChange={(e) => socialMediaChangeHandler("twitter", e.target.value)}
@@ -842,6 +1040,7 @@ const DiscountForm = (props) => {
                   <div>
                     <label>Website link</label>
                     <input
+                      id="websiteURL"
                       type="text"
                       value={websiteURL}
                       placeholder="https://www.xyz.com"
@@ -857,11 +1056,12 @@ const DiscountForm = (props) => {
                 <span>Discount Creation Agreement</span>
                 <div>
                   <input
-                    type="radio"
                     id="agreement"
+                    type="checkbox"
                     name="agreement"
-                    value="agreed"
-                    onChange={(e) => setAgreement(e.target.value)}
+                    value={agreement}
+                    onChange={(e) => setAgreement(e.target.checked ? "agreed" : "disagreed")}
+                    checked={agreement === "agreed"}
                   />
                   <label for="agreement" className="radio-label">
                     I agree to the &nbsp;
@@ -875,7 +1075,8 @@ const DiscountForm = (props) => {
 
               <SubmitSection>
                 <SubmitButton
-                  onClick={handleNext}
+                //  disabled={!enableNext}
+                 onClick={handleNext}
                 >
                   Next
                 </SubmitButton>
@@ -912,6 +1113,7 @@ const DiscountForm = (props) => {
                           <div>
                             <label>Price</label>
                             <input
+                              id="price"
                               type="number"
                               name="package-price"
                               value={parseFloat(packageOption.price)*(packageOption.quantity ? packageOption.quantity : 1)}
@@ -921,6 +1123,7 @@ const DiscountForm = (props) => {
                           <div>
                             <label>Quantity</label>
                             <input
+                              id="quantity"
                               type="number"
                               name="package-quantity"
                               placeholder="1"
@@ -949,19 +1152,21 @@ const DiscountForm = (props) => {
                     <div>
                       <label>Start Date</label>
                       <input
+                        id="startDate"
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
-                        required
+                        readOnly="True"
                       />
                     </div>
                     <div>
                       <label>End Date</label>
                       <input
+                        id="endDate"
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
-                        required
+                        readOnly="True"
                       />
                     </div>
                   </InputsFlexWrap>
@@ -972,7 +1177,7 @@ const DiscountForm = (props) => {
               <Payment 
                 amount={packageOption.price*packageOption.quantity} 
                 package_type={packageOption.type}
-                enableSubmit={enableSubmit}
+                // enableSubmit={enableSubmit}
                 handlePostDiscount={handlePostDiscount}/>
 
               <SubmitSection>

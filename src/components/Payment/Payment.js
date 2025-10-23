@@ -50,6 +50,7 @@ const Payment = (props) => {
       setMomoContactError(contactRes[1] ? contactRes[1] : "");
     }
   };
+  
 
   useEffect(() => {
     const isAllEntriesFilled = async () => {
@@ -176,7 +177,7 @@ const Payment = (props) => {
               type="submit"
               value="Continue to checkout"
               className={`"payment-input" ${classess.btn}`}
-              disabled={!enableSubmit && !props.enableSubmit}
+              disabled={!enableSubmit}
               onClick={(event) => handleCheckout(event)}
             />
           </form>
