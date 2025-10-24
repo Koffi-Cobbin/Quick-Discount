@@ -14,7 +14,7 @@ const Login = (props) => {
     const [contact, setContact] = useState("");
     const [password, setPassword] = useState("");
     const [loginChoice, setLoginChoice] = useState("");
-    const [rememberMe, setRememberMe] = useState(false);
+    const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
     // ERRORS
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
@@ -54,10 +54,10 @@ const Login = (props) => {
         let elem = document.getElementById(id);
     
         if (elem.checked) {
-          setRememberMe(true);
+          setKeepMeLoggedIn(true);
         }
         else {
-            setRememberMe(false);
+            setKeepMeLoggedIn(false);
         }
     };
 
@@ -72,7 +72,7 @@ const Login = (props) => {
           email: email,
           contact: contact,
           password: password,
-          rememberMe: rememberMe,
+          rememberMe: keepMeLoggedIn,
         };
     
         props.signIn(payload);
