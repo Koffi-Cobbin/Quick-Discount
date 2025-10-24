@@ -10,15 +10,27 @@ import {
 } from "../actions/actionType";
 
 
+// safe getter that prefers sessionStorage and falls back to localStorage,
+// and only JSON.parse when we actually have a non-null string value.
+function getStoredJSON(key) {
+    const raw = sessionStorage.getItem(key) ?? localStorage.getItem(key);
+    if (raw === null || raw === undefined) return null;
+    try {
+        return JSON.parse(raw);
+    } catch (e) {
+        return null;
+    }
+}
+
 const INITIAL_STATE = {
-    user: JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user')),
+    user: getStoredJSON('user'),
     activate_user: false,
-    token: JSON.parse(sessionStorage.getItem('user-token') || localStorage.getItem('user-token')),
-    order: JSON.parse(sessionStorage.getItem('user-order')),
-    payment: JSON.parse(sessionStorage.getItem('payment')),
-    tickets: JSON.parse(sessionStorage.getItem('user-tickets')),
-    notifications: JSON.parse(sessionStorage.getItem('user-notifications')),
-    is_follower: JSON.parse(sessionStorage.getItem('user-is-following')),
+    token: getStoredJSON('user-token'),
+    order: getStoredJSON('user-order'),
+    payment: getStoredJSON('payment'),
+    tickets: getStoredJSON('user-tickets'),
+    notifications: getStoredJSON('user-notifications'),
+    is_follower: getStoredJSON('user-is-following'),
 };
 
 
