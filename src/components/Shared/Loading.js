@@ -1,93 +1,330 @@
-import React from "react";
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
+import styled, { keyframes, css } from "styled-components";
 import { connect } from 'react-redux';
 import { setLoading, setLoadingMessage } from "../../actions";
 
 
 const Loading = (props) => {
+  const [visible, setVisible] = useState(false);
+
+  // Slight delay before showing — prevents flash on fast loads
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 60);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <>
-        <Container>
-          <Content>
-            <span className="close-popup" onClick={() => props.close(props.loading_message)}>&times;</span>
-            {props.loading_message ? (
-              <>{props.loading_message}</>
-              ) : (
-                <>
-                  <img src="/images/icons/spinner.svg" className="spinner" alt="Loading..." />
-                  <p>Loading...</p>
-                </>
-            )}
-          </Content>
-        </Container>
-    </>
+    <Overlay visible={visible}>
+      {/* Ambient orbs for depth */}
+      <Orb top="15%" left="10%" size="320px" color="rgba(220,103,14,0.13)" delay="0s" />
+      <Orb top="60%" left="75%" size="260px" color="rgba(220,103,14,0.09)" delay="1.4s" />
+      <Orb top="40%" left="50%" size="180px" color="rgba(255,255,255,0.04)" delay="0.7s" />
+
+      <Card>
+        {/* Close button */}
+        <CloseBtn
+          onClick={() => props.close(props.loading_message)}
+          aria-label="Dismiss"
+        >
+          &times;
+        </CloseBtn>
+
+        {props.loading_message ? (
+          <MessageContent>
+            <MessageIcon>ℹ️</MessageIcon>
+            <MessageText>{props.loading_message}</MessageText>
+          </MessageContent>
+        ) : (
+          <SpinnerContent>
+            {/* Outer ring */}
+            <RingWrap>
+              <RingOuter />
+              <RingMiddle />
+              <RingInner />
+              {/* Central dot */}
+              <CoreDot />
+            </RingWrap>
+
+            {/* Brand wordmark */}
+            <Label>
+              <LabelDot />
+              Loading
+              <Ellipsis>
+                <span>.</span><span>.</span><span>.</span>
+              </Ellipsis>
+            </Label>
+          </SpinnerContent>
+        )}
+
+        {/* Bottom progress bar */}
+        <ProgressBar />
+      </Card>
+    </Overlay>
   );
 };
 
-const Container = styled.div`
+/* ─── Keyframes ──────────────────────────────────────────────────────────── */
+
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to   { opacity: 1; }
+`;
+
+const spinCW = keyframes`
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+`;
+
+const spinCCW = keyframes`
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+`;
+
+const pulse = keyframes`
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.3); opacity: 0.7; }
+`;
+
+const orbFloat = keyframes`
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(18px, -22px) scale(1.07); }
+  66%       { transform: translate(-14px, 12px) scale(0.95); }
+`;
+
+const dotBounce = keyframes`
+  0%, 80%, 100% { transform: translateY(0);    opacity: 0.4; }
+  40%            { transform: translateY(-5px); opacity: 1; }
+`;
+
+const progressSweep = keyframes`
+  0%   { width: 0%;   opacity: 1; }
+  70%  { width: 85%;  opacity: 1; }
+  95%  { width: 98%;  opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+`;
+
+const cardIn = keyframes`
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+`;
+
+/* ─── Overlay ────────────────────────────────────────────────────────────── */
+
+const Overlay = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 999;
-  padding: 0px;
-  min-height: 90vh;
+  inset: 0;
+  z-index: 9999;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.8);
-  animation: fadeIn 0.4s;
+  justify-content: center;
+  background: rgba(8, 5, 2, 0.78);
+  backdrop-filter: blur(14px) saturate(1.6);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  opacity: ${({ visible }) => (visible ? 1 : 0)};
+  transition: opacity 0.3s ease;
+  animation: ${fadeIn} 0.35s ease;
 `;
 
-const Content = styled.div`
-  background-color: white;
-  border-radius: 5px;
-  width: 200px;
-  height: fit-content;
+/* ─── Floating ambient orbs ──────────────────────────────────────────────── */
+
+const Orb = styled.div`
+  position: absolute;
+  top: ${({ top }) => top};
+  left: ${({ left }) => left};
+  width: ${({ size }) => size};
+  height: ${({ size }) => size};
+  background: radial-gradient(circle, ${({ color }) => color} 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ${orbFloat} 6s ease-in-out infinite;
+  animation-delay: ${({ delay }) => delay};
+`;
+
+/* ─── Card ───────────────────────────────────────────────────────────────── */
+
+const Card = styled.div`
   position: relative;
-  padding: 10px;
-  margin: 0 auto;
-
-  @keyframes load-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-  }
-
-  img {
-    height: 50px;
-    pointer-events: none;
-  }
-  img.spinner {
-    animation: load-spin infinite 2s linear;
-  }
-
-  &>span.close-popup {
-        position: absolute;
-        font-size: 20px;
-        top: 0;
-        right: 0;
-        height: 20px;
-        width: 20px;
-        font-weight: 600;
-        color: red;
-        cursor: default;
-    }
+  width: 200px;
+  background: rgba(20, 13, 6, 0.82);
+  border: 1px solid rgba(220, 103, 14, 0.28);
+  border-radius: 20px;
+  padding: 36px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 24px 60px rgba(0,0,0,0.55),
+    0 0 40px rgba(220, 103, 14, 0.08);
+  overflow: hidden;
+  animation: ${cardIn} 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 `;
 
-const mapStateToProps = (state) => {
-  return {
-    loading: state.appState.loading,
-    loading_message: state.appState.loading_message,
+/* ─── Close ──────────────────────────────────────────────────────────────── */
+
+const CloseBtn = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.35);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: color 0.2s;
+
+  &:hover { color: rgba(255,255,255,0.8); }
+`;
+
+/* ─── Spinner ────────────────────────────────────────────────────────────── */
+
+const SpinnerContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+`;
+
+const RingWrap = styled.div`
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ringBase = css`
+  position: absolute;
+  border-radius: 50%;
+  border-style: solid;
+  border-color: transparent;
+`;
+
+const RingOuter = styled.div`
+  ${ringBase}
+  width: 72px;
+  height: 72px;
+  border-width: 3px;
+  border-top-color: #fa8128;
+  border-right-color: rgba(250, 129, 40, 0.3);
+  animation: ${spinCW} 1.1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+`;
+
+const RingMiddle = styled.div`
+  ${ringBase}
+  width: 52px;
+  height: 52px;
+  border-width: 2.5px;
+  border-top-color: rgba(255,255,255,0.6);
+  border-left-color: rgba(255,255,255,0.15);
+  animation: ${spinCCW} 0.85s linear infinite;
+`;
+
+const RingInner = styled.div`
+  ${ringBase}
+  width: 34px;
+  height: 34px;
+  border-width: 2px;
+  border-top-color: rgba(220,103,14,0.5);
+  border-right-color: rgba(220,103,14,0.2);
+  animation: ${spinCW} 1.4s ease-in-out infinite;
+`;
+
+const CoreDot = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fa8128;
+  box-shadow: 0 0 10px 3px rgba(250, 129, 40, 0.55);
+  animation: ${pulse} 1.2s ease-in-out infinite;
+`;
+
+/* ─── Label ──────────────────────────────────────────────────────────────── */
+
+const Label = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: Inter, 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+`;
+
+const LabelDot = styled.div`
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fa8128;
+  box-shadow: 0 0 6px 2px rgba(250, 129, 40, 0.5);
+  animation: ${pulse} 1.4s ease-in-out infinite;
+`;
+
+const Ellipsis = styled.span`
+  display: inline-flex;
+  gap: 1px;
+
+  span {
+    animation: ${dotBounce} 1.2s ease-in-out infinite;
+    color: #fa8128;
+
+    &:nth-child(1) { animation-delay: 0s; }
+    &:nth-child(2) { animation-delay: 0.18s; }
+    &:nth-child(3) { animation-delay: 0.36s; }
   }
-};
+`;
+
+/* ─── Progress bar ───────────────────────────────────────────────────────── */
+
+const ProgressBar = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #fa8128 40%, #ffb366 80%, transparent 100%);
+  border-radius: 0 0 20px 20px;
+  animation: ${progressSweep} 2.4s ease-in-out infinite;
+`;
+
+/* ─── Message state ──────────────────────────────────────────────────────── */
+
+const MessageContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 4px;
+`;
+
+const MessageIcon = styled.div`
+  font-size: 28px;
+`;
+
+const MessageText = styled.p`
+  margin: 0;
+  font-family: Inter, 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  text-align: center;
+  line-height: 1.5;
+`;
+
+/* ─── Redux ──────────────────────────────────────────────────────────────── */
+
+const mapStateToProps = (state) => ({
+  loading: state.appState.loading,
+  loading_message: state.appState.loading_message,
+});
 
 const mapDispatchToProps = (dispatch) => ({
-  close: (loading_message=null) => {
+  close: (loading_message = null) => {
     dispatch(setLoadingMessage(null));
     dispatch(setLoading(false));
   },

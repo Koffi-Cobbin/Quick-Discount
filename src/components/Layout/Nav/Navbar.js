@@ -52,7 +52,7 @@ const Navbar = (props) => {
     // Three navbar visual states:
     //   'transparent' — home hero, not yet scrolled (see-through)
     //   'scrolled'    — home after scrolling (orange glass)
-    //   'blur'        — any other page (frosted glass, no orange fill)
+    //   'blur'        — any other page (dark frosted glass — always visible)
     const navState = isHome
         ? (scrolled ? "scrolled" : "transparent")
         : "blur";
@@ -122,7 +122,7 @@ const Navbar = (props) => {
                     <NavListWrap>
                         {/* Home */}
                         <NavItem>
-                            <NavLink to="/" end className={({ isActive }) => isActive ? "active" : ""}>
+                            <NavLink to="/" end className={({ isActive }) => isActive ? "active current" : ""}>
                                 <span>Home</span>
                             </NavLink>
                         </NavItem>
@@ -314,18 +314,21 @@ const Container = styled.div`
 
     /*
      * State: 'blur' — All other pages
-     *   Pure frosted glass. No orange fill — whatever sits behind
-     *   the navbar (page background, cards, content) tints it naturally.
-     *   A subtle dark-to-transparent gradient anchors it visually.
+     *
+     *   FIXED: Previously used a near-transparent dark gradient that vanished
+     *   on white/light page backgrounds. Now uses a rich dark-smoke glass:
+     *   deep charcoal tint (0.82 opacity) with an orange underline accent.
+     *   Text and icons (all white) remain legible on ANY background colour.
+     *   The glassmorphism blur/saturate effect is preserved — it just has
+     *   enough base opacity to guarantee contrast.
      */
     ${({ navState }) => navState === "blur" && css`
-        background: linear-gradient(
-            to bottom,
-            rgba(0, 0, 0, 0.28) 0%,
-            rgba(0, 0, 0, 0.10) 100%
-        );
-        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+        background: rgba(14, 9, 4, 0.82);
+        border-bottom: 2px solid rgba(220, 103, 14, 0.55);
+        box-shadow:
+            0 4px 24px rgba(0, 0, 0, 0.22),
+            0 1px 0 rgba(255, 255, 255, 0.04) inset,
+            0 -1px 0 rgba(220, 103, 14, 0.2) inset;
         padding: 6px 0;
     `}
 

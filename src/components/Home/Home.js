@@ -285,7 +285,7 @@ const FadeInSection = styled.div`
 
 const FilterBar = styled.div`
   position: sticky;
-  top: 60px;
+  top: 70px;
   z-index: 100;
   /* background-color: #f8f8f8; */
   /* border-bottom: 1px solid rgba(0, 0, 0, 0.06); */

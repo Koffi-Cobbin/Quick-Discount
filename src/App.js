@@ -88,14 +88,13 @@ function App(props) {
         <Router>
           {cartIsShown && <Cart onClose={hideCartHandler} />}
           <ScrollToTop />
-          {/* <Navbar style={{backgroundColor : scrollTop > 100 ? '#67309b' : 'transparent'}}/> */}
           <Routes>
             <Route
               exact
               path="/"
               element={[
                 <Navbar
-                  style={{backgroundColor : 'transparent'}}
+                  style={{backgroundColor : scrollTop > 100 ? '#67309b' : 'transparent'}}
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
                   homeSearch={true}
