@@ -1,306 +1,282 @@
-import React from "react";
-import { useEffect, useState } from "react";
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
+import styled, { keyframes, css } from "styled-components";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Search from "./Search";
 
 
 const SideNav = (props) => {
-    const [scrollTop, setScrollTop] = useState(0);
     const [pressedEnter, setPressedEnter] = useState(false);
-    
+    const [isClosing, setIsClosing] = useState(false);
+
+    // Lock body scroll when sidenav is open
     useEffect(() => {
-        const handleScroll = (event) => {
-            setScrollTop(window.scrollY);
-          };
-      
-          window.addEventListener("scroll", handleScroll);
-      
-          return () => {
-            window.removeEventListener("scroll", handleScroll);
-          };
-    }, [])
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
 
-
-    const getInputValue = () => {
-        //   Get input value
-        const inputValue = document.querySelector("#searchInput").value;
-        console.log('Input value:', inputValue);
+    const handleClose = () => {
+        // Trigger closing animation before unmounting
+        setIsClosing(true);
+        setTimeout(() => {
+            props.close();
+        }, 300); // match animation duration
     };
-
 
     const addSearchEvent = () => {
         let searchInputWraps = document.getElementsByClassName("wrapper");
         let searchInputWrap = searchInputWraps[searchInputWraps.length - 1];
-        console.error('Found search input wrapper... ', searchInputWrap);        
-        
-        // get nested child input element of searchInputWrap
+
         if (searchInputWrap) {
             const input = searchInputWrap.querySelector('input');
-            input.setAttribute("id", "searchInput");
-            console.error('Found search input... ', input);
-            // Add onEnterKey event listener to input
-            input.addEventListener('keydown', function (e) {
-                // console.log("Keypress Function Activated...");
-                if (e.key === 'Enter') {
-                    setPressedEnter(true);
-                };
-            });
-          } else {
-            console.error('Element not found');
-          }
-      };
-
+            if (input) {
+                input.setAttribute("id", "searchInput");
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        setPressedEnter(true);
+                    }
+                });
+            }
+        }
+    };
 
     return (
-        <Container onClick={props.close}>
-            <Sidenav 
-                onClick={(e) => e.stopPropagation()}
-                style={{ transform: props.isOpen ? "translateX(0)" : "translateX(100%)" }}
-            >
-                <Header>
-                    <Logo src="/images/logo.png" alt="Quick Discount" />
-                    <CloseBtn onClick={props.close}>&times;</CloseBtn>
-                </Header>
+        <Overlay isClosing={isClosing} onClick={handleClose}>
+            <Panel isClosing={isClosing} onClick={(e) => e.stopPropagation()}>
+                <CloseBtn onClick={handleClose}>&times;</CloseBtn>
 
-                <ScrollArea>
-                    <SearchWrapper>
-                        <Search 
-                            homeSearch={props.homeSearch} 
-                            styling={{zIndex: "1"}} 
-                            closeNav={props.close} 
-                            pressedEnter={pressedEnter}
-                            addSearchEvent={addSearchEvent}/>
-                    </SearchWrapper>
+                <SearchWrapper>
+                    <Search
+                        homeSearch={props.homeSearch}
+                        styling={{ zIndex: "1" }}
+                        closeNav={handleClose}
+                        pressedEnter={pressedEnter}
+                        addSearchEvent={addSearchEvent}
+                    />
+                </SearchWrapper>
 
-                    <NavLinks>
-                        <NavLinkItem to="/" onClick={props.close}>
-                            <Icon src="/images/icons/home.svg" alt="" onError={(e) => e.target.style.display='none'} />
-                            <span>Home</span>
-                        </NavLinkItem>
-                        <NavLinkItem to="/discounts" onClick={props.close}>
-                            <Icon src="/images/icons/discount.svg" alt="" onError={(e) => e.target.style.display='none'} />
-                            <span>Discounts</span>
-                        </NavLinkItem>
-                        <NavLinkItem to="/discounts/add" onClick={props.close}>
-                            <Icon src="/images/icons/plus.svg" alt="" onError={(e) => e.target.style.display='none'} />
-                            <span>Post a Discount</span>
-                        </NavLinkItem>
-                        <NavLinkItem to="/help" onClick={props.close}>
-                            <Icon src="/images/icons/help.svg" alt="" onError={(e) => e.target.style.display='none'} />
-                            <span>Help & Support</span>
-                        </NavLinkItem>
-                    </NavLinks>
-
-                    <Divider />
+                <NavLinks>
+                    <Link to="/" onClick={handleClose}>
+                        <span>Home</span>
+                    </Link>
+                    <Link to="/discounts" onClick={handleClose}>
+                        <span>Discounts</span>
+                    </Link>
+                    <Link to="/discounts/add" onClick={handleClose}>
+                        <span>Post</span>
+                    </Link>
+                    <Link to="/help" onClick={handleClose}>
+                        <span>Help</span>
+                    </Link>
 
                     {props.user ? (
-                        <UserSection>
-                            <UserInfo>
-                                {props.user.photoURL ? (
-                                    <UserAvatar src={props.user.photoURL} alt="" />
-                                ) : (
-                                    <UserAvatar src="/images/icons/user.svg" alt="" />
-                                )}
-                                <UserDetails>
-                                    <UserName>{props.user.displayName || 'User'}</UserName>
-                                    <UserEmail>{props.user.email}</UserEmail>
-                                </UserDetails>
-                            </UserInfo>
-                            <UserLinks>
-                                <NavLinkItem to="/dashboard" onClick={props.close}>
-                                    Dashboard
-                                </NavLinkItem>
-                                <NavLinkItem to="/logout" onClick={props.close} className="logout">
-                                    Logout
-                                </NavLinkItem>
-                            </UserLinks>
-                        </UserSection>
+                        <>
+                            <DrpdnWrap>
+                                <User className="user-sm">
+                                    <span>
+                                        {props.user && props.user.photoURL ? (
+                                            <img src={props.user.photoURL} alt="" />
+                                        ) : (
+                                            <img src="/images/icons/user.svg" alt="" />
+                                        )}
+                                        <span>
+                                            &nbsp;
+                                            Me<img src="/images/icons/down-arrow-w.svg" alt="" className="down" />
+                                        </span>
+                                    </span>
+                                </User>
+                                <div className="dropdown-content">
+                                    <Link to="/dashboard" onClick={handleClose}>
+                                        Dashboard
+                                    </Link>
+                                    <Link to="/logout" onClick={handleClose}>
+                                        Logout
+                                    </Link>
+                                </div>
+                            </DrpdnWrap>
+                        </>
                     ) : (
-                        <AuthSection>
-                            <LoginButton to="/login" onClick={props.close}>
-                                Login / Sign Up
-                            </LoginButton>
-                        </AuthSection>
+                        <>
+                            <Link to="/login" onClick={handleClose}>
+                                <span>Login</span>
+                            </Link>
+                        </>
                     )}
-                </ScrollArea>
-                
-                <Footer>
-                    <p>&copy; 2026 Quick Discount</p>
-                </Footer>
-            </Sidenav>
-        </Container>
-    )
+                </NavLinks>
+            </Panel>
+        </Overlay>
+    );
 };
 
-const Container = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2000;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: ${props => props.isOpen ? 'flex' : 'none'};
-  justify-content: flex-end;
-  transition: opacity 0.3s ease;
+// Animations
+const fadeIn = keyframes`
+    from { opacity: 0; }
+    to   { opacity: 1; }
 `;
 
-const Sidenav = styled.div`
-    width: 300px;
-    height: 100%;
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-    color: #333;
+const fadeOut = keyframes`
+    from { opacity: 1; }
+    to   { opacity: 0; }
 `;
 
-const Header = styled.div`
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #eee;
+const slideIn = keyframes`
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
 `;
 
-const Logo = styled.img`
-    height: 40px;
+const slideOut = keyframes`
+    from { transform: translateX(0); }
+    to   { transform: translateX(100%); }
+`;
+
+const Overlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.6);
+    font-family: Lato, 'Roboto', sans-serif;
+    animation: ${({ isClosing }) =>
+        isClosing
+            ? css`${fadeOut} 0.3s ease forwards`
+            : css`${fadeIn} 0.3s ease forwards`};
+`;
+
+const Panel = styled.div`
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 75%;
+    max-width: 320px;
+    background-color: #0B0705;
+    padding: 60px 0 20px;
+    overflow-y: auto;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+    animation: ${({ isClosing }) =>
+        isClosing
+            ? css`${slideOut} 0.3s ease forwards`
+            : css`${slideIn} 0.3s ease forwards`};
+
+    @media (min-width: 600px) {
+        width: 50%;
+        max-width: 360px;
+    }
 `;
 
 const CloseBtn = styled.button`
-    font-size: 28px;
-    color: #666;
-    border: none;
-    background: none;
-    cursor: pointer;
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    font-size: 36px;
     line-height: 1;
-    &:hover { color: #fa8128; }
-`;
-
-const ScrollArea = styled.div`
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 0;
+    color: #fff;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1;
 `;
 
 const SearchWrapper = styled.div`
-    padding: 10px 20px 20px;
+    padding: 0 16px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 8px;
 `;
 
 const NavLinks = styled.div`
     display: flex;
     flex-direction: column;
+
+    a {
+        text-align: left;
+        padding: 14px 20px;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+        color: #fff;
+        display: block;
+        transition: color 0.2s, background-color 0.2s;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+
+        img {
+            width: 18px;
+            height: 18px;
+            padding: 0;
+        }
+
+        &:hover {
+            color: #fa8128;
+            background-color: rgba(250, 129, 40, 0.08);
+        }
+    }
 `;
 
-const NavLinkItem = styled(Link)`
+const DrpdnWrap = styled.div`
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+
+    & div.dropdown-content {
+        display: block;
+        margin-top: 8px;
+        padding-left: 12px;
+
+        & > a {
+            background-color: transparent;
+            color: rgba(255,255,255,0.75);
+            padding: 10px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+
+            &:hover {
+                color: #fa8128;
+            }
+        }
+    }
+`;
+
+const User = styled.a`
     display: flex;
     align-items: center;
-    padding: 12px 25px;
-    text-decoration: none;
-    color: #444;
-    font-size: 15px;
-    font-weight: 500;
-    transition: all 0.2s;
+    cursor: pointer;
 
-    &:hover {
-        background-color: #fff5ee;
-        color: #fa8128;
-        padding-left: 30px;
+    &.user-sm {
+        padding: 0;
+        span {
+            padding: 0;
+            color: #fff;
+
+            & > img {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                margin-right: 6px;
+            }
+
+            & > img.down {
+                width: 12px;
+                height: 12px;
+                margin-left: 4px;
+                margin-right: 0;
+            }
+        }
     }
 
-    &.logout {
-        color: #d9534f;
-        &:hover { background-color: #fdf2f2; }
+    span {
+        display: flex;
+        align-items: center;
     }
-`;
-
-const Icon = styled.img`
-    width: 20px;
-    height: 20px;
-    margin-right: 15px;
-    opacity: 0.7;
-`;
-
-const Divider = styled.div`
-    height: 1px;
-    background-color: #eee;
-    margin: 15px 25px;
-`;
-
-const UserSection = styled.div`
-    padding: 10px 0;
-`;
-
-const UserInfo = styled.div`
-    display: flex;
-    align-items: center;
-    padding: 0 25px 15px;
-`;
-
-const UserAvatar = styled.img`
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #fa8128;
-`;
-
-const UserDetails = styled.div`
-    margin-left: 12px;
-    overflow: hidden;
-`;
-
-const UserName = styled.div`
-    font-weight: 600;
-    font-size: 15px;
-    color: #222;
-`;
-
-const UserEmail = styled.div`
-    font-size: 12px;
-    color: #888;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-`;
-
-const UserLinks = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-const AuthSection = styled.div`
-    padding: 20px 25px;
-`;
-
-const LoginButton = styled(Link)`
-    display: block;
-    background-color: #fa8128;
-    color: white;
-    text-align: center;
-    padding: 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: background-color 0.2s;
-    &:hover { background-color: #e67624; }
-`;
-
-const Footer = styled.div`
-    padding: 15px;
-    text-align: center;
-    font-size: 12px;
-    color: #aaa;
-    border-top: 1px solid #eee;
 `;
 
 const mapStateToProps = (state) => {
     return {
         user: state.userState.user,
-    }
+    };
 };
 
 const mapDispatchToProps = (dispatch) => ({});

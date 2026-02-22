@@ -1,538 +1,725 @@
-import React,  { useState } from "react";
-import styled from "styled-components";
+import React, { useState, useEffect, useRef } from "react";
+import styled, { css, keyframes } from "styled-components";
 import { connect } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import { logOutAPI } from "../../../actions";
 import Search from "./Search";
 
+
 const Navbar = (props) => {
     const [pressedEnter, setPressedEnter] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(null); // 'discounts' | 'help' | 'user' | null
+    const [searchVisible, setSearchVisible] = useState(false);
+    const location = useLocation();
+    const dropdownRef = useRef(null);
 
-    const toggleSearch = () => {
-        document.getElementById("search-display").classList.toggle("show");
-      };
+    const isHome = location.pathname === "/";
 
-    const toggleDropdown = (id) => {
-        let elem = document.getElementById(id);
-        elem.classList.toggle("show");
-        elem.classList.toggle("current");
+    // Scroll detection
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 60);
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        handleScroll();
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setOpenDropdown(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    // Close dropdown on route change
+    useEffect(() => {
+        setOpenDropdown(null);
+        setSearchVisible(false);
+    }, [location.pathname]);
+
+    const toggleDropdown = (name) => {
+        setOpenDropdown((prev) => (prev === name ? null : name));
     };
+
+    const closeDropdown = () => setOpenDropdown(null);
+
+    const toggleSearch = () => setSearchVisible((v) => !v);
+
+    // Three navbar visual states:
+    //   'transparent' — home hero, not yet scrolled (see-through)
+    //   'scrolled'    — home after scrolling (orange glass)
+    //   'blur'        — any other page (frosted glass, no orange fill)
+    const navState = isHome
+        ? (scrolled ? "scrolled" : "transparent")
+        : "blur";
 
     // Add KeyDown event to search input
     const addSearchEvent = () => {
         let searchInputWrap = document.getElementsByClassName("wrapper")[0];
-        // let searchInputWrap = searchInputWraps[searchInputWraps.length - 1];
-        console.error('Found main nav search input wrapper... ', searchInputWrap);        
-        
-        // get nested child input element of searchInputWrap
         if (searchInputWrap) {
-            const input = searchInputWrap.querySelector('input');
-            input.setAttribute("id", "searchInput");
-            console.error('Found search input... ', input);
-            // Add onEnterKey event listener to input
-            input.addEventListener('keydown', function (e) {
-                // console.log("Keypress Function Activated...");
-                if (e.key === 'Enter') {
-                    setPressedEnter(true);
-                };
-            });
-          } else {
-            console.error('Element not found');
-          }
-      };
+            const input = searchInputWrap.querySelector("input");
+            if (input) {
+                input.setAttribute("id", "searchInput");
+                input.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter") setPressedEnter(true);
+                });
+            }
+        }
+    };
 
     return (
-        <Container style={props.style} id="top">
+        <Container
+            id="top"
+            navState={navState}
+            style={props.style}
+        >
             <Content>
+                {/* Logo */}
                 <Logo>
                     <NavLink to="/">
                         <img src="/images/logo.png" alt="Logo" />
                     </NavLink>
                 </Logo>
 
-                <SearchEntryDisplayButton onClick={toggleSearch} >
-                    <img src="/images/icons/search-icon-w.svg" alt="" />
-                </SearchEntryDisplayButton> 
+                {/* Mid search - tablet only toggle */}
+                <SearchEntryDisplayButton onClick={toggleSearch}>
+                    <img src="/images/icons/search-icon-w.svg" alt="Search" />
+                </SearchEntryDisplayButton>
 
-                <SearchEntryDisplay id="search-display" className="search-display">
+                {/* Tablet search overlay */}
+                <SearchEntryDisplay visible={searchVisible} id="search-display">
                     <div>
-                        <input type="text" placeholder="Search" />
+                        <input type="text" placeholder="Search discounts..." />
                         <SearchButton>
                             <img src="/images/icons/search-icon.svg" alt="" />
-                        </SearchButton> 
+                        </SearchButton>
                         <CloseBtn onClick={toggleSearch}>&times;</CloseBtn>
                     </div>
                 </SearchEntryDisplay>
 
+                {/* Desktop search bar */}
                 <SearchWrapper>
-                    <Search 
-                        homeSearch={props.homeSearch} 
+                    <Search
+                        homeSearch={isHome}
                         pressedEnter={pressedEnter}
-                        addSearchEvent={addSearchEvent}/>
+                        addSearchEvent={addSearchEvent}
+                    />
                 </SearchWrapper>
 
+                {/* Hamburger — mobile only */}
                 <Menu id="sidenav">
-                    <NavLink onClick={props.sidenav}>
-                        &#9776;
-                        {/* <img src="/images/icons/more-w.svg" alt="More"></img> */}
-                    </NavLink>
+                    <HamburgerBtn onClick={props.sidenav} aria-label="Open menu">
+                        <span /><span /><span />
+                    </HamburgerBtn>
                 </Menu>
 
-                <TopNav>
+                {/* Desktop nav */}
+                <TopNav ref={dropdownRef}>
                     <NavListWrap>
-                        <NavList id="home">
-                            <NavLink to="/" className={({isActive}) => isActive ? 'current' : undefined} end>
+                        {/* Home */}
+                        <NavItem>
+                            <NavLink to="/" end className={({ isActive }) => isActive ? "active" : ""}>
                                 <span>Home</span>
                             </NavLink>
-                        </NavList>
+                        </NavItem>
 
-                        <NavList className="dropdown">
-                            <NavLink to="/discounts" onClick={() => toggleDropdown("events-drpdwn")} >
+                        {/* Discounts dropdown */}
+                        <NavItem className="has-dropdown">
+                            <DropdownTrigger
+                                onClick={() => toggleDropdown("discounts")}
+                                isOpen={openDropdown === "discounts"}
+                                aria-haspopup="true"
+                                aria-expanded={openDropdown === "discounts"}
+                            >
                                 <span>
-                                    Discounts &nbsp;
-                                    <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    Discounts
+                                    <ChevronIcon isOpen={openDropdown === "discounts"}>
+                                        <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    </ChevronIcon>
                                 </span>
-                            </NavLink>
-                            <div className="dropdown-content" id="events-drpdwn">
-                                <Link to="/discounts">
-                                    All 
+                            </DropdownTrigger>
+                            <DropdownMenu isOpen={openDropdown === "discounts"}>
+                                <DropdownArrow />
+                                <Link to="/discounts" onClick={closeDropdown}>
+                                    <DropdownItem>
+                                        <DropdownIcon>🏷️</DropdownIcon>
+                                        All Discounts
+                                    </DropdownItem>
                                 </Link>
-                                {/* <Link to="/discounts/latest">
-                                    Latest
-                                </Link> */}
-                            </div>
-                        </NavList>
+                            </DropdownMenu>
+                        </NavItem>
 
-                        <NavList className="dropdown">
-                            <NavLink to="/help" onClick={() => toggleDropdown("help-drpdwn")}>
+                        {/* Help dropdown */}
+                        <NavItem className="has-dropdown">
+                            <DropdownTrigger
+                                onClick={() => toggleDropdown("help")}
+                                isOpen={openDropdown === "help"}
+                                aria-haspopup="true"
+                                aria-expanded={openDropdown === "help"}
+                            >
                                 <span>
-                                    Help &nbsp;
-                                    <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    Help
+                                    <ChevronIcon isOpen={openDropdown === "help"}>
+                                        <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    </ChevronIcon>
                                 </span>
+                            </DropdownTrigger>
+                            <DropdownMenu isOpen={openDropdown === "help"}>
+                                <DropdownArrow />
+                                <Link to="/help/basics" onClick={closeDropdown}>
+                                    <DropdownItem>
+                                        <DropdownIcon>📖</DropdownIcon>
+                                        Basics
+                                    </DropdownItem>
+                                </Link>
+                                <Link to="/help/accounts" onClick={closeDropdown}>
+                                    <DropdownItem>
+                                        <DropdownIcon>👤</DropdownIcon>
+                                        Account
+                                    </DropdownItem>
+                                </Link>
+                                <Link to="/help/payment" onClick={closeDropdown}>
+                                    <DropdownItem>
+                                        <DropdownIcon>💳</DropdownIcon>
+                                        Payments
+                                    </DropdownItem>
+                                </Link>
+                            </DropdownMenu>
+                        </NavItem>
+
+                        {/* Post */}
+                        <NavItem>
+                            <NavLink to="/discounts/add" className={({ isActive }) => isActive ? "active current" : ""}>
+                                <span>Post</span>
                             </NavLink>
-                            <div className="dropdown-content" id="help-drpdwn">
-                                <Link to="/help/basics">
-                                    Basics
-                                </Link>
-                                <Link to="/help/accounts">
-                                    Account
-                                </Link>
-                                <Link to="/help/payment">
-                                    Payments
-                                </Link>
-                            </div>
-                        </NavList>
+                        </NavItem>
 
-                        <NavList>
-                        <NavList>
-                                <NavLink to="/discounts/add" className={({isActive}) => isActive ? 'current' : undefined}>
-                                    <span>Post</span>
-                                </NavLink>
-                            </NavList>
-                        </NavList>
-
+                        {/* User / Auth */}
                         {props.user ? (
-                            <>
-                            {/* <NavList>
-                                <NavLink>
-                                    <NavCartButton onClick={props.onShowCart} />
-                                </NavLink>
-                            </NavList> */}
-
-                            <NavList className="dropdown">
-                                <NavLink >
-                                    <User className="user-sm">
-                                        <span>
-                                            {props.user && props.user.photoURL ? (
-                                                <img src={props.user.photoURL} alt="" />
-                                            ) : (
-                                            <img src="/images/icons/user.svg" alt="" />
-                                            )}
-                                            <span>
-                                                &nbsp;
-                                                Me<img src="/images/icons/down-arrow-w.svg" alt="" className="down" />
-                                            </span>
+                            <NavItem className="has-dropdown">
+                                <DropdownTrigger
+                                    onClick={() => toggleDropdown("user")}
+                                    isOpen={openDropdown === "user"}
+                                    aria-haspopup="true"
+                                    aria-expanded={openDropdown === "user"}
+                                >
+                                    <UserAvatar>
+                                        {props.user.photoURL ? (
+                                            <img src={props.user.photoURL} alt="avatar" className="avatar" />
+                                        ) : (
+                                            <img src="/images/icons/user.svg" alt="user" className="avatar placeholder" />
+                                        )}
+                                        <span className="me-label">
+                                            Me
+                                            <ChevronIcon isOpen={openDropdown === "user"}>
+                                                <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                            </ChevronIcon>
                                         </span>
-                                    </User>
-                                </NavLink>
-                                <div className="dropdown-content">
-                                    <Link to="/dashboard">Dashboard</Link>
-                                    <Link to="/logout">
-                                        Logout
+                                    </UserAvatar>
+                                </DropdownTrigger>
+                                <DropdownMenu isOpen={openDropdown === "user"} align="right">
+                                    <DropdownArrow align="right" />
+                                    <UserDropdownHeader>
+                                        {props.user.displayName || props.user.email}
+                                    </UserDropdownHeader>
+                                    <DropdownDivider />
+                                    <Link to="/dashboard" onClick={closeDropdown}>
+                                        <DropdownItem>
+                                            <DropdownIcon>📊</DropdownIcon>
+                                            Dashboard
+                                        </DropdownItem>
                                     </Link>
-                                </div>
-                            </NavList>
-                            </>
+                                    <Link to="/logout" onClick={closeDropdown}>
+                                        <DropdownItem danger>
+                                            <DropdownIcon>🚪</DropdownIcon>
+                                            Logout
+                                        </DropdownItem>
+                                    </Link>
+                                </DropdownMenu>
+                            </NavItem>
                         ) : (
-                            <>
-                            {/* <NavList>
-                                <NavLink to="/signup" className={({isActive}) => isActive ? 'current' : undefined}>
-                                    <span>Sign Up</span>
+                            <NavItem>
+                                <NavLink to="/login" className={({ isActive }) => isActive ? "active" : ""}>
+                                    <LoginBtn>Login</LoginBtn>
                                 </NavLink>
-                            </NavList> */}                            
-                            </>)
-                        }
-                        {/* <TicketCart id="ticket-card-2">
-                            <NavLink>
-                                <img src="/images/icons/ticket-w.svg" alt="Tickets"></img>
-                                <span>0</span>
-                            </NavLink>
-                        </TicketCart> */}
+                            </NavItem>
+                        )}
                     </NavListWrap>
-                    
                 </TopNav>
             </Content>
         </Container>
     );
 };
 
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+
+const dropdownEnter = keyframes`
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+`;
+
+const slideDownFade = keyframes`
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+`;
+
+/* ─── Container ──────────────────────────────────────────────────────────── */
+
 const Container = styled.div`
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;
     z-index: 1000;
-    padding: 5px 0;
-    padding-top: 10px;    
-    /* overflow: hidden; */
     font-family: Inter, 'Roboto', sans-serif;
-    background-color: #fa8128;
-    backdrop-filter: blur(10);
+
+    /* Glassmorphism layer — always present, intensity shifts per state */
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+
+    transition:
+        background-color 0.4s ease,
+        box-shadow       0.4s ease,
+        border-color     0.4s ease,
+        padding          0.35s ease;
+
+    /*
+     * State: 'transparent' — Home hero, not yet scrolled
+     *   Barely-there black tint. Hero bleeds through.
+     *   No border, no shadow — it's floating above the image.
+     */
+    ${({ navState }) => navState === "transparent" && css`
+        background-color: rgba(0, 0, 0, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: none;
+        padding: 14px 0;
+    `}
+
+    /*
+     * State: 'scrolled' — Home after scrolling
+     *   Orange glass: brand colour, dense blur, crisp shadow.
+     */
+    ${({ navState }) => navState === "scrolled" && css`
+        background-color: rgba(220, 103, 14, 0.78);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow:
+            0 4px 28px rgba(0, 0, 0, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        padding: 6px 0;
+    `}
+
+    /*
+     * State: 'blur' — All other pages
+     *   Pure frosted glass. No orange fill — whatever sits behind
+     *   the navbar (page background, cards, content) tints it naturally.
+     *   A subtle dark-to-transparent gradient anchors it visually.
+     */
+    ${({ navState }) => navState === "blur" && css`
+        background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.28) 0%,
+            rgba(0, 0, 0, 0.10) 100%
+        );
+        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+        padding: 6px 0;
+    `}
+
+    /* Hide hamburger on desktop */
     @media (min-width: 768px) {
-        #sidenav{
-            display: none;
-        }
+        #sidenav { display: none; }
     }
 `;
 
+/* ─── Content / Layout ───────────────────────────────────────────────────── */
 
 const Content = styled.div`
     display: flex;
-    align-items: center; /** flex-start */
-    min-height: 100%;
+    align-items: center;
     justify-content: space-between;
     width: 95%;
     margin: 0 auto;
+    position: relative;
 
-    @media (min-width: 768px) {
-        width: 90%;        
-    }
-
-    /* Largest devices such as desktops (1920px and up) */
-    @media only screen and (min-width: 120em) {
-        width: 80%;
-    }
-
-    /* Largest devices such as desktops (1280px and up) */
-    @media only screen and (min-width: 160em) {
-        width: 60%;
-    }
+    @media (min-width: 768px)  { width: 90%; }
+    @media (min-width: 1920px) { width: 80%; }
+    @media (min-width: 2560px) { width: 60%; }
 `;
 
+/* ─── Logo ───────────────────────────────────────────────────────────────── */
 
 const Logo = styled.span`
-    font-size: 0px;
-    img {
-        height: 70px;
-        margin-top: -5px;
-        margin-right: 10px;
-        padding: 0px;
-        /* border: 2px solid white; */
-    }
-    @media screen and (max-width: 768px){
-        img {
-            height: 40px;
-            margin-top: -5px;
-            /* border: 2px solid white; */
-        }
-    }
-`;
-
-const SearchEntryDisplayButton = styled.button`
     font-size: 0;
+    flex-shrink: 0;
+
     img {
-        position: relative;
-        border: none;
-        outline: none;
-        box-sizing: none;
-        width: 20px;
+        height: 64px;
+        margin-top: -4px;
+        margin-right: 10px;
+        padding: 0;
+        transition: height 0.35s ease;
+        display: block;
     }
-    @media screen and (max-width: 767px){
-        display: none;
-    }
-    @media screen and (min-width: 1021px){
-        display: none;
+
+    @media (max-width: 768px) {
+        img { height: 40px; }
     }
 `;
 
-const SearchButton = styled.button`
-    font-size: 0px;
-    img {
-        position: relative;
-        border: none;
-        outline: none;
-        box-sizing: none;
-        background-color: transparent;
-        width: 25px;
-    }
-`;
-
-const SearchEntryDisplay = styled.div`
-    display: none;
-    & div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        & input {
-            width: 50%;
-            height: 40px;
-            padding-left: 10px;
-            margin-right: 10px;
-            border: 1px solid black;
-            border-radius: 20px;
-        }
-    }
-    @media screen and (max-width: 1020px){
-        background-color: #eef3f8;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100vw;
-        z-index: 1000;
-        padding: 10px 0;
-        overflow: hidden;
-        height: 70px;
-    }
-    .show {display:block;}
-`;
+/* ─── Search ─────────────────────────────────────────────────────────────── */
 
 const SearchWrapper = styled.div`
     position: relative;
-    width: 400px;
-    @media (max-width: 1020px) {
-        display: none;
-    }
+    width: 380px;
+    flex-shrink: 0;
+
+    @media (max-width: 1020px) { display: none; }
 `;
 
-const Search2 = styled.div`
-    padding: 0;
-    margin: 0;
-    /* border: 1px solid blue; */
-    input {
-        border: none;
-        box-sizing: none;
-        background-color: rgba(255, 255, 255, 0.4);
-        border-radius: 20px;
-        color: #fff; 
-        width: 300px;
-        padding: 0 8px 0 40px;
-        font-size: 16px;
-        height: 40px;
-        border-color: #dce6f1;
-        /* vertical-align: text-top; */
-        outline: none;
-        &::placeholder{
-            color: #fff;
-        }
-        @media (max-width: 768px) {
-            max-width: 150px;
+const SearchEntryDisplayButton = styled.button`
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+
+    img { width: 20px; height: 20px; }
+
+    @media (max-width: 767px)  { display: none; }
+    @media (min-width: 1021px) { display: none; }
+`;
+
+const SearchButton = styled.button`
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    img { width: 22px; height: 22px; }
+`;
+
+const SearchEntryDisplay = styled.div`
+    display: ${({ visible }) => (visible ? "flex" : "none")};
+    align-items: center;
+    justify-content: center;
+    background-color: #eef3f8;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    z-index: 1100;
+    padding: 12px 16px;
+    animation: ${slideDownFade} 0.2s ease;
+
+    & > div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 600px;
+
+        input {
+            flex: 1;
+            height: 40px;
+            padding: 0 14px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 15px;
+            outline: none;
+
+            &:focus { border-color: #fa8128; }
         }
     }
-    @media (min-width: 769px) {
-        min-width: 300px;
-    }
+
+    @media (min-width: 1021px) { display: none !important; }
 `;
 
 const CloseBtn = styled.button`
-    position: absolute;
-    right: 15px;
-    font-size: 30px;
-    color: black;
+    background: transparent;
     border: none;
+    font-size: 26px;
+    line-height: 1;
+    color: #333;
+    cursor: pointer;
+    padding: 0 4px;
     outline: none;
-    background-color: transparent;
 `;
+
+/* ─── Hamburger ──────────────────────────────────────────────────────────── */
+
+const Menu = styled.li`
+    list-style: none;
+    display: flex;
+    align-items: center;
+
+    @media (min-width: 600px) { display: none; }
+`;
+
+const HamburgerBtn = styled.button`
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: #fff;
+        border-radius: 2px;
+        transition: transform 0.2s ease;
+    }
+
+    &:hover span { background: rgba(255,255,255,0.8); }
+`;
+
+/* ─── Top Nav ────────────────────────────────────────────────────────────── */
 
 const TopNav = styled.nav`
     margin-left: auto;
-    display: block; 
-    color: #000;
-    font-size: 16px;
-    font-weight: 500;
-    @media (max-width: 600px) {
-        display: none;
-    }
+    display: flex;
+    align-items: center;
+
+    @media (max-width: 600px) { display: none; }
 `;
 
 const NavListWrap = styled.ul`
     display: flex;
-    list-style-type: none;
-    position: relative;
+    align-items: center;
+    list-style: none;
     padding: 0;
+    margin: 0;
+    gap: 2px;
 `;
 
+/* ─── Nav Items ──────────────────────────────────────────────────────────── */
 
-const NavList = styled.li`
+const NavItem = styled.li`
+    position: relative;
     display: flex;
     align-items: center;
-    margin-right: 8px;
-    
+
     a {
-        // align-items: flex-start;
-        background: transparent;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        min-height: 30px;
-        min-width: 40px;
-        position: relative;
-        text-decoration: none;
-        margin-left: 5px;
-        color: #fff;
-
-        img {
-            width: 30px;
-            height: 30px;
-        }
-
-        span {
-            display: flex;
-            align-items: center;
-            margin: 0;
-            position: relative;
-            img {
-                width: 12px;
-                height: 12px;
-            }
-        }
-
-        &.current{
-            background-color: #fa8128;
-            padding: 0 15px;
-            border-radius: 40px;
-        }
-
-        @media (max-width: 768px) {
-            min-width: 70px;
-        }
-    }
-    &:hover,
-    &.active{
-        a {
-            border-bottom: 2px solid #fa8128;
-        }
-
-        span:after {
-            content: '';
-            transform: scaleX(1);
-            bottom: 0;
-            left: 0;
-            position: absolute;
-            transition: transform 0.2s ease-in-out;
-            width: 100%;
-        }
-    }
-
-    &.dropdown{
-        position: relative;
-        display: inline-block;
-    }
-    /* Dropdown Content (Hidden by Default) */
-    & div.dropdown-content {
-        display: none;
-        position: fixed;
-        background-color: #f1f1f1;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-        /* Links inside the dropdown */
-        &>a {
-            background-color: #000;
-            opacity: 0.8;
-            color: #FFF;
-            padding: 5px 16px;
-            text-decoration: none;
-            margin-left: 0;
-        }
-        &>a:hover, &a.active {
-            color: #fa8128;
-        }
-    }
-    @media (min-width: 1024px) {
-        &.dropdown:hover .dropdown-content {display: block;}
-    }
-    .show {display:block;}
-`;
-
-const TicketCart = styled(NavList)`
-    a {
-        margin: 0 15px 0 -5px;
-        color: white;
-        
-        img {
-            margin-right: 5px;
-        }
-    }
-    &#ticket-card-2{
-        margin-right: 15px;
-    }
-`;
-
-const Menu = styled(NavList)`
-    color: #fff;
-    font-size: 30px;
-    font-weight: 600;
-    a {
-        min-width: 5px;
-    }
-    @media (min-width: 600px) {
-        display: none;
-    }
-`;
-
-
-
-const User = styled(NavList)`
-    &.user-sm {
-        padding: 0;
-        span {
-            padding: 0;
-            & > img {
-                width: 24px;
-                height: 24px;
-                border-radius: 50%;
-            }
-            & > img.down {
-                width: 12px;
-                height: 12px;
-            }
-        }
-    }
-
-    span {
         display: flex;
         align-items: center;
-    }
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 15px;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: color 0.2s ease, background-color 0.2s ease;
+        position: relative;
+        white-space: nowrap;
 
-    /* @media (min-width: 768px) {
-        &.user-sm {
-            display: flex;
+        span { display: flex; align-items: center; gap: 4px; }
+
+        &:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        &.active, &.current {
+            color: #fff;
+            font-weight: 600;
+
+            &::after {
+                content: '';
+                position: absolute;
+                bottom: 2px;
+                left: 12px;
+                right: 12px;
+                height: 2px;
+                background: #fff;
+                border-radius: 2px;
+            }
         }
     }
-
-    @media (max-width: 480px) {
-        &.user-sm {
-            display: flex;
-        }
-    } */
 `;
 
+/* ─── Dropdown Trigger ───────────────────────────────────────────────────── */
 
-const mapStateToProps = (state) => {
-    return {
-        user: state.userState.user,
+const DropdownTrigger = styled.button`
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    font-weight: 500;
+    font-family: inherit;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    white-space: nowrap;
+
+    span { display: flex; align-items: center; gap: 4px; }
+
+    &:hover {
+        color: #fff;
+        background-color: rgba(255, 255, 255, 0.12);
     }
-};
+
+    ${({ isOpen }) =>
+        isOpen &&
+        css`
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.18);
+        `}
+`;
+
+const ChevronIcon = styled.span`
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.25s ease;
+    transform: ${({ isOpen }) => (isOpen ? "rotate(180deg)" : "rotate(0deg)")};
+
+    img { width: 11px; height: 11px; display: block; }
+`;
+
+/* ─── Dropdown Menu ──────────────────────────────────────────────────────── */
+
+const DropdownMenu = styled.div`
+    position: absolute;
+    top: calc(100% + 10px);
+    ${({ align }) => align === "right" ? "right: 0;" : "left: 0;"}
+    min-width: 190px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    z-index: 1200;
+    pointer-events: ${({ isOpen }) => (isOpen ? "auto" : "none")};
+    opacity: ${({ isOpen }) => (isOpen ? 1 : 0)};
+    transform: ${({ isOpen }) => (isOpen ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.97)")};
+    transition: opacity 0.22s ease, transform 0.22s ease;
+
+    a {
+        display: block;
+        text-decoration: none;
+        color: #1a1a1a;
+
+        &:hover > div { background-color: #fff5ee; }
+        &:last-child > div { border-bottom: none; }
+    }
+`;
+
+const DropdownArrow = styled.div`
+    position: absolute;
+    top: -6px;
+    ${({ align }) => align === "right" ? "right: 18px;" : "left: 18px;"}
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    transform: rotate(45deg);
+    border-radius: 2px 0 0 0;
+    box-shadow: -2px -2px 4px rgba(0,0,0,0.06);
+`;
+
+const DropdownItem = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: ${({ danger }) => (danger ? "#e53e3e" : "#1a1a1a")};
+    border-bottom: 1px solid #f5f5f5;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+        background-color: ${({ danger }) => (danger ? "#fff5f5" : "#fff5ee")};
+        color: ${({ danger }) => (danger ? "#c53030" : "#fa8128")};
+    }
+`;
+
+const DropdownIcon = styled.span`
+    font-size: 15px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+`;
+
+const DropdownDivider = styled.hr`
+    margin: 0;
+    border: none;
+    border-top: 1px solid #f0f0f0;
+`;
+
+const UserDropdownHeader = styled.div`
+    padding: 12px 16px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+`;
+
+/* ─── User Avatar Trigger ────────────────────────────────────────────────── */
+
+const UserAvatar = styled.span`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    img.avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        object-fit: cover;
+
+        &.placeholder {
+            padding: 3px;
+            background: rgba(255,255,255,0.2);
+        }
+    }
+
+    .me-label {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        color: rgba(255,255,255,0.9);
+        font-size: 14px;
+        font-weight: 500;
+    }
+`;
+
+/* ─── Login Button ───────────────────────────────────────────────────────── */
+
+const LoginBtn = styled.span`
+    background: rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.55);
+    border-radius: 20px;
+    padding: 5px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff !important;
+    transition: background 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.28) !important;
+        border-color: #fff;
+    }
+`;
+
+/* ─── Redux ──────────────────────────────────────────────────────────────── */
+
+const mapStateToProps = (state) => ({
+    user: state.userState.user,
+});
 
 const mapDispatchToProps = (dispatch) => ({
     signOut: () => dispatch(logOutAPI()),

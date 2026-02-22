@@ -1,431 +1,674 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { loginAPI, googleAuth } from "../../actions";
-import { NavLink, Link } from "react-router-dom";
-import { Navigate, useNavigate } from "react-router-dom";
-import { setLoading, setLoadingMessage } from "../../actions";
+import { loginAPI } from "../../actions";
+import { NavLink, useNavigate } from "react-router-dom";
 import { isEmailValid, isPasswordValid, isContactValid } from "../../utils/middleware";
 
+// ─── Decorative discount tags for the left panel ─────────────────────────────
+const TAGS = [
+  { label: "50% OFF",  top: "18%", left: "12%",  rotate: "-14deg", delay: "0s"    },
+  { label: "SALE",     top: "32%", left: "68%",  rotate: "10deg",  delay: "0.1s"  },
+  { label: "GHS 20",   top: "54%", left: "20%",  rotate: "6deg",   delay: "0.2s"  },
+  { label: "30% OFF",  top: "70%", left: "58%",  rotate: "-8deg",  delay: "0.15s" },
+  { label: "NEW",      top: "80%", left: "10%",  rotate: "12deg",  delay: "0.25s" },
+  { label: "HOT 🔥",   top: "12%", left: "55%",  rotate: "-5deg",  delay: "0.05s" },
+];
 
 const Login = (props) => {
-    const [email, setEmail] = useState("");
-    const [contact, setContact] = useState("");
-    const [password, setPassword] = useState("");
-    const [loginChoice, setLoginChoice] = useState("");
-    const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
-    // ERRORS
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-    const [contactError, setContactError] = useState("");
-    const [loginError, setLoginError] = useState("");
+  const [email,          setEmail]          = useState("");
+  const [contact,        setContact]        = useState("");
+  const [password,       setPassword]       = useState("");
+  const [loginChoice,    setLoginChoice]    = useState("email");
+  const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
+  const [showPassword,   setShowPassword]   = useState(false);
+  const [focusedField,   setFocusedField]   = useState(null);
 
-    const navigate = useNavigate();
+  // errors
+  const [emailError,    setEmailError]    = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [contactError,  setContactError]  = useState("");
+  const [loginError,    setLoginError]    = useState("");
 
-    const handleRedirect = (url) => {
-        if (url){
-            navigate(url);
-        }
-        else{
-            navigate('/');
-        }
-      };
+  const navigate = useNavigate();
 
-    const validateEmail = (value) => { 
-        setEmail(value);
-        let emailRes = isEmailValid(value);
-        setEmailError(emailRes[1] ? emailRes[1] : "");
-    }; 
+  const handleRedirect = (url) => navigate(url || "/");
 
-    const validatePassword = (value) => { 
-        setPassword(value);
-        let paswdRes = isPasswordValid(value);
-        setPasswordError(paswdRes[1] ? paswdRes[1] : "");
-    }; 
+  const validateEmail   = (v) => { setEmail(v);   setEmailError(isEmailValid(v)[1]     || ""); };
+  const validatePassword= (v) => { setPassword(v); setPasswordError(isPasswordValid(v)[1] || ""); };
+  const validateContact = (v) => { setContact(v);  setContactError(isContactValid(v)[1]  || ""); };
 
-    const validateContact = (value) => { 
-        setContact(value);
-        let contactRes = isContactValid(value);
-        setContactError(contactRes[1] ? contactRes[1] : "");
-    }; 
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (e.target !== e.currentTarget) return;
+    props.signIn({ email, contact, password, rememberMe: keepMeLoggedIn });
+  };
 
-    const checkInputChangeHandler = (id) => {
-        let elem = document.getElementById(id);
-    
-        if (elem.checked) {
-          setKeepMeLoggedIn(true);
-        }
-        else {
-            setKeepMeLoggedIn(false);
-        }
-    };
+  useEffect(() => {
+    if (props.errors?.login) setLoginError(props.errors.login);
+    if (props.user) handleRedirect(props.previous_url);
+  }, [props.errors, props.user, props.previous_url]);
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-    
-        if (e.target !== e.currentTarget) {
-          return;
-        }
-    
-        const payload = {
-          email: email,
-          contact: contact,
-          password: password,
-          rememberMe: keepMeLoggedIn,
-        };
-    
-        props.signIn(payload);
-      }
+  const canSubmit = password && (loginChoice === "email" ? email : contact);
 
-    const reset = () => {
-        setEmail("");
-        setContact("");
-        setPassword("");
-    };
+  return (
+    <Page>
+      {/* ── Left decorative panel ── */}
+      <LeftPanel>
+        <PanelGrain />
+        <PanelGlow />
 
-    useEffect(() => {
-        if (props.errors){
-            if (props.errors.login){
-                setLoginError(props.errors.login);
-            }
-        }
-        if (props.user){
-            // props.closeLoader();
-            handleRedirect(props.previous_url);
-        }
-    }, [props.errors, props.user, props.previous_url]);
+        {TAGS.map(({ label, top, left, rotate, delay }) => (
+          <FloatingTag key={label} style={{ top, left, transform: `rotate(${rotate})` }} delay={delay}>
+            {label}
+          </FloatingTag>
+        ))}
 
-    return (
-        <Container>
-            {/* {props.user && <Navigate to='/' />}  */}
-             <Section>
-                <FormSection>
-                    <Form>
-                        <h1>Welcome back!</h1>
-                        <form>
-                            <LoginType>
-                                <label for="login-choice">Select login method</label>
-                                <Options>
-                                    <Option onClick={()=>{setLoginChoice("email")}}>
-                                        Email
-                                    </Option>
-                                    <Option className="contact" onClick={()=>{setLoginChoice("contact")}}>
-                                        Contact
-                                    </Option>
-                                </Options>
-                            </LoginType>
-                            
-                            {loginError && <p style={{color:"red", margin:"-10px 0 30px 0"}}>{loginError}</p>}
+        <PanelContent>
+          <PanelLogo>
+            <img src="/images/logo.png" alt="QuickDiscount" />
+          </PanelLogo>
+          <PanelTagline>
+            Ghana's fastest way to<br />
+            <PanelAccent>find & run discounts.</PanelAccent>
+          </PanelTagline>
+          <PanelSub>No wahala. Just deals.</PanelSub>
 
-                            { loginChoice === "email" &&
-                            <div className="inputbox-wrap">
-                                <div className="inputbox">
-                                    <input 
-                                        type="email" 
-                                        value={email}
-                                        onChange={(e) => validateEmail(e.target.value)}
-                                        required="required" 
-                                    />
-                                    <span>Email</span>
-                                </div>
-                                {emailError && <p>{emailError}</p>}
-                            </div>
-                            }
+          <PanelStats>
+            <Stat><StatNum>500+</StatNum><StatLabel>Active deals</StatLabel></Stat>
+            <StatDivider />
+            <Stat><StatNum>50+</StatNum><StatLabel>Categories</StatLabel></Stat>
+            <StatDivider />
+            <Stat><StatNum>Free</StatNum><StatLabel>To browse</StatLabel></Stat>
+          </PanelStats>
+        </PanelContent>
+      </LeftPanel>
 
-                            { loginChoice === "contact" &&
-                            <div className="inputbox-wrap">
-                                <div className="inputbox">
-                                    <input 
-                                        type="tel" 
-                                        value={contact}
-                                        onChange={(e) => validateContact(e.target.value)}
-                                        required="required" 
-                                    />
-                                    <span>Contact</span>
-                                </div>
-                                {contactError && <p>{contactError}</p>}
-                            </div>
-                            }
+      {/* ── Right form panel ── */}
+      <RightPanel>
+        <FormCard>
+          <FormHeader>
+            <Greeting>Welcome back</Greeting>
+            <FormSubtitle>Sign in to your QuickDiscount account</FormSubtitle>
+          </FormHeader>
 
-                            <div className="inputbox-wrap">
-                                <div className="inputbox">
-                                    <input 
-                                        type="password" 
-                                        value={password}
-                                        onChange={(e) => validatePassword(e.target.value)}
-                                        required="required" 
-                                    />
-                                    <span>Password</span>
-                                </div>
-                                {passwordError && <p>{passwordError}</p>}
-                            </div>
+          {/* Method toggle */}
+          <MethodToggle>
+            <MethodBtn
+              active={loginChoice === "email"}
+              onClick={() => { setLoginChoice("email"); setContact(""); setContactError(""); }}
+            >
+              Email
+            </MethodBtn>
+            <MethodBtn
+              active={loginChoice === "contact"}
+              onClick={() => { setLoginChoice("contact"); setEmail(""); setEmailError(""); }}
+            >
+              Phone
+            </MethodBtn>
+            <MethodSlider offset={loginChoice === "contact" ? "50%" : "0%"} />
+          </MethodToggle>
 
-                            <div className="inputbox">
-                                <input 
-                                    type="button" 
-                                    value="submit" 
-                                    onClick={handleLogin}
-                                    disabled={!((password && email) || (password && contact)) ? true : false}
-                                />
-                            </div>
-                            <ForgetPassword>
-                                <div>
-                                    <input 
-                                    type="checkbox" 
-                                    id="rememberMe" 
-                                    onChange={()=> checkInputChangeHandler("rememberMe")}
-                                    /> 
-                                    Remember Me
-                                </div>
-                                
-                                <NavLink to="/forgetpassword">Forgot password?</NavLink>
-                            </ForgetPassword>
-                        </form>
-                        <hr/>
-                        <CreateAccount>New here?<NavLink to="/signup">Create account </NavLink></CreateAccount>  
-                    </Form>
+          {loginError && <ErrorBanner>{loginError}</ErrorBanner>}
 
-                </FormSection>
-                <Hero>
-                    <div>
-                        <img src="/images/art2.png" alt="SignUp" />
-                    </div>
-                </Hero>
-            </Section>
+          <FormBody onSubmit={handleLogin}>
 
-        </Container>
-    );
+            {/* Email or Contact */}
+            {loginChoice === "email" ? (
+              <FieldGroup>
+                <InputWrap>
+                  <FloatingInput
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => validateEmail(e.target.value)}
+                    onFocus={() => setFocusedField("email")}
+                    onBlur={() => setFocusedField(null)}
+                    focused={focusedField === "email"}
+                    placeholder=""
+                    required
+                  />
+                  <FloatingLabel
+                    htmlFor="email"
+                    raised={focusedField === "email" || !!email}
+                    focused={focusedField === "email"}
+                  >Email address</FloatingLabel>
+                </InputWrap>
+                {emailError && <FieldError>{emailError}</FieldError>}
+              </FieldGroup>
+            ) : (
+              <FieldGroup>
+                <InputWrap>
+                  <FloatingInput
+                    id="contact"
+                    type="tel"
+                    value={contact}
+                    onChange={(e) => validateContact(e.target.value)}
+                    onFocus={() => setFocusedField("contact")}
+                    onBlur={() => setFocusedField(null)}
+                    focused={focusedField === "contact"}
+                    placeholder=""
+                    required
+                  />
+                  <FloatingLabel
+                    htmlFor="contact"
+                    raised={focusedField === "contact" || !!contact}
+                    focused={focusedField === "contact"}
+                  >Phone number</FloatingLabel>
+                </InputWrap>
+                {contactError && <FieldError>{contactError}</FieldError>}
+              </FieldGroup>
+            )}
+
+            {/* Password */}
+            <FieldGroup>
+              <PasswordWrap>
+                <FloatingInput
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => validatePassword(e.target.value)}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
+                  focused={focusedField === "password"}
+                  placeholder=""
+                  required
+                />
+                <FloatingLabel
+                  htmlFor="password"
+                  raised={focusedField === "password" || !!password}
+                  focused={focusedField === "password"}
+                >Password</FloatingLabel>
+                <TogglePassword
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </TogglePassword>
+              </PasswordWrap>
+              {passwordError && <FieldError>{passwordError}</FieldError>}
+            </FieldGroup>
+
+            {/* Remember me + Forgot password */}
+            <FormMeta>
+              <RememberMe>
+                <Checkbox
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={keepMeLoggedIn}
+                  onChange={(e) => setKeepMeLoggedIn(e.target.checked)}
+                />
+                <label htmlFor="rememberMe">Remember me</label>
+              </RememberMe>
+              <ForgotLink to="/forgetpassword">Forgot password?</ForgotLink>
+            </FormMeta>
+
+            {/* Submit */}
+            <SubmitBtn type="submit" disabled={!canSubmit} onClick={handleLogin}>
+              Sign in
+            </SubmitBtn>
+          </FormBody>
+
+          <Divider><DividerLine /><DividerText>or</DividerText><DividerLine /></Divider>
+
+          <SignupPrompt>
+            New to QuickDiscount?{" "}
+            <SignupLink to="/signup">Create a free account →</SignupLink>
+          </SignupPrompt>
+        </FormCard>
+      </RightPanel>
+    </Page>
+  );
 };
 
-const Container = styled.div`
-    padding: 0px;
-    margin-top: 50px;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
+// ─── Animations ───────────────────────────────────────────────────────────────
+
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 `;
 
-const CreateAccount = styled.div`
-    display: flex;
-    justify-content: space-between;
+const float = keyframes`
+  0%, 100% { transform: translateY(0)   rotate(var(--r)); }
+  50%       { transform: translateY(-8px) rotate(var(--r)); }
 `;
 
-const Section = styled.section`
-    display: flex;
-    flex-wrap: wrap;
-    align-content: start;
-    align-items: flex-start;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1128px;
-    margin: auto;
-    /* border: 1px solid black; */
-    @media (min-width: 768px) and (max-width: 1023px){
-        min-height: 80%;
-        width: 90%;
-    } 
-
-    @media (min-width: 1024px) {
-        min-height: 80%;
-        width: 70%;
-    } 
+const shimmerGlow = keyframes`
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 0.85; }
 `;
 
-const FormSection = styled.div`
-    width: 50%;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+// ─── Page shell ───────────────────────────────────────────────────────────────
 
-    /* border: 1px solid blue; */
-    @media (max-width: 768px) {
-        width: 100%;
-    }
+const Page = styled.div`
+  display: flex;
+  min-height: 100vh;
+  font-family: Inter, 'Roboto', sans-serif;
 `;
 
-const Form = styled.div`
-    padding: 50px;
-    background: #fff;
-    border-radius: 10px;
-    margin: 20px;
-    /* border: 1px solid green; */
-    & h1{
-        font-size: 2em;
-        border-left: 5px solid dodgerblue;
-        padding: 10px;
-        color: #000;
-        letter-spacing: 5px;
-        margin-bottom: 35px;
-        font-weight: bold;
-        padding-left: 10px;
-        /* border: 1px solid blue; */
-    }
-    & .inputbox-wrap {
-        & p {
-            text-align: left;
-            padding-left: 10px;
-            color: red;
-        }
-        margin-bottom: 30px;
-    }
-    & .inputbox {
-        height: 50px;
-        padding: 0;
-        /* border: 1px solid green; */
-        position: relative;
-        &:last-child {
-            margin-bottom: 0;
-        }
-    }
-    & input {
-        position: relative;
-        padding: 11px 5px;
-        border-radius: 10px;
-        font-size: 1.2em;
-        border: 2px solid #000;
-        outline: none;
-        display: block;
-        width: 100%;
-        &:focus ~ span,
-        &:valid ~ span {
-            transform: translateX(-13px) translateY(-35px);
-            font-size: 1em;
-        }
-    }
+// ─── Left panel ───────────────────────────────────────────────────────────────
 
-    & span {
-        position: absolute;
-        top: 14px;
-        left: 20px;
-        font-size: 1em;
-        transition: 0.6s;
-        font-family: sans-serif;
-    }
+const LeftPanel = styled.div`
+  position: relative;
+  width: 45%;
+  background-color: #0e0c0b;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    & [type="button"] {
-        width: 100%;
-        background: dodgerblue;
-        color: #fff;
-        border: #fff;
-        &:hover {
-            background: linear-gradient(45deg, greenyellow, dodgerblue);
-        }
-    }
-    @media (max-width: 768px) {
-        padding: 0 20px;
-        & h1{
-        font-size: 1.5em;
-        }
-    }
+  @media (max-width: 860px) { display: none; }
 `;
 
-const LoginType = styled.div`
-    font-size: 1em;
-    font-family: sans-serif;
-    text-align: left;
-    color: rgba(0, 0, 0, 0.7);
-    margin-bottom: 30px;
+const PanelGrain = styled.div`
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+  pointer-events: none;
 `;
 
-const Options = styled.div`
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+const PanelGlow = styled.div`
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250, 129, 40, 0.22) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: ${shimmerGlow} 4s ease-in-out infinite;
+  pointer-events: none;
 `;
 
-const Option = styled.button`
-    width: 49%;
-    height: 30px;
-    color: rgba(0, 0, 0, 0.6);
-    background-color: #E5E4E2; /* #B2BEB5;  #7393B3 #A9A9A9 #D3D3D3*/
-    &.active, &:hover {
-        color: dodgerblue;
-        border-bottom: 3px solid dodgerblue;
-    }
+const FloatingTag = styled.div`
+  position: absolute;
+  background: rgba(250, 129, 40, 0.12);
+  border: 1px solid rgba(250, 129, 40, 0.3);
+  color: rgba(250, 129, 40, 0.85);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  --r: ${({ style }) => style?.transform?.match(/rotate\(([^)]+)\)/)?.[1] || '0deg'};
+  animation: ${float} ${() => 3 + Math.random() * 2}s ease-in-out infinite;
+  animation-delay: ${({ delay }) => delay};
+  pointer-events: none;
 `;
 
-const Google = styled.button`
-    display: flex;
-    justify-content: center;
-    background-color: #fff;
-    align-items: center;
-    height: 50px;
-    width: 100%;
-    border: 1px solid dodgerblue;
-    border-radius: 10px;
-    vertical-align: middle;
-    z-index: 0;
-    transition-duration: 167ms;
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.6);
-    margin: 10px auto;
-    margin-bottom: 0;
-    &:hover{
-        background-color: rgba(207, 207, 207, 0.25);
-        color: rgba(0, 0, 0, 0.75);
-    }
-    @media (max-width: 768px) {
-        width: 100%;
-    }
+const PanelContent = styled.div`
+  position: relative;
+  z-index: 1;
+  padding: 48px;
+  text-align: left;
+  animation: ${fadeUp} 0.7s ease both;
 `;
 
-
-const Hero = styled.div`
-    width: 50%;
-    overflow: hidden;
-    /* border: 1px solid red; */
-    div {
-        height: fit-content;
-        width: 400px;
-        padding: 50px;
-        border-radius: 50%; 
-        margin: 20px auto;
-        background: #fff;
-        border: 1px solid white;
-        &>img{
-            height: 400px;
-            /* border: 1px solid blue; */
-        }
-    }
-    @media (max-width: 768px) {
-        display: none;
-    }
+const PanelLogo = styled.div`
+  margin-bottom: 36px;
+  img {
+    height: 56px;
+    object-fit: contain;
+    filter: brightness(1.1);
+  }
 `;
 
-const mapStateToProps = (state) => {
-    return {
-        previous_url: state.appState.previous_url,
-        user: state.userState.user,
-        errors: state.appState.errors,
-    }
-};
-
-const ForgetPassword = styled.div`
-    display: flex;
-    justify-content: space-between;
-    padding-top: 10px;
-    flex-wrap: wrap;
-    
-    div{
-        display: flex;
-        align-items: center;
-    }
-    #rememberMe{
-        width: 15px;
-        height: 15px;
-        margin-right: 5px;
-    }
+const PanelTagline = styled.h2`
+  font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+  font-weight: 700;
+  color: #f5f0e8;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  font-family: Georgia, serif;
+  letter-spacing: -0.02em;
 `;
+
+const PanelAccent = styled.span`
+  color: #fa8128;
+`;
+
+const PanelSub = styled.p`
+  font-size: 1rem;
+  color: rgba(240, 236, 230, 0.45);
+  margin: 0 0 40px;
+`;
+
+const PanelStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`;
+
+const Stat = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const StatNum = styled.span`
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fa8128;
+  font-family: Georgia, serif;
+`;
+
+const StatLabel = styled.span`
+  font-size: 11px;
+  color: rgba(240, 236, 230, 0.4);
+  letter-spacing: 0.05em;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+`;
+
+const StatDivider = styled.div`
+  width: 1px;
+  height: 36px;
+  background: rgba(240, 236, 230, 0.12);
+`;
+
+// ─── Right panel ──────────────────────────────────────────────────────────────
+
+const RightPanel = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f7f5;
+  padding: 24px;
+
+  @media (max-width: 480px) { padding: 16px; }
+`;
+
+const FormCard = styled.div`
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  animation: ${fadeUp} 0.5s ease both;
+
+  @media (max-width: 480px) {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+`;
+
+// ─── Form header ──────────────────────────────────────────────────────────────
+
+const FormHeader = styled.div`
+  margin-bottom: 28px;
+`;
+
+const Greeting = styled.h1`
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0e0c0b;
+  margin: 0 0 6px;
+  font-family: Georgia, serif;
+  letter-spacing: -0.02em;
+`;
+
+const FormSubtitle = styled.p`
+  font-size: 0.875rem;
+  color: #888;
+  margin: 0;
+`;
+
+// ─── Method toggle ────────────────────────────────────────────────────────────
+
+const MethodToggle = styled.div`
+  position: relative;
+  display: flex;
+  background: #f0ece8;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 24px;
+`;
+
+const MethodSlider = styled.div`
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: ${({ offset }) => `calc(${offset} + 3px)`};
+  width: calc(50% - 6px);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+  transition: left 0.25s ease;
+`;
+
+const MethodBtn = styled.button`
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 9px 0;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: ${({ active }) => (active ? "600" : "400")};
+  color: ${({ active }) => (active ? "#0e0c0b" : "#999")};
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color 0.2s;
+  font-family: inherit;
+`;
+
+// ─── Error banner ─────────────────────────────────────────────────────────────
+
+const ErrorBanner = styled.div`
+  background: #fff2f2;
+  border: 1px solid #ffd5d5;
+  border-left: 3px solid #e53e3e;
+  color: #c53030;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 18px;
+  animation: ${fadeUp} 0.3s ease;
+`;
+
+// ─── Form body + fields ───────────────────────────────────────────────────────
+
+const FormBody = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+`;
+
+const FieldGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const InputWrap = styled.div`
+  position: relative;
+`;
+
+const FloatingLabel = styled.label`
+  position: absolute;
+  left: 14px;
+  top: ${({ raised }) => (raised ? '8px' : '50%')};
+  transform: ${({ raised }) => (raised ? 'none' : 'translateY(-50%)')};
+  font-size: ${({ raised }) => (raised ? '11px' : '14px')};
+  color: ${({ focused }) => (focused ? '#fa8128' : '#aaa')};
+  pointer-events: none;
+  transition: top 0.18s ease, font-size 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  background: #fff;
+  padding: 0 3px;
+  line-height: 1;
+  z-index: 1;
+`;
+
+const FloatingInput = styled.input`
+  width: 100%;
+  height: 52px;
+  padding: 20px 14px 6px;
+  border: 1.5px solid ${({ focused }) => (focused ? '#fa8128' : '#e8e4e0')};
+  border-radius: 10px;
+  font-size: 15px;
+  color: #0e0c0b;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+  box-shadow: ${({ focused }) => (focused ? '0 0 0 3px rgba(250,129,40,0.1)' : 'none')};
+`;
+
+const PasswordWrap = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+const TogglePassword = styled.button`
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fa8128;
+  cursor: pointer;
+  padding: 4px;
+  letter-spacing: 0.04em;
+  font-family: 'Courier New', monospace;
+
+  &:hover { color: #e06010; }
+`;
+
+const FieldError = styled.span`
+  font-size: 12px;
+  color: #e53e3e;
+  padding-left: 4px;
+`;
+
+// ─── Form meta row ────────────────────────────────────────────────────────────
+
+const FormMeta = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -4px;
+`;
+
+const RememberMe = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: #666;
+
+  label { cursor: pointer; }
+`;
+
+const Checkbox = styled.input`
+  width: 15px;
+  height: 15px;
+  accent-color: #fa8128;
+  cursor: pointer;
+`;
+
+const ForgotLink = styled(NavLink)`
+  font-size: 13px;
+  color: #fa8128;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover { color: #e06010; text-decoration: underline; }
+`;
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
+
+const SubmitBtn = styled.button`
+  width: 100%;
+  height: 50px;
+  background: ${({ disabled }) => disabled ? "#e0dbd6" : "#fa8128"};
+  color: ${({ disabled }) => disabled ? "#b0aaa4" : "#fff"};
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: ${({ disabled }) => disabled ? "not-allowed" : "pointer"};
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  margin-top: 4px;
+
+  ${({ disabled }) => !disabled && css`
+    &:hover {
+      background: #e07010;
+      box-shadow: 0 4px 16px rgba(250, 129, 40, 0.35);
+      transform: translateY(-1px);
+    }
+    &:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+  `}
+`;
+
+// ─── Divider ──────────────────────────────────────────────────────────────────
+
+const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 20px;
+`;
+
+const DividerLine = styled.div`
+  flex: 1;
+  height: 1px;
+  background: #f0ece8;
+`;
+
+const DividerText = styled.span`
+  font-size: 12px;
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.1em;
+`;
+
+// ─── Signup prompt ────────────────────────────────────────────────────────────
+
+const SignupPrompt = styled.p`
+  text-align: center;
+  font-size: 13.5px;
+  color: #888;
+  margin: 0;
+`;
+
+const SignupLink = styled(NavLink)`
+  color: #fa8128;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover { color: #e06010; text-decoration: underline; }
+`;
+
+// ─── Redux ────────────────────────────────────────────────────────────────────
+
+const mapStateToProps = (state) => ({
+  previous_url: state.appState.previous_url,
+  user: state.userState.user,
+  errors: state.appState.errors,
+});
 
 const mapDispatchToProps = (dispatch) => ({
-    signIn: (payload) => dispatch(loginAPI(payload)),
-    // closeLoader: () => {
-    //     dispatch(setLoadingMessage(null));
-    //     dispatch(setLoading(false));
-    //   },
+  signIn: (payload) => dispatch(loginAPI(payload)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
