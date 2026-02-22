@@ -142,8 +142,7 @@ const Container = styled.div`
   bottom: 0;
   z-index: 2000;
   background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
+  display: ${props => props.isOpen ? 'flex' : 'none'};
   justify-content: flex-end;
   transition: opacity 0.3s ease;
 `;
