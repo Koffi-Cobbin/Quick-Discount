@@ -269,11 +269,7 @@ function App(props) {
               />
           </Routes>
           {
-            openNav && (
-              // <Modal close={closeSideNav}>
-              <SideNav width={openNav ? "70%" : "0"} close={closeSideNav} onShowCart={showCartHandler}/>
-            )
-            // </Modal>
+            <SideNav isOpen={openNav} close={closeSideNav} onShowCart={showCartHandler}/>
           }
         </Router>
 

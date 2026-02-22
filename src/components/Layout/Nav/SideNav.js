@@ -54,73 +54,82 @@ const SideNav = (props) => {
 
 
     return (
-        <Container>
-        <Sidenav style={{ top: scrollTop > 100 ? "0" : "60px" }}>
-            <CloseBtn onClick={props.close}>&times;</CloseBtn>
+        <Container onClick={props.close}>
+            <Sidenav 
+                onClick={(e) => e.stopPropagation()}
+                style={{ transform: props.isOpen ? "translateX(0)" : "translateX(100%)" }}
+            >
+                <Header>
+                    <Logo src="/images/logo.png" alt="Quick Discount" />
+                    <CloseBtn onClick={props.close}>&times;</CloseBtn>
+                </Header>
 
-            <SearchWrapper>
-                <Search 
-                    homeSearch={props.homeSearch} 
-                    styling={{zIndex: "1"}} 
-                    closeNav={props.close} 
-                    pressedEnter={pressedEnter}
-                    addSearchEvent={addSearchEvent}/>
-            </SearchWrapper>
+                <ScrollArea>
+                    <SearchWrapper>
+                        <Search 
+                            homeSearch={props.homeSearch} 
+                            styling={{zIndex: "1"}} 
+                            closeNav={props.close} 
+                            pressedEnter={pressedEnter}
+                            addSearchEvent={addSearchEvent}/>
+                    </SearchWrapper>
 
-            <Link to="/" onClick={props.close}>
-                <span>Home</span>
-            </Link>
-            <Link to="/discounts" onClick={props.close}>
-                <span>Discounts</span>
-            </Link>
-            <Link to="/discounts/add" onClick={props.close}>
-                <span>Post</span>
-            </Link>
-            <Link to="/help" onClick={props.close}>
-                <span>Help</span>
-            </Link>
+                    <NavLinks>
+                        <NavLinkItem to="/" onClick={props.close}>
+                            <Icon src="/images/icons/home.svg" alt="" onError={(e) => e.target.style.display='none'} />
+                            <span>Home</span>
+                        </NavLinkItem>
+                        <NavLinkItem to="/discounts" onClick={props.close}>
+                            <Icon src="/images/icons/discount.svg" alt="" onError={(e) => e.target.style.display='none'} />
+                            <span>Discounts</span>
+                        </NavLinkItem>
+                        <NavLinkItem to="/discounts/add" onClick={props.close}>
+                            <Icon src="/images/icons/plus.svg" alt="" onError={(e) => e.target.style.display='none'} />
+                            <span>Post a Discount</span>
+                        </NavLinkItem>
+                        <NavLinkItem to="/help" onClick={props.close}>
+                            <Icon src="/images/icons/help.svg" alt="" onError={(e) => e.target.style.display='none'} />
+                            <span>Help & Support</span>
+                        </NavLinkItem>
+                    </NavLinks>
 
-            {props.user ? (
-            <>
-                {/* <Link onClick={props.close} className="tickets">
-                    <NavCartButton onClick={props.onShowCart} />
-                </Link> */}
+                    <Divider />
+
+                    {props.user ? (
+                        <UserSection>
+                            <UserInfo>
+                                {props.user.photoURL ? (
+                                    <UserAvatar src={props.user.photoURL} alt="" />
+                                ) : (
+                                    <UserAvatar src="/images/icons/user.svg" alt="" />
+                                )}
+                                <UserDetails>
+                                    <UserName>{props.user.displayName || 'User'}</UserName>
+                                    <UserEmail>{props.user.email}</UserEmail>
+                                </UserDetails>
+                            </UserInfo>
+                            <UserLinks>
+                                <NavLinkItem to="/dashboard" onClick={props.close}>
+                                    Dashboard
+                                </NavLinkItem>
+                                <NavLinkItem to="/logout" onClick={props.close} className="logout">
+                                    Logout
+                                </NavLinkItem>
+                            </UserLinks>
+                        </UserSection>
+                    ) : (
+                        <AuthSection>
+                            <LoginButton to="/login" onClick={props.close}>
+                                Login / Sign Up
+                            </LoginButton>
+                        </AuthSection>
+                    )}
+                </ScrollArea>
                 
-                <DrpdnWrap>
-                    <User className="user-sm">
-                        <span>
-                            {props.user && props.user.photoURL ? (
-                                <img src={props.user.photoURL} alt="" />
-                            ) : (
-                            <img src="/images/icons/user.svg" alt="" />
-                            )}
-                            <span>
-                                &nbsp;
-                                Me<img src="/images/icons/down-arrow-w.svg" alt="" className="down" />
-                            </span>
-                        </span>
-                    </User>
-                    <div className="dropdown-content">
-                        <Link to="/dashboard" onClick={props.close}>
-                            Dashboard
-                        </Link>
-                        <Link to="/logout" onClick={props.close}>
-                            Logout
-                        </Link>
-                    </div>
-                </DrpdnWrap>
-            </>
-            ) : (
-            <>
-            {/* <Link to="/signup" onClick={props.close}>
-                <span>Signup</span>
-            </Link> */}
-            <Link to="/login" onClick={props.close}>
-                <span>Login</span>
-            </Link>
-            </>)
-        }
-        </Sidenav>
+                <Footer>
+                    <p>&copy; 2026 Quick Discount</p>
+                </Footer>
+            </Sidenav>
         </Container>
     )
 };
@@ -131,111 +140,162 @@ const Container = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 999;
-  background-color: rgba(0, 0, 0, 0.8);
-  animation: fadeIn 0.4s;
-  font-family: Lato, 'Roboto', sans-serif;
+  z-index: 2000;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: flex-end;
+  transition: opacity 0.3s ease;
 `;
 
 const Sidenav = styled.div`
-    height: fit-content;
-    position: absolute; 
-    /* top: 60px;  */
-    right: 0;
-    background-color: #0B0705; 
-    padding-top: 10px; 
-    transition: 0.5s; 
-    width: 100%;
-    /* border: 1px solid #fff; */
-
-    a {
-        text-align: left;
-        padding: 8px 20px;
-        text-decoration: none;
-        font-size: 14px;
-        color: #fff;
-        display: block;
-        transition: 0.3s;
-        img {
-            width: 18px;
-            height: 18px;
-            padding: 0;
-        }
-        &:hover {
-            color: #fa8128;
-        }
-    }
+    width: 300px;
+    height: 100%;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    color: #333;
 `;
-  
+
+const Header = styled.div`
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+`;
+
+const Logo = styled.img`
+    height: 40px;
+`;
+
 const CloseBtn = styled.button`
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 36px;
-    line-height: 25px;
-    color: #FFF;
+    font-size: 28px;
+    color: #666;
     border: none;
-    outline: none;
-    background-color: transparent;
+    background: none;
+    cursor: pointer;
+    line-height: 1;
+    &:hover { color: #fa8128; }
+`;
+
+const ScrollArea = styled.div`
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 0;
 `;
 
 const SearchWrapper = styled.div`
-    margin-top: 40px;
-    padding: 0 8px;
+    padding: 10px 20px 20px;
 `;
 
-
-const DrpdnWrap = styled.div`
-    padding: 8px 20px;
-    /* Dropdown Content (Hidden by Default) */
-    & div.dropdown-content {
-        display: none;
-        position: relative;
-        background-color: #f1f1f1;
-        min-width: 160px;
-        margin-top: 5px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        /* Links inside the dropdown */
-        &>a {
-            background-color: #000;
-            opacity: 0.8;
-            color: #FFF;
-            padding: 5px 16px;
-            text-decoration: none;
-            margin-left: 0;
-        }
-        &>a:hover, &a.active {
-            color: #fa8128;
-        }
-    }
-
-    &:hover div.dropdown-content, 
-    & a.active  {display: block;}
+const NavLinks = styled.div`
+    display: flex;
+    flex-direction: column;
 `;
 
-const User = styled.a`
+const NavLinkItem = styled(Link)`
     display: flex;
     align-items: center;
-    &.user-sm {
-        padding: 0;
-        span {
-            padding: 0;
-            & > img {
-                width: 24px;
-                height: 24px;
-                border-radius: 50%;
-            }
-            & > img.down {
-                width: 12px;
-                height: 12px;
-            }
-        }
+    padding: 12px 25px;
+    text-decoration: none;
+    color: #444;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s;
+
+    &:hover {
+        background-color: #fff5ee;
+        color: #fa8128;
+        padding-left: 30px;
     }
 
-    span {
-        display: flex;
-        align-items: center;
+    &.logout {
+        color: #d9534f;
+        &:hover { background-color: #fdf2f2; }
     }
+`;
+
+const Icon = styled.img`
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    opacity: 0.7;
+`;
+
+const Divider = styled.div`
+    height: 1px;
+    background-color: #eee;
+    margin: 15px 25px;
+`;
+
+const UserSection = styled.div`
+    padding: 10px 0;
+`;
+
+const UserInfo = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 0 25px 15px;
+`;
+
+const UserAvatar = styled.img`
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fa8128;
+`;
+
+const UserDetails = styled.div`
+    margin-left: 12px;
+    overflow: hidden;
+`;
+
+const UserName = styled.div`
+    font-weight: 600;
+    font-size: 15px;
+    color: #222;
+`;
+
+const UserEmail = styled.div`
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+`;
+
+const UserLinks = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+const AuthSection = styled.div`
+    padding: 20px 25px;
+`;
+
+const LoginButton = styled(Link)`
+    display: block;
+    background-color: #fa8128;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    &:hover { background-color: #e67624; }
+`;
+
+const Footer = styled.div`
+    padding: 15px;
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+    border-top: 1px solid #eee;
 `;
 
 const mapStateToProps = (state) => {
