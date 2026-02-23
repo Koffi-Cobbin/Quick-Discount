@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import parse from 'html-react-parser';
 import { useParams } from "react-router";
@@ -32,6 +32,7 @@ import { BASE_URL } from "../../utils/constants";
 
 
 const DiscountDetail = (props) => {
+    const clickLock = useRef(false);
     let { discountId } = useParams();
     const [discount, setDiscount] = useState();
     const [readMore,setReadMore] = useState(false);
@@ -42,7 +43,8 @@ const DiscountDetail = (props) => {
     const [play, setPlay] = useState(false);
     const [following, setFollowing] = useState(false);
     const [liked, setLiked] = useState(false);
-    // const [disableLike, setDisableLike] = useState(false);
+    // const [disableLike, setDisableLike] = useState(false); 
+    const [unfollowOrganizer, setUnfollowOrganizer] = useState(false);
 
     const linkName = readMore ? 'Read Less':'Read More'
 
@@ -159,7 +161,14 @@ const DiscountDetail = (props) => {
 
     // SET FOLLOWING
     useEffect(() => {
-        setFollowing(props.is_follower);
+        if (props.is_follower){
+            console.log("Is following ", props.is_follower.user ? true : false);
+            setFollowing(props.is_follower.user ? true : false);
+        }
+        else {
+            setFollowing(false);
+        }
+        
         }, [props.is_follower]);
 
     // SET liked on discount
@@ -245,7 +254,10 @@ const DiscountDetail = (props) => {
 
     // handle follow
     const handleFollow = async () => {
-        if (props.is_follower) {
+        if (clickLock.current) return; // ignore spam clicks
+        clickLock.current = true;
+
+        if (following) {
             setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers === 0 ?  0 : discount.organizer.followers - 1}});
 
             unfollowOrganizerHandler();
@@ -256,6 +268,10 @@ const DiscountDetail = (props) => {
         } else {
             navigate(`/login`);
         }
+
+        setTimeout(() => {
+            clickLock.current = false;
+        }, 300);
     };
 
 
@@ -283,7 +299,7 @@ const DiscountDetail = (props) => {
             };
 
 
-    // dislike discount (TODO: Exclude this function to allow for only likes)
+    // TODO: Exclude this function to allow for only likes
     const dislikeDiscount = () => {
         const searchUrl = `${BASE_URL}/discounts/likes/delete/${liked.id}/`;
         axios.delete(searchUrl, {
@@ -306,6 +322,8 @@ const DiscountDetail = (props) => {
 
     // handle like
     const handleLike = async () => {
+        if (clickLock.current) return; // ignore spam clicks
+        clickLock.current = true;
         // if (liked) {
         //     setDiscount({...discount, likes: discount.likes-1});
         //     dislikeDiscount();
@@ -316,21 +334,27 @@ const DiscountDetail = (props) => {
         } else {
             navigate(`/login`);
         }
+        setTimeout(() => {
+            clickLock.current = false;
+        }, 300);
     };
 
 
     useEffect(() => {
         const handleScroll = (event) => {
-            const videoSection = document.getElementById('video-section');
-            const rect = videoSection.getBoundingClientRect();
-            const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-            const inView = rect.top <= viewHeight && rect.bottom >= 0;
-            if (inView) {
-                setPlay(true);
-                } 
-            else {
-                setPlay(false);
-                }
+            // Check if discount has video_url
+            if (discount && discount.video_url){
+                const videoSection = document.getElementById('video-section');
+                const rect = videoSection.getBoundingClientRect();
+                const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                const inView = rect.top <= viewHeight && rect.bottom >= 0;
+                if (inView) {
+                    setPlay(true);
+                    } 
+                else {
+                    setPlay(false);
+                    }
+            };
             // Is description overflowing?
             isOverflown();
         };
@@ -801,7 +825,7 @@ const ReviewVerificationInfo = styled.div`
 const DiscountInfo = styled.div`
     color: #36454F;
     padding: 10px;     
-    width: 80%;
+    width: 70%;
     /* border: 1px solid red; */
     @media (max-width: 620px) {
         width: 100%;
@@ -846,7 +870,7 @@ const Address = styled.div`
 `;
 
 const ContactSection = styled.div`
-    width: 20%;
+    width: 30%;
     /* border: 1px solid yellow;     */
     /* flex-direction: row-reverse; */
     &>h4{

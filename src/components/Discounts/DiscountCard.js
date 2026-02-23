@@ -37,10 +37,10 @@ const DiscountCard = (props) => {
   return (
     <>
     {props.discount && 
-    <Card>
-        <a href={`/discounts/${props.discount.id}`} >      
-          <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }}/>
-        </a>
+    <Card href={`/discounts/${props.discount.id}`}>
+        {/* <a href={`/discounts/${props.discount.id}`} >   </a>    */}
+        <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }}/>
+        
       <EventInfo>
         <Title>
           {handleSlice(props.discount.title, 50)}
@@ -58,7 +58,7 @@ const DiscountCard = (props) => {
           <Date>
             <p>
               <span>{formatDate(props.discount.start_date, false)} 
-              <b> to </b>{formatDate(props.discount.end_date, false)}</span> 
+              &nbsp; to {formatDate(props.discount.end_date, false)}</span> 
             </p>
           </Date>
         </DateTimeWrapper>
@@ -77,9 +77,10 @@ const DiscountCard = (props) => {
    </>);
 };
 
-const Card = styled.div`  
+const Card = styled.a`  
   /* width: 270px;
   height: 300px; */
+  
   width: 100%;
   height: 100%;
   border-radius: 20px;
@@ -88,12 +89,23 @@ const Card = styled.div`
   overflow: hidden;
   position: relative;
 
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
   display: flex;
   flex-direction: column;
 
   /* border: 1px solid red; */
   /* scroll-snap-align: center; */
   transition: all 0.3s;
+
+  &:visited, &:hover, &:active, &:focus {
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+  }
 
   &:first-of-type {
     /* Allow users to fully scroll to the start */

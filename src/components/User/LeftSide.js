@@ -163,7 +163,7 @@ const Photo = styled.div`
   background-clip: content-box;
   background-color: white;
   background-position: center;
-  background-size: 99%;
+  background-size: cover;
   background-repeat: no-repeat;
   border: 2px solid white;
   margin: -38px auto 12px;
@@ -228,6 +228,7 @@ const Settings = styled.a`
   padding: 12px;
   font-size: 12px;
   display: block;
+  text-decoration: none;
   span {
     display: flex;
     align-items: center;
@@ -250,6 +251,7 @@ const Settings = styled.a`
 `;
 
 const OrganizerDashboard = styled(Settings)`
+  text-decoration: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 `;
 

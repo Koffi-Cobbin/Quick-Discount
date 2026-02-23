@@ -58,39 +58,76 @@ const Paystack = (props) => {
 
   return (
     <Container>
-      <h4>
-        Payment of <b>GH&#8373; {props.payment.amount}</b> for {props.package_type} package.
-      </h4>
-      <PaystackButtonWrap>
-        <PaystackButton
-          text="Make Payment"
-          className="paystack-button"
-          publicKey={publicKey}
-          amount={amount}
-          currency={currency}
-          reference={reference}
-          email={email}
-          metadata={extraData} // Pass extra data as metadata
-          onSuccess={handleSuccess}
-          onClose={handleFailure}
-        />
-      </PaystackButtonWrap>
-      {/* <button onClick={verify}>Verify</button> */}
+      <Content>
+        <p>Payment of <br />
+        <b>GH&#8373; {props.payment.amount}</b> <br />
+        for {props.package_type} package.</p>
+        <PaystackButtonWrap>
+          <PaystackButton
+            text="Make Payment"
+            className="paystack-button"
+            publicKey={publicKey}
+            amount={amount}
+            currency={currency}
+            reference={reference}
+            email={email}
+            metadata={extraData} // Pass extra data as metadata
+            onSuccess={handleSuccess}
+            onClose={handleFailure}
+          />
+        </PaystackButtonWrap>
+        {/* <button onClick={verify}>Verify</button> */}
+      </Content>
     </Container>
   );
 };
 
 const Container = styled.div`
-  text-align: center;
-  min-height: 50vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: 0px;
+  min-height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  animation: fadeIn 0.4s;
+`;
+
+const Content = styled.div`
+  background-color: white;
+  border-radius: 5px;
+  width: 200px;
+  height: fit-content;
+  position: relative;
+  padding: 10px;
   margin: 0 auto;
-  h4 {
+  text-align: center;
+  z-index: 2;
+
+  p {
     b {
       color: #fa8128;
     }
     margin-bottom: 20px;
   }
 `;
+
+// const Container = styled.div`
+//   text-align: center;
+//   min-height: 50vh;
+//   margin: 0 auto;
+//   h4 {
+//     b {
+//       color: #fa8128;
+//     }
+//     margin-bottom: 20px;
+//   }
+// `;
 
 const PaystackButtonWrap = styled.div`
   padding: 10px;

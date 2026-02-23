@@ -245,16 +245,20 @@ export const getUserTokenAPI = (payload) => (dispatch) => {
     })
     .then((data) => {
       console.log("token data ", data);
-      dispatch(setUserToken(data));
+      dispatch(setUserToken(data));      
+      // console.log("User logged in successfully!");
       let wishlist = sessionStorage.getItem('wishlist') ? JSON.parse(sessionStorage.getItem('wishlist')) : [];
       if (wishlist && wishlist.length > 0){
         let wishlist_ids = wishlist.filter(discount => discount.id);
+        console.log("wishlist_ids ", wishlist_ids);
         dispatch(addToWishlistAPI({discount_ids: wishlist_ids}))
       }      
+      console.log("Fetching organizer data...");
       dispatch(getOrganizerAPI());
     })
     .catch((error) => {
       alert(error.message);
+      dispatch(setLoading(false));
     });
 };
 
@@ -349,6 +353,7 @@ export function userUpdateAPI(payload) {
 
     const state = getState();
     const authToken = state.userState.token.access;
+    console.log("User update token ", authToken);
 
     const url = `${BASE_URL}/profile/update/`;
 
@@ -368,6 +373,7 @@ export function userUpdateAPI(payload) {
           let user_data = data.user_data;
           user_data['organizer_detail'] = organizer_detail;
           dispatch(setUser(user_data));
+          dispatch(setLoading(false));
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setErrors({ login: data.errors }));
@@ -1205,10 +1211,8 @@ export function getOrganizerAPI(organizer_id=null) {
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         else return response.json();
-        // return response.json();
       })
       .then((data) => {
-        // let user = state.userState.user;
         if (data.failed){
           console.log("Get organizer failed!");
         }
@@ -1220,6 +1224,7 @@ export function getOrganizerAPI(organizer_id=null) {
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
+        dispatch(setLoading(false));
       });
   };
 }

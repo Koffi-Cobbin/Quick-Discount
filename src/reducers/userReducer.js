@@ -68,7 +68,7 @@ const userReducer = (state = INITIAL_STATE, action) => {
             };
 
         case SET_USER_TOKEN:
-            if (action.user.rememberMe){
+            if (state.user && state.user.rememberMe){
                 localStorage.setItem('user-token', JSON.stringify(action.token));
             }
             else{

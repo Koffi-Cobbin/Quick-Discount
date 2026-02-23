@@ -12,6 +12,7 @@ import {
   isEmailValid,
   isValidURL,
   handleImageErrors,
+  generateEmbedFromName,
 } from "../../utils/middleware";
 import { 
   getCategoriesAPI, 
@@ -24,6 +25,7 @@ import {
   setPreviousUrl
 } from "../../actions";
 import Payment from "../Payment/Payment";
+import { use } from "react";
 
 
 const DiscountForm = (props) => {
@@ -61,6 +63,10 @@ const DiscountForm = (props) => {
   const [packageOption, setPackageOption] = useState();
   const [next, setNext] = useState(false);
   const [prev, setPrev] = useState(false);
+
+  // Google maps embed use states
+  const [generating, setGenerating] = useState(false);
+  const [embedError, setEmbedError] = useState('');
   
   // ERRORS
   const [emailError, setEmailError] = useState("");
@@ -484,6 +490,11 @@ const DiscountForm = (props) => {
     updatedOption.quantity = parseInt(quantity);
     setPackageOption(updatedOption);     
   };
+  
+
+// -----------------------------------
+// Google Maps Embed Generator
+// -----------------------------------
 
   const updateIframeDimensions = (googleMap) => {
     // Create a new DOMParser
@@ -509,8 +520,48 @@ const DiscountForm = (props) => {
     }
   };
 
-  const handlePostDiscount = () => {
+
+  const generateEmbed = async () => {
+    setEmbedError('');
+    setGenerating(true);
+
+    try {
+      const trimmedInput = location.trim();
+      
+      if (!trimmedInput) {
+        throw new Error('Please enter a location name or URL');
+      }
+
+      let code = '';
+
+      code = generateEmbedFromName(trimmedInput);
+      
+      console.log("Generated Embed Code ", code);
+      let result = updateIframeDimensions(code);
+      return result;
+    } catch (err) {
+      setEmbedError(err.message || 'Failed to generate embed code. Please check your input and try again.');
+      console.error(err);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+
+  const handlePostDiscount = async () => {
     // e.preventDefault();
+    let embed_location = address;
+
+    if (!address || address.trim() === "" ) {
+      console.log("Executing Embed genration");
+      try {
+        embed_location = await generateEmbed();
+        console.log("Embeded location ", embed_location);
+        // setAddress(embed_location);
+      } catch (error) {
+        console.error("Error generating embeded location:", error);
+      }
+    } 
 
     // remove entries with no value or spaces in socialMediaHandles
     // for key and value in object if value is empty or space, remove entry
@@ -541,7 +592,7 @@ const DiscountForm = (props) => {
         website_url: websiteURL,
         agreement: agreement,
         location: location,
-        address: updateIframeDimensions(address),             
+        address: embed_location,             
       },
       organizer_data: {
         name: organizerName,
@@ -590,130 +641,29 @@ const DiscountForm = (props) => {
     };    
   };
 
-  useEffect(() => {
-
-    // const checkEmptyFields = (idArray) => { 
-    //   let hasEmpty = false;
-
-    //   idArray.forEach(id => {
-    //     const element = document.getElementById(id);
-    //     if (!element) return; // skip if element not found
-
-    //     const value = element.value?.trim();
-
-    //     // Reset border before checking
-    //     element.style.border = '';
-
-    //     // Check emptiness (for textareas, inputs, and selects)
-    //     if (value === '' || value === null || value === undefined) {
-    //       element.style.border = '2px solid red';
-    //       hasEmpty = true;
-    //     }
-    //   });
-
-    //   return !hasEmpty; // returns true if all fields are filled
-    // }
-
-
-    // const isFirstPageEnteriesFilled = async () => {
-    //   const requiredFields = [
-    //   discountTitle,
-    //   discountDescription, 
-    //   percentageDiscount,
-    //   organizerName,
-    //   organizerDescription,
-    //   email,
-    //   phoneNumber,
-    //   discountCategories,
-    //   location,
-    //   discountFlyer,
-    //   socialMediaHandles,
-    //   agreement
-    //   ];
-
-    //   const isValid = checkEmptyFields(requiredFields);
-    //   setEnableNext(isValid);
-    //   console.log(isValid ? "First page filled!" : "Missing required fields");
-    // };
-
-    // All entries filled check
-    // const isAllEntriesFilled = async () => {
-    //   const requiredFields = [
-    //   "discountTitle",
-    //   "discountDescription",
-    //   "percentageDiscount", 
-    //   "organizerName",
-    //   "organizerDescription",
-    //   "email",
-    //   "phoneNumber",
-    //   "categories",
-    //   "packageOption",
-    //   "location",     
-    //   "startDate",
-    //   "endDate",
-    //   "discountFlyer",
-    //   "socialMediaHandles",
-    //   "agreement",
-    //   "username",
-    //   "contact"
-    //   ];
-    //   // address,
-
-    //   const isValid = checkEmptyFields(requiredFields);
-    //   if (isValid) {
-    //     setEnableSubmit(true);
-    //     console.log("FILLED!");
-    //   } else {
-    //     setEnableSubmit(false);
-    //   }
-    // };
-    // isFirstPageEnteriesFilled();
-    // isAllEntriesFilled();
-  }, [
-    discountTitle,
-    discountDescription,
-    percentageDiscount,
-    organizerName,
-    organizerDescription,
-    email,
-    phoneNumber,
-    discountCategories,
-    location,
-    address,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-    discountFlyer,
-    discountImages,
-    socialMediaHandles,
-    agreement,
-    websiteURL,
-  ]);
-
-  const reset = () => {
-    setDiscountName("");
-    setPercentageDiscount("");
-    setEmail("");
-    setPhoneNumber("");
-    setWebsiteUrl("");
-    setOrganizerName("");
-    setOrganizerDescription("");
-    setStartDate("");
-    setEndDate("");
-    setStartTime("");
-    setEndTime("");
-    setLocation("");
-    setSocialMediaHandles([]);
-    setEnableNext(false);
-    setEnableSubmit(false);
-    setEmailError("");
-    setDiscountCategories([]);
-    setDiscountFlyer();
-    setDiscountImages([]);
-    setAgreement("");
-    setAddress("");
-  };
+  // const reset = () => {
+  //   setDiscountName("");
+  //   setPercentageDiscount("");
+  //   setEmail("");
+  //   setPhoneNumber("");
+  //   setWebsiteUrl("");
+  //   setOrganizerName("");
+  //   setOrganizerDescription("");
+  //   setStartDate("");
+  //   setEndDate("");
+  //   setStartTime("");
+  //   setEndTime("");
+  //   setLocation("");
+  //   setSocialMediaHandles([]);
+  //   setEnableNext(false);
+  //   setEnableSubmit(false);
+  //   setEmailError("");
+  //   setDiscountCategories([]);
+  //   setDiscountFlyer();
+  //   setDiscountImages([]);
+  //   setAgreement("");
+  //   setAddress("");
+  // };
 
   const openTermsPage = () => {
     window.open('/terms', '_blank');
@@ -858,12 +808,16 @@ const DiscountForm = (props) => {
                     id="location"
                     type="text"
                     value={location}
+                    placeholder="e.g., Kempinski Hotel, Accra or Baba Yara, Kumasi"
                     onChange={(e) => setLocation(e.target.value)}
                   />
+                   {/* Error Message */}
+                  {/* className="error" */}
+                   {embedError && <p className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">{embedError}</p>}
                 </FormInputs>
               </FormContent>
 
-              <FormContent>
+              {/* <FormContent>
                 <FormInputs>
                   <label>Google Location &nbsp;</label>
                   <label>
@@ -875,10 +829,11 @@ const DiscountForm = (props) => {
                     id="address"
                     type="text"
                     value={address}
+                    placeholder="Paste a Google Maps share link"
                     onChange={(e) => setAddress(e.target.value)}
                   />
                 </FormInputs>
-              </FormContent>               
+              </FormContent>                */}
 
               <FormContent>
                 <AssetsArea>
@@ -930,7 +885,7 @@ const DiscountForm = (props) => {
                     </div>
                   </FormInputs>
                   
-                {props.organizer &&
+                {!props.organizer &&
                 <>
                 <label style={{textAlign: "left", color: "rgba(0, 0, 0, 0.6)"}}>Social Media Links</label>
                 <FormInputs>
@@ -952,8 +907,7 @@ const DiscountForm = (props) => {
                             id="instagram"
                             type="text"
                             value={socialMediaHandles.instagram}
-                            onChange={(e) => socialMediaChangeHandler("instagram", e.target.value)}
-                            required
+                            onChange={(e) => socialMediaChangeHandler("instagram", e.target.value)}                            
                           />
                         </div>  
                       </InputsFlexWrap>
@@ -976,8 +930,7 @@ const DiscountForm = (props) => {
                             id="facebook"
                             type="text"
                             value={socialMediaHandles.facebook}
-                            onChange={(e) => socialMediaChangeHandler("facebook", e.target.value)}
-                            required
+                            onChange={(e) => socialMediaChangeHandler("facebook", e.target.value)}                            
                           />
                         </div>
                       </InputsFlexWrap>
@@ -1024,8 +977,7 @@ const DiscountForm = (props) => {
                             id="twitter"
                             type="text"
                             value={socialMediaHandles.twitter}
-                            onChange={(e) => socialMediaChangeHandler("twitter", e.target.value)}
-                            required
+                            onChange={(e) => socialMediaChangeHandler("twitter", e.target.value)}                            
                           />
                         </div>
                       </InputsFlexWrap>
