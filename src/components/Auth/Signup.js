@@ -288,6 +288,7 @@ const perkSlide = keyframes`
 const Page = styled.div`
   display: flex;
   min-height: 100vh;
+  padding-top: 70px;               
   font-family: Inter, 'Roboto', sans-serif;
 `;
 
