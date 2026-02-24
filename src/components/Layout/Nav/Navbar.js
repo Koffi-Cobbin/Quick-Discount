@@ -277,8 +277,8 @@ const Container = styled.div`
     font-family: Inter, 'Roboto', sans-serif;
 
     /* Glassmorphism layer — always present, intensity shifts per state */
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: ${({ $navState }) => ($navState === "transparent" ? "none" : "blur(20px) saturate(1.8)")};
+    -webkit-backdrop-filter: ${({ $navState }) => ($navState === "transparent" ? "none" : "blur(20px) saturate(1.8)")};
 
     transition:
         background-color 0.4s ease,
