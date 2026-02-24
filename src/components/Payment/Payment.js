@@ -11,7 +11,6 @@ import CartContext from "../../store/cart-context";
 import { checkoutAPI, setUserOrder } from "../../actions";
 import { isContactValid, isEmailValid } from "../../utils/middleware";
 
-
 const Payment = (props) => {
   const [email, setEmail] = useState(props.user.email);
   const [contact, setContact] = useState(props.user.contact);
@@ -50,11 +49,10 @@ const Payment = (props) => {
       setMomoContactError(contactRes[1] ? contactRes[1] : "");
     }
   };
-  
 
   useEffect(() => {
     const isAllEntriesFilled = async () => {
-      if (username && email && contact ) {
+      if (username && email && contact) {
         setEnableSubmit(true);
       } else {
         setEnableSubmit(false);
@@ -63,7 +61,6 @@ const Payment = (props) => {
 
     isAllEntriesFilled();
   }, [username, email, contact]);
-
 
   const handleCheckout = (e) => {
     e.preventDefault();
@@ -75,7 +72,6 @@ const Payment = (props) => {
     props.handlePostDiscount(e);
   };
 
-
   useEffect(() => {
     const checkout = () => {
       // Send discount form data to create new discount
@@ -83,7 +79,7 @@ const Payment = (props) => {
         username: username,
         email: email,
         contact: contact,
-  
+
         momoNumber: momoNumber,
         cardname: cardname,
         cardnumber: cardnumber,
@@ -91,32 +87,31 @@ const Payment = (props) => {
         expyear: expyear,
         cvv: cvv,
       };
-  
+
       props.checkout(payload);
-  
+
       console.log(payload);
     };
     // Send billing address to checkout
-    if (props.createDiscountStatus){
+    if (props.createDiscountStatus) {
       checkout();
     }
   }, [props.createDiscountStatus]);
-
 
   return (
     <Wrapper>
       <Container>
         <Row>
-            {props.payment ? (
-            <Paystack payment={props.payment} package_type={props.package_type}/>
-            ) : (
+          {props.payment ? (
+            <Paystack
+              payment={props.payment}
+              package_type={props.package_type}
+            />
+          ) : (
             <div className={classess.container}>
               <form>
                 <h3 className={classess.title}>Billing Address</h3>
-                <label
-                  className={classess["payment-label"]}
-                  htmlFor="username"
-                >
+                <label className={classess["payment-label"]} htmlFor="username">
                   <i className="fa fa-user"></i> Full Name
                 </label>
                 <input
@@ -142,9 +137,7 @@ const Payment = (props) => {
                   onChange={(e) => validateEmail(e.target.value)}
                   required
                 />
-                {emailError && (
-                  <p className={classess.error}>{emailError}</p>
-                )}
+                {emailError && <p className={classess.error}>{emailError}</p>}
 
                 <label htmlFor="contact" className={classess["payment-label"]}>
                   <i className="fa fa-phone"></i> Contact
@@ -162,27 +155,26 @@ const Payment = (props) => {
                 {contactError && (
                   <p className={classess.error}>{contactError}</p>
                 )}
-              
 
-            <div>
-              <p>
-                Total: &nbsp;{" "}
-                <span className={classess.price} style={{ color: "black" }}>
-                  <b>GH&#8373; {totalAmount}</b>
-                </span>
-              </p>
+                <div>
+                  <p>
+                    Total: &nbsp;{" "}
+                    <span className={classess.price} style={{ color: "black" }}>
+                      <b>GH&#8373; {totalAmount}</b>
+                    </span>
+                  </p>
+                </div>
+
+                <input
+                  type="submit"
+                  value="Continue to checkout"
+                  className={`"payment-input" ${classess.btn}`}
+                  disabled={!enableSubmit}
+                  onClick={(event) => handleCheckout(event)}
+                />
+              </form>
             </div>
-
-            <input
-              type="submit"
-              value="Continue to checkout"
-              className={`"payment-input" ${classess.btn}`}
-              disabled={!enableSubmit}
-              onClick={(event) => handleCheckout(event)}
-            />
-          </form>
-        </div>
-        )}
+          )}
         </Row>
       </Container>
     </Wrapper>
@@ -192,7 +184,7 @@ const Payment = (props) => {
 const Wrapper = styled.div`
   display: flex;
   align-items: center;
-  font-family: Lato, 'Roboto', sans-serif;
+  /* font-family: Lato, 'Roboto', sans-serif; */
   font-size: 20px;
   padding: 10px;
 `;
@@ -210,10 +202,10 @@ const Spinner = styled.div`
   /* border: 1px solid black; */
   @keyframes load-spin {
     from {
-        transform: rotate(0deg);
+      transform: rotate(0deg);
     }
     to {
-        transform: rotate(360deg);
+      transform: rotate(360deg);
     }
   }
 

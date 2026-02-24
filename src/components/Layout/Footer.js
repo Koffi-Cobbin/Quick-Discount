@@ -181,7 +181,7 @@ const FooterSection = styled.div`
     color: white;
     padding: 10px;
     margin-bottom: 0;
-    font-family: Inter, "Roboto", sans-serif;
+    /* font-family: Inter, "Roboto", sans-serif; */
     font-size: 14px;
     @media (max-width: 768px) {
     }

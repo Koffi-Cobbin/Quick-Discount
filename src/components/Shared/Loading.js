@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled, { keyframes, css } from "styled-components";
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 import { setLoading, setLoadingMessage } from "../../actions";
-
 
 const Loading = (props) => {
   const [visible, setVisible] = useState(false);
@@ -16,9 +15,27 @@ const Loading = (props) => {
   return (
     <Overlay visible={visible}>
       {/* Ambient orbs for depth */}
-      <Orb top="15%" left="10%" size="320px" color="rgba(220,103,14,0.13)" delay="0s" />
-      <Orb top="60%" left="75%" size="260px" color="rgba(220,103,14,0.09)" delay="1.4s" />
-      <Orb top="40%" left="50%" size="180px" color="rgba(255,255,255,0.04)" delay="0.7s" />
+      <Orb
+        top="15%"
+        left="10%"
+        size="320px"
+        color="rgba(220,103,14,0.13)"
+        delay="0s"
+      />
+      <Orb
+        top="60%"
+        left="75%"
+        size="260px"
+        color="rgba(220,103,14,0.09)"
+        delay="1.4s"
+      />
+      <Orb
+        top="40%"
+        left="50%"
+        size="180px"
+        color="rgba(255,255,255,0.04)"
+        delay="0.7s"
+      />
 
       <Card>
         {/* Close button */}
@@ -50,7 +67,9 @@ const Loading = (props) => {
               <LabelDot />
               Loading
               <Ellipsis>
-                <span>.</span><span>.</span><span>.</span>
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
               </Ellipsis>
             </Label>
           </SpinnerContent>
@@ -133,7 +152,11 @@ const Orb = styled.div`
   left: ${({ left }) => left};
   width: ${({ size }) => size};
   height: ${({ size }) => size};
-  background: radial-gradient(circle, ${({ color }) => color} 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    ${({ color }) => color} 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   pointer-events: none;
   animation: ${orbFloat} 6s ease-in-out infinite;
@@ -154,8 +177,8 @@ const Card = styled.div`
   align-items: center;
   gap: 20px;
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 24px 60px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px rgba(0, 0, 0, 0.55),
     0 0 40px rgba(220, 103, 14, 0.08);
   overflow: hidden;
   animation: ${cardIn} 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -169,14 +192,16 @@ const CloseBtn = styled.button`
   right: 12px;
   background: transparent;
   border: none;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255, 255, 255, 0.35);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
   padding: 2px 4px;
   transition: color 0.2s;
 
-  &:hover { color: rgba(255,255,255,0.8); }
+  &:hover {
+    color: rgba(255, 255, 255, 0.8);
+  }
 `;
 
 /* ─── Spinner ────────────────────────────────────────────────────────────── */
@@ -219,8 +244,8 @@ const RingMiddle = styled.div`
   width: 52px;
   height: 52px;
   border-width: 2.5px;
-  border-top-color: rgba(255,255,255,0.6);
-  border-left-color: rgba(255,255,255,0.15);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  border-left-color: rgba(255, 255, 255, 0.15);
   animation: ${spinCCW} 0.85s linear infinite;
 `;
 
@@ -229,8 +254,8 @@ const RingInner = styled.div`
   width: 34px;
   height: 34px;
   border-width: 2px;
-  border-top-color: rgba(220,103,14,0.5);
-  border-right-color: rgba(220,103,14,0.2);
+  border-top-color: rgba(220, 103, 14, 0.5);
+  border-right-color: rgba(220, 103, 14, 0.2);
   animation: ${spinCW} 1.4s ease-in-out infinite;
 `;
 
@@ -249,12 +274,12 @@ const Label = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: Inter, 'Roboto', sans-serif;
+  /* font-family: Inter, 'Roboto', sans-serif; */
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255, 255, 255, 0.65);
 `;
 
 const LabelDot = styled.div`
@@ -274,9 +299,15 @@ const Ellipsis = styled.span`
     animation: ${dotBounce} 1.2s ease-in-out infinite;
     color: #fa8128;
 
-    &:nth-child(1) { animation-delay: 0s; }
-    &:nth-child(2) { animation-delay: 0.18s; }
-    &:nth-child(3) { animation-delay: 0.36s; }
+    &:nth-child(1) {
+      animation-delay: 0s;
+    }
+    &:nth-child(2) {
+      animation-delay: 0.18s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.36s;
+    }
   }
 `;
 
@@ -287,7 +318,13 @@ const ProgressBar = styled.div`
   bottom: 0;
   left: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, #fa8128 40%, #ffb366 80%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #fa8128 40%,
+    #ffb366 80%,
+    transparent 100%
+  );
   border-radius: 0 0 20px 20px;
   animation: ${progressSweep} 2.4s ease-in-out infinite;
 `;
@@ -308,10 +345,10 @@ const MessageIcon = styled.div`
 
 const MessageText = styled.p`
   margin: 0;
-  font-family: Inter, 'Roboto', sans-serif;
+  font-family: Inter, "Roboto", sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
   text-align: center;
   line-height: 1.5;
 `;

@@ -40,7 +40,7 @@ const Home = (props) => {
   useEffect(() => {
     if (props.discounts.results) {
       const categories_lists = props.discounts.results.map(
-        (discount) => discount.categories,
+        (discount) => discount.categories
       );
       const categories_set = new Set();
       categories_lists.forEach((subList) => {
@@ -89,7 +89,7 @@ const Home = (props) => {
         ([entry]) => {
           if (entry.isIntersecting) setActiveCategory(category);
         },
-        { threshold: 0.3 },
+        { threshold: 0.3 }
       );
       observer.observe(el);
       observers.push(observer);
@@ -109,15 +109,9 @@ const Home = (props) => {
   // Scroll the active chip into view inside the filter bar
   useEffect(() => {
     if (!activeCategory || !filterRef.current) return;
-    const activeChip = filterRef.current.querySelector(
-      `[data-cat="${activeCategory}"]`,
-    );
+    const activeChip = filterRef.current.querySelector(`[data-cat="${activeCategory}"]`);
     if (activeChip) {
-      activeChip.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
+      activeChip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }
   }, [activeCategory]);
 
@@ -131,9 +125,7 @@ const Home = (props) => {
           <SkeletonSection>
             <SkeletonTitle />
             <SkeletonRow>
-              {[1, 2, 3, 4].map((i) => (
-                <SkeletonCard key={i} />
-              ))}
+              {[1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)}
             </SkeletonRow>
           </SkeletonSection>
         ) : (
@@ -178,69 +170,60 @@ const Home = (props) => {
 
         {/* ── Category Sections ── */}
         <CategoriesWrap>
-          {loading
-            ? [1, 2].map((i) => (
-                <SkeletonSection key={i}>
-                  <SkeletonTitle />
-                  <SkeletonRow>
-                    {[1, 2, 3, 4].map((j) => (
-                      <SkeletonCard key={j} />
-                    ))}
-                  </SkeletonRow>
-                </SkeletonSection>
-              ))
-            : categories &&
-              categories.map((category, key) => (
-                <AnimatedSection
-                  key={key}
-                  id={`${category.toLowerCase()}-section`}
-                  index={key}
-                >
-                  <CategoryHeader>
-                    <CategoryTitleLeft>
-                      <CategoryName>{category}</CategoryName>
-                      <CategoryCount>
-                        {props.discounts.results
-                          ? props.discounts.results.filter((d) =>
-                              d.categories
-                                .map((c) => c.name)
-                                .includes(category),
-                            ).length
-                          : 0}{" "}
-                        deals
-                      </CategoryCount>
-                    </CategoryTitleLeft>
-                    <SeeMoreLink
-                      to={`/discounts/cat/${category.toLowerCase()}`}
-                    >
-                      See all →
-                    </SeeMoreLink>
-                  </CategoryHeader>
-
-                  {props.discounts.results && (
-                    <CarouselFlex
-                      type="category"
-                      divId={category.toLowerCase()}
-                      className="category-carousel-section"
-                    >
+          {loading ? (
+            [1, 2].map((i) => (
+              <SkeletonSection key={i}>
+                <SkeletonTitle />
+                <SkeletonRow>
+                  {[1, 2, 3, 4].map((j) => <SkeletonCard key={j} />)}
+                </SkeletonRow>
+              </SkeletonSection>
+            ))
+          ) : (
+            categories && categories.map((category, key) => (
+              <AnimatedSection
+                key={key}
+                id={`${category.toLowerCase()}-section`}
+                index={key}
+              >
+                <CategoryHeader>
+                  <CategoryTitleLeft>
+                    <CategoryName>{category}</CategoryName>
+                    <CategoryCount>
                       {props.discounts.results
-                        .filter((discount) =>
-                          discount.categories
-                            .map((cat) => cat.name)
-                            .includes(category),
-                        )
-                        .slice(0, 4)
-                        .map((discount, key) => (
-                          <DiscountCard
-                            key={key}
-                            index={key}
-                            discount={discount}
-                          />
-                        ))}
-                    </CarouselFlex>
-                  )}
-                </AnimatedSection>
-              ))}
+                        ? props.discounts.results.filter((d) =>
+                            d.categories.map((c) => c.name).includes(category)
+                          ).length
+                        : 0}{" "}
+                      deals
+                    </CategoryCount>
+                  </CategoryTitleLeft>
+                  <SeeMoreLink to={`/discounts/cat/${category.toLowerCase()}`}>
+                    See all →
+                  </SeeMoreLink>
+                </CategoryHeader>
+
+                {props.discounts.results && (
+                  <CarouselFlex
+                    type="category"
+                    divId={category.toLowerCase()}
+                    className="category-carousel-section"
+                  >
+                    {props.discounts.results
+                      .filter((discount) =>
+                        discount.categories
+                          .map((cat) => cat.name)
+                          .includes(category)
+                      )
+                      .slice(0, 4)
+                      .map((discount, key) => (
+                        <DiscountCard key={key} index={key} discount={discount} />
+                      ))}
+                  </CarouselFlex>
+                )}
+              </AnimatedSection>
+            ))
+          )}
         </CategoriesWrap>
       </Content>
     </Container>
@@ -269,7 +252,7 @@ const pipScale = keyframes`
 const Container = styled.div`
   max-width: 100%;
   position: relative;
-  font-family: Inter, "Roboto", sans-serif;
+  font-family: var(--font-sans); 
 `;
 
 const Content = styled.div`
@@ -299,19 +282,33 @@ const FadeInSection = styled.div`
 `;
 
 // ─── Category Filter Bar ──────────────────────────────────────────────────────
-
+/*
+ * Navbar heights (scrolled state, padding: 6px 0):
+ *   Mobile  < 600px : logo 40px + 12px padding = 52px
+ *   Desktop ≥ 600px : logo 64px + 12px padding = 76px
+ *
+ * `top` must equal the navbar height so the filter bar sticks
+ * flush underneath it when the page is scrolled.
+ */
 const FilterBar = styled.div`
   position: sticky;
-  top: 70px;
+  top: 52px; /* mobile default — sits flush under the 52px mobile navbar */
   z-index: 100;
-  /* background-color: #f8f8f8; */
-  background-color: rgba(255, 255, 255, 0.12);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: rgba(14, 9, 4, 0.82);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 -1px 0 rgba(220, 103, 14, 0.2) inset;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2px;
+
+  /* Desktop: navbar is taller (64px logo + 12px padding = 76px) */
+  @media (min-width: 600px) {
+    top: 76px;
+  }
 `;
 
 const FilterEdgeFade = styled.div`
@@ -392,12 +389,8 @@ const CategoryChip = styled.span`
     transform: translateY(0);
   }
 
-  &:first-of-type {
-    scroll-snap-align: start;
-  }
-  &:last-of-type {
-    scroll-snap-align: end;
-  }
+  &:first-of-type { scroll-snap-align: start; }
+  &:last-of-type  { scroll-snap-align: end; }
 `;
 
 const ChipActiveDot = styled.span`
@@ -447,7 +440,7 @@ const CategoryName = styled.h4`
   position: relative;
 
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     left: 0;
     bottom: -4px;
@@ -473,9 +466,7 @@ const SeeMoreLink = styled(Link)`
   text-decoration: none;
   padding: 4px 10px;
   border-radius: 12px;
-  transition:
-    background 0.2s,
-    color 0.2s;
+  transition: background 0.2s, color 0.2s;
 
   &:hover {
     background: #f5f0fa;
@@ -516,7 +507,7 @@ const SkeletonWrap = styled.div`
   overflow: hidden;
   background: #fff;
   padding: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 `;
 
 const SkeletonImg = styled.div`

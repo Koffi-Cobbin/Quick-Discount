@@ -151,7 +151,7 @@ const FilterButtons = ( props ) => {
 const Wrapper = styled.div`
   margin: 1px 0;
   padding: 20px 0;
-  font-family: Lato, 'Roboto', sans-serif;
+  /* font-family: Lato, 'Roboto', sans-serif; */
   font-size: 20px;
   /* border: 1px solid red; */
   button {

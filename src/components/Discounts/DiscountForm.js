@@ -1160,7 +1160,7 @@ const DiscountForm = (props) => {
 
 const Container = styled.div`
   margin-bottom: 20px;
-  font-family: Lato, 'Roboto', sans-serif;
+  /* font-family: Lato, 'Roboto', sans-serif; */
   font-size: 20px;
 `;
 

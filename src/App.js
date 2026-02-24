@@ -16,7 +16,6 @@ import Discounts from "./components/Discounts/Discounts";
 import CreateDiscount from "./components/Discounts/CreateDiscount"; 
 import DiscountDetail from "./components/Discounts/DiscountDetail";
 import UpdateDiscount from "./components/Discounts/UpdateDiscount";
-// import Modal from "./components/Shared/Modal";
 import Signup from "./components/Auth/Signup";
 import Login from "./components/Auth/Login";
 import ForgetPassword from "./components/Auth/ForgetPassword";
@@ -156,13 +155,11 @@ function App(props) {
             <Route
               path="/payment"
               element={[
-                // <Protected user={props.user}></Protected>
                   <Navbar
                     sidenav={openSideNav}
                     onShowCart={showCartHandler}
                   />,
                   <Payment />
-                
               ]}
             />
 
@@ -278,7 +275,7 @@ function App(props) {
         <Footer />
 
         <ScrollToTopButton
-          style={{ display: scrollTop > 100 ? "block" : "none" }}
+          style={{ display: scrollTop > 100 ? "flex" : "none" }}
           onClick={scrollUp}
         >
           <img src="/images/icons/up-arrow-w.svg" alt="Up" />
@@ -286,20 +283,39 @@ function App(props) {
       </div>
       </WishlistProvider>
     </CartProvider>
-    // style={{backgroundColor : scrollTop > 100 ? '#67309b' : 'transparent'}}
   );
 }
 
 const ScrollToTopButton = styled.button`
-  position: sticky;
-  bottom: 20px;
-  float: right;
+  /* Fixed positioning takes it fully out of document flow —
+     eliminates the phantom space that 'sticky + float' was
+     creating below the footer. */
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
   height: 40px;
   width: 40px;
   border: none;
   border-radius: 50%;
   background-color: #fa8128;
   z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(250, 129, 40, 0.4);
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    background-color: #e07010;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(250, 129, 40, 0.5);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
   img {
     height: 20px;
     width: 20px;

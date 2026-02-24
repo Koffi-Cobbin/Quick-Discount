@@ -1,15 +1,15 @@
-.mainWrapper{
+.mainWrapper {
   margin-top: 50px;
   min-height: 90vh;
   padding-top: 30px;
   position: relative;
   background-color: #fff;
-  font-family: Lato, 'Roboto', sans-serif;
+  /* font-family inherited from :root — Inter Variable, Roboto, sans-serif */
   font-size: 20px;
   /* border: 1px solid black; */
 }
 
-.wrapper{
+.wrapper {
   position: relative;
   display: flex;
   width: 80%;
@@ -17,6 +17,7 @@
   background-color: #fff;
   /* border: 1px solid black; */
 }
+
 /* Sidebar */
 .sidebar {
   width: 20%;
@@ -66,24 +67,20 @@ section {
   margin-bottom: 30px;
 }
 
-/* section h6{
-  color: #fa8128;
-  border-left: 3px solid #fa8128;
-  padding-left: 5px;
-  font-weight: 600;
-} */
-
 @media (max-width: 768px) {
-  .mainWrapper{
+  .mainWrapper {
     padding: 0;
   }
+
   .wrapper {
     width: 100%;
     flex-direction: column;
   }
+
   .sidebar {
     width: 100%;
   }
+
   .content {
     width: 100%;
     margin: 0;

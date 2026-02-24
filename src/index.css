@@ -2,45 +2,75 @@
   box-sizing: border-box;
 }
 
+/* ─── Global font stack ───────────────────────────────────────────────────────
+   Primary  : "Inter Variable"  — loaded via @fontsource-variable/inter in App.js
+   Fallback 1: Roboto            — widely available on Android / Google devices
+   Fallback 2: sans-serif        — OS default sans (Helvetica, Arial, etc.)
+   ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  font-family: "Inter Variable", sans-serif;
-  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+  --font-sans: "Inter Variable", "Roboto", sans-serif;
+
+  font-family: var(--font-sans);
+  font-feature-settings: 'liga' 1, 'calt' 1; /* contextual alternates & ligatures */
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
+
+/* Ensure the variable font is used when font-variation-settings is supported */
 @supports (font-variation-settings: normal) {
-  :root { font-family: InterVariable, sans-serif; }
+  :root {
+    font-family: "InterVariable", "Roboto", sans-serif;
+  }
 }
 
 body {
   overflow-y: scroll;
   overflow-x: hidden;
-  font-family: "Inter Variable";
-  /* font-family: Arial, Helvetica, sans-serif; */
+  font-family: var(--font-sans);
+}
+
+/* ─── Reset ───────────────────────────────────────────────────────────────────
+   Inherit font-family everywhere so every element picks up the root stack.
+   ─────────────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 
 *,
-div, 
-h1, 
-h2, 
-h3, 
-h4, 
-h5, 
-h6, 
-header, 
-html, 
-i, 
-img, 
-label, 
-li, 
-nav, 
-p, 
-small, 
-span, 
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+header,
+html,
+i,
+img,
+input,
+button,
+select,
+textarea,
+label,
+li,
+nav,
+p,
+small,
+span,
 ul {
   margin: 0;
   padding: 0;
   border: 0;
   outline: none;
   font-size: 100%;
+  /* Inherit the root font stack — eliminates browser default "Times New Roman"
+     fallback on form elements and other replaced elements */
+  font-family: inherit;
   vertical-align: baseline;
   background: transparent;
 }
@@ -49,21 +79,14 @@ li {
   list-style: none;
 }
 
+/* ─── Keyframes ───────────────────────────────────────────────────────────── */
+
 @-webkit-keyframes fadeIn {
-  from {
-      opacity: 0;
-  }
-  to {
-      opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @keyframes fadeIn {
-  from {
-      opacity: 0;
-  }
-  to {
-      opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-

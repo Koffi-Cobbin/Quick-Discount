@@ -136,7 +136,7 @@ const Discounts = (props) => {
 
 const Wrapper = styled.div`
   margin-top: 50px;
-  font-family: Lato, 'Roboto', sans-serif;
+  /* font-family: Lato, 'Roboto', sans-serif; */
   font-size: 20px;
 `;
 
