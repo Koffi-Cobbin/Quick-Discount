@@ -169,8 +169,16 @@ const Card = styled.div`
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 const CardHeader = styled.div`
-  padding: 32px 36px 24px;
+  padding: 24px 16px 20px;
   border-bottom: 1px solid ${T.border};
+
+  @media (min-width: 400px) {
+    padding: 28px 24px 22px;
+  }
+
+  @media (min-width: 560px) {
+    padding: 32px 36px 24px;
+  }
 `;
 
 const Eyebrow = styled.span`
@@ -198,7 +206,11 @@ const FormTitle = styled.h1`
 const StepRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+
+  @media (min-width: 400px) {
+    gap: 8px;
+  }
 `;
 
 const StepItem = styled.button`
@@ -211,20 +223,22 @@ const StepItem = styled.button`
   cursor: ${({ active, done }) => (done ? "pointer" : "default")};
   padding: 0;
   flex: 1;
+  min-width: 0;
   opacity: ${({ active, done }) => (active || done ? 1 : 0.35)};
   transition: opacity 0.3s;
 `;
 
 const StepDot = styled.div`
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: "Courier New", monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
+  flex-shrink: 0;
   transition: all 0.3s;
   background: ${({ active, done }) =>
     done ? T.orange : active ? "transparent" : "rgba(255,255,255,0.04)"};
@@ -233,23 +247,48 @@ const StepDot = styled.div`
       active || done ? T.orange : "rgba(240,236,230,0.12)"};
   color: ${({ active, done }) =>
     done ? "#fff" : active ? T.orange : T.textMuted};
+
+  @media (min-width: 400px) {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
 `;
 
 const StepLabel = styled.span`
   font-family: "Courier New", monospace;
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: 8px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: ${({ active }) => (active ? T.orange : T.textMuted)};
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+
+  /* Hide labels on very small screens — dots + connector are enough */
+  @media (max-width: 360px) {
+    display: none;
+  }
+
+  @media (min-width: 400px) {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
 `;
 
 const StepConnector = styled.div`
-  flex: 0 0 20px;
+  flex: 1 1 8px;
+  min-width: 6px;
+  max-width: 28px;
   height: 1px;
   background: ${({ done }) => (done ? T.orange : "rgba(240,236,230,0.08)")};
   transition: background 0.4s;
   margin-bottom: 13px;
+
+  @media (max-width: 360px) {
+    margin-bottom: 0;
+  }
 `;
 
 const ProgressBar = styled.div`
@@ -405,11 +444,41 @@ const Divider = styled.hr`
 `;
 
 // ─── Category chips ───────────────────────────────────────────────────────────
-const ChipGrid = styled.div`
+const CategoryWrap = styled.div`
+  position: relative;
+`;
+
+/* Fade-out edges hint that the rail is scrollable */
+const CategoryRail = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  max-height: 132px;
+  overflow-y: auto;
+  padding: 2px 2px 8px;
+
+  /* hide scrollbar visually but keep it functional */
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* When many categories exist, fade the bottom edge */
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 `;
+
+const CategoryCount = styled.span`
+  display: block;
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: ${T.textMuted};
+  margin-top: 10px;
+`;
+
+/* Keep old name as alias so JSX doesn't need to change */
+const ChipGrid = CategoryRail;
 
 const Chip = styled.button`
   padding: 6px 14px;
@@ -419,6 +488,8 @@ const Chip = styled.button`
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.18s;
+  white-space: nowrap;
+  flex-shrink: 0;
   border: 1px solid ${({ active }) => (active ? T.orange : T.border)};
   background: ${({ active }) => (active ? T.orangeDim : "transparent")};
   color: ${({ active }) => (active ? T.orange : T.textSub)};
@@ -427,6 +498,13 @@ const Chip = styled.button`
     border-color: ${T.orange};
     color: ${T.orange};
   }
+
+  /* Pulse the active state so selections are unmissable */
+  ${({ active }) =>
+    active &&
+    `
+    box-shadow: 0 0 0 3px rgba(250,129,40,0.12);
+  `}
 `;
 
 // ─── Social media row ─────────────────────────────────────────────────────────
@@ -587,33 +665,44 @@ const AssetLabel = styled.p`
 const CardFooter = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 36px 28px;
   border-top: 1px solid ${T.border};
-  gap: 12px;
+  padding: 14px 16px 18px;
+  gap: 10px;
 
-  @media (max-width: 480px) {
-    padding: 16px 18px 22px;
+  /* On mobile: Next fills remaining space, Back is compact, counter is left */
+  flex-wrap: nowrap;
+
+  @media (min-width: 480px) {
+    padding: 20px 36px 28px;
+    gap: 12px;
   }
 `;
 
 const NavButton = styled.button`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 10px 22px;
   border-radius: 40px;
-  font-size: 0.85rem;
   font-family: "Courier New", monospace;
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
+  padding: 10px 18px;
+  font-size: 0.82rem;
+
+  @media (min-width: 480px) {
+    padding: 10px 22px;
+    font-size: 0.85rem;
+  }
 `;
 
 const PrevButton = styled(NavButton)`
   background: transparent;
   border: 1px solid ${T.border};
   color: ${T.textSub};
+  flex-shrink: 0;
 
   &:hover {
     border-color: ${T.orange};
@@ -626,6 +715,12 @@ const NextButton = styled(NavButton)`
   border: 1px solid ${T.orange};
   color: #fff;
   margin-left: auto;
+  flex-shrink: 0;
+
+  /* On mobile, grow to fill available space for easy tapping */
+  @media (max-width: 479px) {
+    flex: 1;
+  }
 
   &:hover {
     background: #e67020;
@@ -643,6 +738,8 @@ const StepCounter = styled.span`
   font-size: 10px;
   letter-spacing: 0.14em;
   color: ${T.textMuted};
+  flex-shrink: 0;
+  white-space: nowrap;
 `;
 
 // ─── InfoNote ─────────────────────────────────────────────────────────────────
@@ -728,8 +825,6 @@ const DiscountForm = (props) => {
   const [endDate, setEndDate] = useState(
     new Date(Date.now() + 86400000).toISOString().slice(0, 10),
   );
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
   const [discountFlyer, setDiscountFlyer] = useState();
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
   const [discountImages, setDiscountImages] = useState([]);
@@ -812,8 +907,6 @@ const DiscountForm = (props) => {
       setAddress(discount.address);
       setStartDate(discount.start_date);
       setEndDate(discount.end_date);
-      setStartTime(discount.start_time);
-      setEndTime(discount.end_time);
       setSocialMediaHandles(discount.organizer.social_media_handles);
       setWebsiteUrl(discount.website_url);
       setPackageOption(discount_packages.results[0]);
@@ -951,8 +1044,6 @@ const DiscountForm = (props) => {
         percentage_discount: percentageDiscount,
         start_date: startDate,
         end_date: endDate,
-        start_time: startTime,
-        end_time: endTime,
         categories: discountCategories,
         video_url: videoURL,
         website_url: websiteURL,
@@ -1087,25 +1178,6 @@ const DiscountForm = (props) => {
               </FieldGroup>
             </TwoCol>
 
-            <TwoCol>
-              <FieldGroup>
-                <FieldLabel>Start Time</FieldLabel>
-                <Input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
-              </FieldGroup>
-              <FieldGroup>
-                <FieldLabel>End Time</FieldLabel>
-                <Input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </FieldGroup>
-            </TwoCol>
-
             <Divider />
 
             <SectionHeading>
@@ -1114,20 +1186,27 @@ const DiscountForm = (props) => {
             </SectionHeading>
 
             {allCategories ? (
-              <ChipGrid id="categories">
-                {allCategories.map((cat) => (
-                  <Chip
-                    key={cat.id}
-                    active={discountCategories?.some(
-                      (c) => c.name === cat.name,
-                    )}
-                    onClick={() => toggleCategory(cat)}
-                    type="button"
-                  >
-                    {cat.name}
-                  </Chip>
-                ))}
-              </ChipGrid>
+              <CategoryWrap>
+                <ChipGrid id="categories">
+                  {allCategories.map((cat) => (
+                    <Chip
+                      key={cat.id}
+                      active={discountCategories?.some(
+                        (c) => c.name === cat.name,
+                      )}
+                      onClick={() => toggleCategory(cat)}
+                      type="button"
+                    >
+                      {cat.name}
+                    </Chip>
+                  ))}
+                </ChipGrid>
+                <CategoryCount>
+                  {discountCategories?.length
+                    ? `${discountCategories.length} selected · scroll to see all`
+                    : `${allCategories.length} categories · scroll to see all`}
+                </CategoryCount>
+              </CategoryWrap>
             ) : (
               <FieldHint>Loading categories…</FieldHint>
             )}
