@@ -300,10 +300,11 @@ const Container = styled.div`
 
     /*
      * State: 'scrolled' — Home after scrolling
-     *   Orange glass: brand colour, dense blur, crisp shadow.
+     *   Orange glass: brand colour, dense blur, crisp shadow. 
+     *   rgba(220, 103, 14, 0.78)
      */
     ${({ $navState }) => $navState === "scrolled" && css`
-        background-color: rgba(220, 103, 14, 0.78);
+        background-color: rgba(103, 48, 155, 0.78);
         border-bottom: 1px solid rgba(255, 255, 255, 0.18);
         box-shadow:
             0 4px 28px rgba(0, 0, 0, 0.18),
