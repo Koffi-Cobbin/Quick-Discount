@@ -217,7 +217,7 @@ const Home = (props) => {
                       )
                       .slice(0, 4)
                       .map((discount, key) => (
-                        <DiscountCard key={key} discount={discount} />
+                        <DiscountCard key={key} index={key} discount={discount} />
                       ))}
                   </CarouselFlex>
                 )}

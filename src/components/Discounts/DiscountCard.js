@@ -1,22 +1,15 @@
 import React from "react";
-import styled from "styled-components";
-// import { Link } from "react-router-dom";
-// import { useState } from "react";
+import styled, { keyframes, css } from "styled-components";
 import { formatDate } from "../../utils/middleware";
 import StarRating from "./StarRating";
-// import AddToWishlist from "../Wishlist/AddToWishlist";
 
 const DiscountCard = (props) => {
-  // const [slice, setSlice] = useState(false);
-
   const handleSlice = (data, size) => {
     if (data.length <= size) {
       return data;
     }
-  
     const words = data.split(' ');
     let truncatedString = '';
-  
     for (let i = 0; i < words.length; i++) {
       if (truncatedString.length + words[i].length <= size) {
         truncatedString += words[i] + ' ';
@@ -24,33 +17,30 @@ const DiscountCard = (props) => {
         break;
       }
     }
-  
     return `${truncatedString.trim()} ...`;
-
-    // if (data.length > size) {      
-    //   return `${data.slice(0, size)}...`;
-    // } else {
-    //   return data;
-    // }
   };
 
   return (
     <>
     {props.discount && 
-    <Card href={`/discounts/${props.discount.id}`}>
-        {/* <a href={`/discounts/${props.discount.id}`} >   </a>    */}
-        <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }}/>
-        
+    <Card href={`/discounts/${props.discount.id}`} $index={props.index || 0}>
+        <ImageWrapper>
+          <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }} />
+          <ShineOverlay />
+          <DiscountBadge>
+            {props.discount.percentage_discount
+              ? handleSlice(props.discount.percentage_discount, 20)
+              : "Deal"}
+          </DiscountBadge>
+        </ImageWrapper>
+
       <EventInfo>
         <Title>
           {handleSlice(props.discount.title, 50)}
         </Title>
 
-        <PercentageDiscount>        
-          <p>{handleSlice(props.discount.percentage_discount, 30)}</p>
-        </PercentageDiscount>
-
         <Address>
+          <LocationIcon>📍</LocationIcon>
           <span>{props.discount.location}</span>
         </Address>
 
@@ -63,68 +53,159 @@ const DiscountCard = (props) => {
           </Date>
         </DateTimeWrapper>
 
-
-          <SocialActions>
-            <Left><b>{props.discount.likes}</b></Left>
-            <Right>
-              <StarRating rating={props.discount.total_rating} showRate={true}/>
-            </Right>
-            {/* <AddToWishlist type="icon" discount={props.discount} /> */}
+        <SocialActions>
+          <Left><LikesCount>♥ <b>{props.discount.likes}</b></LikesCount></Left>
+          <Right>
+            <StarRating rating={props.discount.total_rating} showRate={true}/>
+          </Right>
         </SocialActions>
       </EventInfo>
     </Card>
     }
-   </>);
+   </>
+  );
 };
 
-const Card = styled.a`  
-  /* width: 270px;
-  height: 300px; */
-  
+// ─── Animations ──────────────────────────────────────────────────────────────
+
+const fadeSlideUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+`;
+
+const shineSweep = keyframes`
+  0%   { left: -80%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { left: 120%; opacity: 0.6; }
+  100% { left: 120%; opacity: 0; }
+`;
+
+// ─── Styled Components ────────────────────────────────────────────────────────
+
+const Card = styled.a`
   width: 100%;
   height: 100%;
   border-radius: 20px;
   background-color: #fff;
-  margin: 0 auto;  
+  margin: 0 auto;
   overflow: hidden;
   position: relative;
-
   text-decoration: none;
   color: inherit;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-
   display: flex;
   flex-direction: column;
 
-  /* border: 1px solid red; */
-  /* scroll-snap-align: center; */
-  transition: all 0.3s;
+  /* Staggered entry animation */
+  animation: ${fadeSlideUp} 0.45s ease both;
+  animation-delay: ${({ $index }) => Math.min($index * 0.07, 0.35)}s;
 
-  &:visited, &:hover, &:active, &:focus {
+  /* Smooth transitions for all hover effects */
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+
+  &:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.14),
+      0 4px 12px rgba(250, 129, 40, 0.18),
+      0 1px 2px rgba(0, 0, 0, 0.06);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(1.005);
+    transition-duration: 0.1s;
+  }
+
+  &:visited, &:focus {
     text-decoration: none;
     color: inherit;
     outline: none;
   }
+`;
 
-  &:first-of-type {
-    /* Allow users to fully scroll to the start */
-    /* scroll-snap-align: center; */
-  }
-  &:last-of-type {
-    /* Allow users to fully scroll to the end */
-    /* scroll-snap-align: end; */
+const ImageWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+`;
+
+const BackgroundImage = styled.div`
+  width: 100%;
+  min-height: 180px;
+  background-color: #333;
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px 20px 0 0;
+
+  /* Smooth image zoom on hover */
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  ${Card}:hover & {
+    transform: scale(1.06);
   }
 `;
 
-const BackgroundImage = styled.div` 
-  width: 100%;
-  min-height: 180px;  
-  border-radius: 20px 2s0px 0 0;
-  background-color: #333;
-  background-size: cover;
-  /* background-position: center; */
-  /* border: 2px solid green; */
+/* Shine sweep — triggers on hover */
+const ShineOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  opacity: 0;
+
+  ${Card}:hover & {
+    animation: ${shineSweep} 0.6s ease forwards;
+  }
+`;
+
+const DiscountBadge = styled.span`
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #fa8128, #e05a00);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(250, 129, 40, 0.45);
+  pointer-events: none;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  ${Card}:hover & {
+    transform: scale(1.05);
+  }
 `;
 
 const EventInfo = styled.div`
@@ -133,9 +214,13 @@ const EventInfo = styled.div`
   padding: 12px;
   font-size: 16px;
   font-family: Lato, 'Roboto', sans-serif;
-  /* css to occupy remaining height of parent */
   flex: 1;
-  /* border: 1px solid blue; */
+
+  transition: background-color 0.25s ease;
+
+  ${Card}:hover & {
+    background-color: #fafaf9;
+  }
 `;
 
 const Title = styled.h4`
@@ -146,7 +231,12 @@ const Title = styled.h4`
   text-align: left;
   max-height: 45px;
   overflow: hidden;
-  /* border: 1px solid black; */
+
+  transition: color 0.25s ease;
+
+  ${Card}:hover & {
+    color: #fa8128;
+  }
 `;
 
 const DateTimeWrapper = styled.div`
@@ -158,48 +248,40 @@ const DateTimeWrapper = styled.div`
 
 const Date = styled.div`
   text-align: left;
-  align-items: center;  
+  align-items: center;
   display: flex;
   margin-bottom: 12px;
   p {
     span {
-      width: 100px;
-    }
-    span:first-child {
-      text-align: left;
-    }
-    span:last-child {
-      text-align: right;
+      font-size: 13px;
+      color: #888;
     }
   }
 `;
-
-
-const PercentageDiscount = styled.p`
-  padding: 0;
-  color: #fa8128;
-  text-align: left;
-  font-weight: 600;
-  max-height: 22px;
-  overflow: hidden;
-  /* border: 1px solid black; */
-`;
-
 
 const Address = styled.p`
   text-align: left;
   overflow: hidden;
   margin-bottom: 5px;
-  font-weight: 600;  
+  font-weight: 600;
   max-height: 42px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #555;
+`;
+
+const LocationIcon = styled.span`
+  font-size: 12px;
+  flex-shrink: 0;
 `;
 
 const SocialActions = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;  
-  /* css to position content at the bottom of parent */
+  justify-content: space-between;
   position: absolute;
   bottom: 10px;
   left: 12px;
@@ -207,28 +289,24 @@ const SocialActions = styled.div`
 `;
 
 const Left = styled.div``;
-
 const Right = styled.div``;
 
-const Like = styled.span`
-  opacity: 0.7;
-  padding: 2px;
-  width: fit-content;
-  height: fit-content;
+const LikesCount = styled.span`
+  font-size: 13px;
+  color: #aaa;
   display: flex;
   align-items: center;
-  span {
-    margin-right: 3px;
-    color: blue;
+  gap: 4px;
+  transition: color 0.25s ease;
+
+  ${Card}:hover & {
+    color: #fa8128;
   }
-  img {
-    width: 15px;
-    height: 15px;
-    background-color: blue;
-    padding: 3px;
-    border-radius: 50%;
+
+  b {
+    color: inherit;
+    font-weight: 600;
   }
 `;
-
 
 export default DiscountCard;

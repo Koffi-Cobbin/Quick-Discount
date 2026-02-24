@@ -18,12 +18,13 @@ const TopDiscounts = (props) => {
           .map((discount, key) => (
             <DiscountCard
               key={key}
+              index={key}
               discount={discount}
             />
           ))}
       </CarouselFlex>
     </Container>
-    )
+  );
 };
 
 const Container = styled.div`
@@ -38,7 +39,7 @@ const CategoryTitle = styled.div`
   align-items: center;
   justify-content: space-between;
   width: inherit;
-  
+
   h4 {
     font-size: 22px;
     margin: 0 10px;
@@ -47,7 +48,7 @@ const CategoryTitle = styled.div`
       color: #808080;
       font-size: 16px;
       text-decoration: none;
-      &:hover{
+      &:hover {
         cursor: pointer;
       }
     }
