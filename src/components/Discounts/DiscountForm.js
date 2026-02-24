@@ -75,21 +75,96 @@ const slideInLeft = keyframes`
 // ─── Layout ───────────────────────────────────────────────────────────────────
 const PageWrap = styled.div`
   min-height: 100vh;
-  background: ${T.bg};
+  background-color: ${T.bg};
+  background-image:
+    radial-gradient(
+      ellipse 70% 45% at 50% 0%,
+      rgba(250, 129, 40, 0.13) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 40% 30% at 80% 80%,
+      rgba(250, 129, 40, 0.05) 0%,
+      transparent 60%
+    );
+  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 60px 16px 80px;
+  padding: 80px 16px 100px;
+
+  &::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  &::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(250, 129, 40, 0.5) 25%,
+      rgba(250, 129, 40, 0.25) 65%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+`;
+
+const CardOuter = styled.div`
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 640px;
+  animation: ${fadeUp} 0.55s ease both;
+`;
+
+const CardTag = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-left: 2px;
+`;
+
+const CardTagLine = styled.div`
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(250, 129, 40, 0.4), transparent);
+`;
+
+const CardTagText = styled.span`
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(250, 129, 40, 0.55);
+  white-space: nowrap;
 `;
 
 const Card = styled.div`
   width: 100%;
-  max-width: 620px;
-  background: ${T.surface};
-  border: 1px solid ${T.border};
-  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.032);
+  border: 1px solid rgba(240, 236, 230, 0.07);
+  border-top: 1px solid rgba(250, 129, 40, 0.2);
+  border-radius: 16px;
   overflow: hidden;
-  animation: ${fadeUp} 0.55s ease both;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 32px 80px rgba(0, 0, 0, 0.45),
+    0 0 120px rgba(250, 129, 40, 0.04);
 `;
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -1389,71 +1464,77 @@ const DiscountForm = (props) => {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <PageWrap id="top">
-      <Card>
-        {/* ── Header ── */}
-        <CardHeader>
-          <Eyebrow>Quick Discount</Eyebrow>
-          <FormTitle>
-            {discount ? "Update Discount Ad" : "Create Discount Ad"}
-          </FormTitle>
+      <CardOuter>
+        <CardTag>
+          <CardTagText>New Ad</CardTagText>
+          <CardTagLine />
+        </CardTag>
+        <Card>
+          {/* ── Header ── */}
+          <CardHeader>
+            <Eyebrow>Quick Discount</Eyebrow>
+            <FormTitle>
+              {discount ? "Update Discount Ad" : "Create Discount Ad"}
+            </FormTitle>
 
-          {/* Step indicators */}
-          <StepRow>
-            {STEPS.map((s, i) => (
-              <React.Fragment key={s.label}>
-                <StepItem
-                  type="button"
-                  active={i === step}
-                  done={i < step}
-                  onClick={() => i < step && goTo(i)}
-                >
-                  <StepDot active={i === step} done={i < step}>
-                    {i < step ? "✓" : i + 1}
-                  </StepDot>
-                  <StepLabel active={i === step}>{s.label}</StepLabel>
-                </StepItem>
-                {i < STEPS.length - 1 && <StepConnector done={i < step} />}
-              </React.Fragment>
-            ))}
-          </StepRow>
+            {/* Step indicators */}
+            <StepRow>
+              {STEPS.map((s, i) => (
+                <React.Fragment key={s.label}>
+                  <StepItem
+                    type="button"
+                    active={i === step}
+                    done={i < step}
+                    onClick={() => i < step && goTo(i)}
+                  >
+                    <StepDot active={i === step} done={i < step}>
+                      {i < step ? "✓" : i + 1}
+                    </StepDot>
+                    <StepLabel active={i === step}>{s.label}</StepLabel>
+                  </StepItem>
+                  {i < STEPS.length - 1 && <StepConnector done={i < step} />}
+                </React.Fragment>
+              ))}
+            </StepRow>
 
-          <ProgressBar pct={pct} />
-        </CardHeader>
+            <ProgressBar pct={pct} />
+          </CardHeader>
 
-        {/* ── Body ── */}
-        <CardBody>{renderStepContent()}</CardBody>
+          {/* ── Body ── */}
+          <CardBody>{renderStepContent()}</CardBody>
 
-        {/* ── Footer ── */}
-        <CardFooter>
-          <StepCounter>
-            {step + 1} / {STEPS.length}
-          </StepCounter>
+          {/* ── Footer ── */}
+          <CardFooter>
+            <StepCounter>
+              {step + 1} / {STEPS.length}
+            </StepCounter>
 
-          {step > 0 && (
-            <PrevButton type="button" onClick={() => goTo(step - 1)}>
-              ← Back
-            </PrevButton>
-          )}
+            {step > 0 && (
+              <PrevButton type="button" onClick={() => goTo(step - 1)}>
+                ← Back
+              </PrevButton>
+            )}
 
-          {step < STEPS.length - 1 ? (
-            <NextButton
-              type="button"
-              disabled={!canProceed[step]}
-              onClick={() => goTo(step + 1)}
-            >
-              Continue →
-            </NextButton>
-          ) : (
-            <NextButton
-              type="button"
-              disabled={!canProceed[step]}
-              onClick={handlePostDiscount}
-            >
-              {discount ? "Update Ad" : "Submit Ad"} →
-            </NextButton>
-          )}
-        </CardFooter>
-      </Card>
+            {step < STEPS.length - 1 ? (
+              <NextButton
+                type="button"
+                disabled={!canProceed[step]}
+                onClick={() => goTo(step + 1)}
+              >
+                Continue →
+              </NextButton>
+            ) : (
+              <NextButton
+                type="button"
+                disabled={!canProceed[step]}
+                onClick={handlePostDiscount}
+              >
+                {discount ? "Update Ad" : "Submit Ad"} →
+              </NextButton>
+            )}
+          </CardFooter>
+        </Card>
+      </CardOuter>
     </PageWrap>
   );
 };
