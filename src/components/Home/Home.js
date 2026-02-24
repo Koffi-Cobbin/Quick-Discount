@@ -288,8 +288,14 @@ const FilterBar = styled.div`
   top: 70px;
   z-index: 100;
   /* background-color: #f8f8f8; */
-  /* border-bottom: 1px solid rgba(0, 0, 0, 0.06); */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); */
+  background: rgba(14, 9, 4, 0.82);
+  box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.22),
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 -1px 0 rgba(220, 103, 14, 0.2) inset;
+  /*  */
   display: flex;
   align-items: center;
   justify-content: space-between;
