@@ -49,10 +49,9 @@ const Navbar = (props) => {
 
     const toggleSearch = () => setSearchVisible((v) => !v);
 
-    // Three navbar visual states:
-    //   'transparent' — home hero, not yet scrolled (see-through)
-    //   'scrolled'    — home after scrolling (orange glass)
-    //   'blur'        — any other page (dark frosted glass — always visible)
+    // State: 'transparent' — home hero, not yet scrolled (see-through)
+    // State: 'scrolled'    — home after scrolling (orange glass)
+    // State: 'blur'        — any other page (dark frosted glass — always visible)
     const navState = isHome
         ? (scrolled ? "scrolled" : "transparent")
         : "blur";
@@ -74,7 +73,7 @@ const Navbar = (props) => {
     return (
         <Container
             id="top"
-            navState={navState}
+            $navState={navState}
             style={props.style}
         >
             <Content>
@@ -292,7 +291,7 @@ const Container = styled.div`
      *   Barely-there black tint. Hero bleeds through.
      *   No border, no shadow — it's floating above the image.
      */
-    ${({ navState }) => navState === "transparent" && css`
+    ${({ $navState }) => $navState === "transparent" && css`
         background-color: rgba(0, 0, 0, 0.08);
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         box-shadow: none;
@@ -303,7 +302,7 @@ const Container = styled.div`
      * State: 'scrolled' — Home after scrolling
      *   Orange glass: brand colour, dense blur, crisp shadow.
      */
-    ${({ navState }) => navState === "scrolled" && css`
+    ${({ $navState }) => $navState === "scrolled" && css`
         background-color: rgba(220, 103, 14, 0.78);
         border-bottom: 1px solid rgba(255, 255, 255, 0.18);
         box-shadow:
@@ -314,21 +313,14 @@ const Container = styled.div`
 
     /*
      * State: 'blur' — All other pages
-     *
-     *   FIXED: Previously used a near-transparent dark gradient that vanished
-     *   on white/light page backgrounds. Now uses a rich dark-smoke glass:
-     *   deep charcoal tint (0.82 opacity) with an orange underline accent.
-     *   Text and icons (all white) remain legible on ANY background colour.
-     *   The glassmorphism blur/saturate effect is preserved — it just has
-     *   enough base opacity to guarantee contrast.
      */
-    ${({ navState }) => navState === "blur" && css`
-        background: rgba(14, 9, 4, 0.82);
-        border-bottom: 2px solid rgba(220, 103, 14, 0.55);
+    ${({ $navState }) => $navState === "blur" && css`
+        background: rgba(14, 9, 4, 0.82) !important;
+        border-bottom: 2px solid rgba(220, 103, 14, 0.55) !important;
         box-shadow:
             0 4px 24px rgba(0, 0, 0, 0.22),
             0 1px 0 rgba(255, 255, 255, 0.04) inset,
-            0 -1px 0 rgba(220, 103, 14, 0.2) inset;
+            0 -1px 0 rgba(220, 103, 14, 0.2) inset !important;
         padding: 6px 0;
     `}
 

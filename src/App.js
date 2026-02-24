@@ -94,7 +94,6 @@ function App(props) {
               path="/"
               element={[
                 <Navbar
-                  style={{backgroundColor : scrollTop > 100 ? '#67309b' : 'transparent'}}
                   sidenav={openSideNav}
                   onShowCart={showCartHandler}
                   homeSearch={true}
@@ -287,6 +286,7 @@ function App(props) {
       </div>
       </WishlistProvider>
     </CartProvider>
+    // style={{backgroundColor : scrollTop > 100 ? '#67309b' : 'transparent'}}
   );
 }
 
