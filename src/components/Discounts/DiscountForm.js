@@ -18,15 +18,13 @@ import React, { useState, useEffect } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { connect } from "react-redux";
 import { createId } from "@paralleldrive/cuid2";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Dropzone from "./Features/Dropzone";
 import ImageGrid from "./Features/ImageGrid";
 import {
   isContactValid,
   isEmailValid,
   isValidURL,
-  handleImageErrors,
   generateEmbedFromName,
 } from "../../utils/middleware";
 import {
@@ -35,8 +33,6 @@ import {
   updateDiscountAPI,
   getDiscountMediaAPI,
   getDiscountPackagesAPI,
-  deleteDiscountMediaAPI,
-  deleteDiscountPackageAPI,
   setPreviousUrl,
 } from "../../actions";
 import Payment from "../Payment/Payment";
@@ -74,10 +70,6 @@ const slideIn = keyframes`
 const slideInLeft = keyframes`
   from { opacity: 0; transform: translateX(-32px); }
   to   { opacity: 1; transform: translateX(0); }
-`;
-
-const barGrow = keyframes`
-  from { width: 0; }
 `;
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
@@ -160,13 +152,10 @@ const StepDot = styled.div`
   font-weight: 700;
   transition: all 0.3s;
   background: ${({ active, done }) =>
-    done
-      ? T.orange
-      : active
-      ? "transparent"
-      : "rgba(255,255,255,0.04)"};
-  border: 1.5px solid ${({ active, done }) =>
-    active || done ? T.orange : "rgba(240,236,230,0.12)"};
+    done ? T.orange : active ? "transparent" : "rgba(255,255,255,0.04)"};
+  border: 1.5px solid
+    ${({ active, done }) =>
+      active || done ? T.orange : "rgba(240,236,230,0.12)"};
   color: ${({ active, done }) =>
     done ? "#fff" : active ? T.orange : T.textMuted};
 `;
@@ -183,15 +172,14 @@ const StepLabel = styled.span`
 const StepConnector = styled.div`
   flex: 0 0 20px;
   height: 1px;
-  background: ${({ done }) =>
-    done ? T.orange : "rgba(240,236,230,0.08)"};
+  background: ${({ done }) => (done ? T.orange : "rgba(240,236,230,0.08)")};
   transition: background 0.4s;
   margin-bottom: 13px;
 `;
 
 const ProgressBar = styled.div`
   height: 2px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   margin-top: 18px;
   border-radius: 2px;
   overflow: hidden;
@@ -219,8 +207,12 @@ const CardBody = styled.div`
 const StepSlide = styled.div`
   animation: ${({ direction }) =>
     direction === "forward"
-      ? css`${slideIn} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both`
-      : css`${slideInLeft} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both`};
+      ? css`
+          ${slideIn} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both
+        `
+      : css`
+          ${slideInLeft} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both
+        `};
 `;
 
 // ─── Section heading inside a step ────────────────────────────────────────────
@@ -262,21 +254,26 @@ const FieldLabel = styled.label`
 
 const baseInput = css`
   width: 100%;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid ${T.border};
   border-radius: ${T.radiusSm};
   color: ${T.text};
   font-size: 0.92rem;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
   outline: none;
   font-family: inherit;
 
-  &::placeholder { color: ${T.textMuted}; }
+  &::placeholder {
+    color: ${T.textMuted};
+  }
 
   &:focus {
     border-color: ${T.borderFocus};
     background: ${T.orangeGlow};
-    box-shadow: 0 0 0 3px rgba(250,129,40,0.06);
+    box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.06);
   }
 
   ${({ hasError }) =>
@@ -298,19 +295,6 @@ const Textarea = styled.textarea`
   padding: 12px 14px;
   min-height: 100px;
   resize: vertical;
-`;
-
-const Select = styled.select`
-  ${baseInput}
-  height: 44px;
-  padding: 0 14px;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='rgba(240,236,230,0.35)' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-
-  option { background: #1a1814; color: ${T.text}; }
 `;
 
 const FieldError = styled.p`
@@ -360,9 +344,9 @@ const Chip = styled.button`
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.18s;
-  border: 1px solid ${({ active }) => active ? T.orange : T.border};
-  background: ${({ active }) => active ? T.orangeDim : "transparent"};
-  color: ${({ active }) => active ? T.orange : T.textSub};
+  border: 1px solid ${({ active }) => (active ? T.orange : T.border)};
+  background: ${({ active }) => (active ? T.orangeDim : "transparent")};
+  color: ${({ active }) => (active ? T.orange : T.textSub)};
 
   &:hover {
     border-color: ${T.orange};
@@ -408,7 +392,7 @@ const PackageCard = styled.button`
   text-align: left;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1.5px solid ${({ active }) => active ? T.orange : T.border};
+  border: 1.5px solid ${({ active }) => (active ? T.orange : T.border)};
   background: ${({ active }) =>
     active
       ? "linear-gradient(135deg, rgba(250,129,40,0.14) 0%, rgba(180,70,0,0.08) 100%)"
@@ -417,8 +401,9 @@ const PackageCard = styled.button`
   overflow: hidden;
 
   &:hover {
-    border-color: ${({ active }) => active ? T.orange : "rgba(250,129,40,0.35)"};
-    background: ${({ active }) => active ? undefined : T.surfaceHover};
+    border-color: ${({ active }) =>
+      active ? T.orange : "rgba(250,129,40,0.35)"};
+    background: ${({ active }) => (active ? undefined : T.surfaceHover)};
   }
 `;
 
@@ -427,7 +412,7 @@ const PackageName = styled.div`
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: ${({ active }) => active ? T.orange : T.textMuted};
+  color: ${({ active }) => (active ? T.orange : T.textMuted)};
   margin-bottom: 6px;
 `;
 
@@ -458,7 +443,7 @@ const PackageCheck = styled.div`
   justify-content: center;
   font-size: 10px;
   color: #fff;
-  opacity: ${({ active }) => active ? 1 : 0};
+  opacity: ${({ active }) => (active ? 1 : 0)};
   transition: opacity 0.2s;
 `;
 
@@ -470,12 +455,14 @@ const AgreementBox = styled.label`
   cursor: pointer;
   padding: 16px;
   border-radius: ${T.radiusSm};
-  border: 1px solid ${({ checked }) => checked ? T.borderFocus : T.border};
-  background: ${({ checked }) => checked ? T.orangeGlow : "transparent"};
+  border: 1px solid ${({ checked }) => (checked ? T.borderFocus : T.border)};
+  background: ${({ checked }) => (checked ? T.orangeGlow : "transparent")};
   transition: all 0.2s;
   margin-bottom: 24px;
 
-  &:hover { border-color: ${T.borderFocus}; }
+  &:hover {
+    border-color: ${T.borderFocus};
+  }
 `;
 
 const Checkbox = styled.input`
@@ -495,7 +482,9 @@ const AgreementText = styled.span`
   a {
     color: ${T.orange};
     text-decoration: none;
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
@@ -551,7 +540,10 @@ const PrevButton = styled(NavButton)`
   border: 1px solid ${T.border};
   color: ${T.textSub};
 
-  &:hover { border-color: ${T.orange}; color: ${T.orange}; }
+  &:hover {
+    border-color: ${T.orange};
+    color: ${T.orange};
+  }
 `;
 
 const NextButton = styled(NavButton)`
@@ -560,12 +552,14 @@ const NextButton = styled(NavButton)`
   color: #fff;
   margin-left: auto;
 
-  &:hover { background: #e67020; }
+  &:hover {
+    background: #e67020;
+  }
   &:disabled {
-    background: rgba(250,129,40,0.25);
+    background: rgba(250, 129, 40, 0.25);
     border-color: transparent;
     cursor: not-allowed;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.4);
   }
 `;
 
@@ -579,7 +573,7 @@ const StepCounter = styled.span`
 // ─── InfoNote ─────────────────────────────────────────────────────────────────
 const InfoNote = styled.div`
   padding: 12px 16px;
-  border-left: 3px solid rgba(250,129,40,0.4);
+  border-left: 3px solid rgba(250, 129, 40, 0.4);
   background: ${T.orangeGlow};
   border-radius: 0 8px 8px 0;
   font-size: 0.83rem;
@@ -610,7 +604,10 @@ const QtyButton = styled.button`
   cursor: pointer;
   transition: all 0.18s;
 
-  &:hover { border-color: ${T.orange}; color: ${T.orange}; }
+  &:hover {
+    border-color: ${T.orange};
+    color: ${T.orange};
+  }
 `;
 
 const QtyValue = styled.span`
@@ -623,10 +620,10 @@ const QtyValue = styled.span`
 
 // ─── Steps meta ───────────────────────────────────────────────────────────────
 const STEPS = [
-  { label: "Details",  icon: "✦" },
+  { label: "Details", icon: "✦" },
   { label: "Organizer", icon: "◈" },
-  { label: "Media",    icon: "◉" },
-  { label: "Package",  icon: "◇" },
+  { label: "Media", icon: "◉" },
+  { label: "Package", icon: "◇" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -636,16 +633,26 @@ const DiscountForm = (props) => {
   // ── State (same as original) ──────────────────────────────────────────────
   const [discountTitle, setDiscountName] = useState("");
   const [discountDescription, setDiscountDescription] = useState("");
-  const [organizerName, setOrganizerName] = useState(props.organizer?.name ?? "");
-  const [organizerDescription, setOrganizerDescription] = useState(props.organizer?.description ?? "");
+  const [organizerName, setOrganizerName] = useState(
+    props.organizer?.name ?? "",
+  );
+  const [organizerDescription, setOrganizerDescription] = useState(
+    props.organizer?.description ?? "",
+  );
   const [email, setEmail] = useState(props.organizer?.email ?? "");
-  const [phoneNumber, setPhoneNumber] = useState(props.organizer?.phone_number ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(
+    props.organizer?.phone_number ?? "",
+  );
   const [discountCategories, setDiscountCategories] = useState([]);
   const [percentageDiscount, setPercentageDiscount] = useState("");
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
-  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
-  const [endDate, setEndDate] = useState(new Date(Date.now() + 86400000).toISOString().slice(0, 10));
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().slice(0, 10),
+  );
+  const [endDate, setEndDate] = useState(
+    new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+  );
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [discountFlyer, setDiscountFlyer] = useState();
@@ -653,7 +660,12 @@ const DiscountForm = (props) => {
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
   const [socialMediaHandles, setSocialMediaHandles] = useState(
-    props.organizer?.social_media_handles ?? { whatsapp: "", facebook: "", instagram: "", twitter: "" }
+    props.organizer?.social_media_handles ?? {
+      whatsapp: "",
+      facebook: "",
+      instagram: "",
+      twitter: "",
+    },
   );
   const [videoURL, setVideoURL] = useState("");
   const [websiteURL, setWebsiteUrl] = useState("");
@@ -665,70 +677,98 @@ const DiscountForm = (props) => {
   // UI state
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState("forward");
-  const [generating, setGenerating] = useState(false);
-  const [embedError, setEmbedError] = useState("");
-
   // Errors
   const [emailError, setEmailError] = useState("");
   const [contactError, setContactError] = useState("");
   const [imageError, setImageError] = useState({ flyer: "", images: "" });
   const [videoURLError, setVideoURLError] = useState("");
   const [websiteURLError, setWebsiteURLError] = useState("");
-  const [socialMediaHandlesURLError, setSocialMediaHandlesURLError] = useState(
-    { whatsappError: "", facebookError: "", instagramError: "", twitterError: "" }
-  );
+  const [socialMediaHandlesURLError, setSocialMediaHandlesURLError] = useState({
+    whatsappError: "",
+    facebookError: "",
+    instagramError: "",
+    twitterError: "",
+  });
   const [isFlyerEmpty, setIsFlyerEmpty] = useState(false);
   const [filename, setFilename] = useState("");
 
-  const navigate = useNavigate();
-  const current_url = useLocation();
+  const { pathname } = useLocation();
+  const {
+    setUrl,
+    categories,
+    discount,
+    discount_media,
+    discount_packages,
+    getCategories,
+    getDiscountPackages,
+    getDiscountMedia,
+  } = props;
 
-  // ── Effects (same as original) ────────────────────────────────────────────
-  useEffect(() => { props.setUrl?.(current_url.pathname); }, []);
+  // ── Effects ───────────────────────────────────────────────────────────────
+  // Mount-only: record URL for post-login redirect. Refs let us read
+  // the latest values without adding them as reactive dependencies.
+  const pathnameRef = React.useRef(pathname);
+  const setUrlRef = React.useRef(setUrl);
+  useEffect(() => {
+    setUrlRef.current?.(pathnameRef.current);
+  }, []);
 
   useEffect(() => {
-    if (props.categories) setAllCategories(props.categories);
-    else props.getCategories?.();
+    if (categories) setAllCategories(categories);
+    else getCategories?.();
 
-    if (props.discount_packages) {
-      setDiscountPackages(props.discount_packages.results);
-      setPackageOption({ ...props.discount_packages.results[0], quantity: 1 });
+    if (discount_packages) {
+      setDiscountPackages(discount_packages.results);
+      setPackageOption({ ...discount_packages.results[0], quantity: 1 });
     } else {
-      props.getDiscountPackages?.();
+      getDiscountPackages?.();
     }
 
-    if (props.discount && !discountFlyer) {
-      setDiscountName(props.discount.name);
-      setDiscountDescription(props.discount.description);
-      setOrganizerName(props.discount.organizer.name);
-      setOrganizerDescription(props.discount.organizer.description);
-      setEmail(props.discount.organizer.email);
-      setPhoneNumber(props.discount.organizer.phone_number);
-      setDiscountCategories(props.discount.categories);
-      setPercentageDiscount(props.discount.percentage_discount);
-      setLocation(props.discount.location);
-      setAddress(props.discount.address);
-      setStartDate(props.discount.start_date);
-      setEndDate(props.discount.end_date);
-      setStartTime(props.discount.start_time);
-      setEndTime(props.discount.end_time);
-      setSocialMediaHandles(props.discount.organizer.social_media_handles);
-      setWebsiteUrl(props.discount.website_url);
-      setPackageOption(props.discount_packages.results[0]);
-      setDiscountFlyer(props.discount.flyer);
-      setAgreement(props.discount.agreement);
+    if (discount && !discountFlyer) {
+      setDiscountName(discount.name);
+      setDiscountDescription(discount.description);
+      setOrganizerName(discount.organizer.name);
+      setOrganizerDescription(discount.organizer.description);
+      setEmail(discount.organizer.email);
+      setPhoneNumber(discount.organizer.phone_number);
+      setDiscountCategories(discount.categories);
+      setPercentageDiscount(discount.percentage_discount);
+      setLocation(discount.location);
+      setAddress(discount.address);
+      setStartDate(discount.start_date);
+      setEndDate(discount.end_date);
+      setStartTime(discount.start_time);
+      setEndTime(discount.end_time);
+      setSocialMediaHandles(discount.organizer.social_media_handles);
+      setWebsiteUrl(discount.website_url);
+      setPackageOption(discount_packages.results[0]);
+      setDiscountFlyer(discount.flyer);
+      setAgreement(discount.agreement);
     }
 
-    if ((!props.discount_media && props.discount) ||
-        (props.discount && props.discount_media?.[0]?.discount !== props.discount.url)) {
-      props.getDiscountMedia?.(props.discount.id);
+    if (
+      (!discount_media && discount) ||
+      (discount && discount_media?.[0]?.discount !== discount.url)
+    ) {
+      getDiscountMedia?.(discount.id);
     }
 
-    if (props.discount_media && !discountImages.length) {
-      setDiscountImages(props.discount_media);
-      setReadDiscountImages(props.discount_media);
+    if (discount_media && !discountImages.length) {
+      setDiscountImages(discount_media);
+      setReadDiscountImages(discount_media);
     }
-  }, [props.categories, props.discount, props.discount_media, props.discount_packages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    categories,
+    discount,
+    discount_media,
+    discount_packages,
+    discountFlyer,
+    discountImages.length,
+    getCategories,
+    getDiscountMedia,
+    getDiscountPackages,
+  ]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const goTo = (next) => {
@@ -741,7 +781,7 @@ const DiscountForm = (props) => {
     setDiscountCategories(
       exists
         ? discountCategories.filter((c) => c.name !== cat.name)
-        : [...(discountCategories || []), cat]
+        : [...(discountCategories || []), cat],
     );
   };
 
@@ -760,9 +800,15 @@ const DiscountForm = (props) => {
   const handleSocialChange = (platform, value) => {
     setSocialMediaHandles((prev) => ({ ...prev, [platform]: value }));
     if (value && !isValidURL(value)) {
-      setSocialMediaHandlesURLError((prev) => ({ ...prev, [`${platform}Error`]: "Invalid URL" }));
+      setSocialMediaHandlesURLError((prev) => ({
+        ...prev,
+        [`${platform}Error`]: "Invalid URL",
+      }));
     } else {
-      setSocialMediaHandlesURLError((prev) => ({ ...prev, [`${platform}Error`]: "" }));
+      setSocialMediaHandlesURLError((prev) => ({
+        ...prev,
+        [`${platform}Error`]: "",
+      }));
     }
   };
 
@@ -776,7 +822,10 @@ const DiscountForm = (props) => {
       const imgId = createId();
       setDiscountImages((prev) => [...prev, { id: `image-${imgId}`, file }]);
       reader.onload = (e) =>
-        setReadDiscountImages((prev) => [...prev, { id: `image-${imgId}`, image: e.target.result }]);
+        setReadDiscountImages((prev) => [
+          ...prev,
+          { id: `image-${imgId}`, image: e.target.result },
+        ]);
       reader.readAsDataURL(file);
     });
   };
@@ -797,45 +846,56 @@ const DiscountForm = (props) => {
     setReadDiscountImages((prev) => prev.filter((img) => img.id !== id));
   };
 
-  const handleOptionChange = (type) => {
-    const pkg = discountPackages.find((p) => p.type === type);
-    if (pkg) setPackageOption({ ...pkg, quantity: packageOption?.quantity || 1 });
-  };
-
   const generateEmbed = async () => {
-    setGenerating(true);
     try {
       const embed = await generateEmbedFromName(location);
       setAddress(embed);
       return embed;
     } catch (err) {
-      setEmbedError?.("Could not generate embed. Please paste a Google Maps link manually.");
-    } finally {
-      setGenerating(false);
+      console.error("Could not generate embed:", err);
     }
   };
 
   const handlePostDiscount = async () => {
     let embed_location = address;
     if (!address?.trim()) {
-      try { embed_location = await generateEmbed(); } catch (_) {}
+      try {
+        embed_location = await generateEmbed();
+      } catch (_) {}
     }
 
     const filteredSocial = Object.fromEntries(
-      Object.entries(socialMediaHandles).filter(([, v]) => v?.trim())
+      Object.entries(socialMediaHandles).filter(([, v]) => v?.trim()),
     );
 
     const payload = {
       discount_data: {
-        title: discountTitle, description: discountDescription,
-        package_type: packageOption?.type, percentage_discount: percentageDiscount,
-        start_date: startDate, end_date: endDate, start_time: startTime, end_time: endTime,
-        categories: discountCategories, video_url: videoURL, website_url: websiteURL,
-        agreement, location, address: embed_location,
+        title: discountTitle,
+        description: discountDescription,
+        package_type: packageOption?.type,
+        percentage_discount: percentageDiscount,
+        start_date: startDate,
+        end_date: endDate,
+        start_time: startTime,
+        end_time: endTime,
+        categories: discountCategories,
+        video_url: videoURL,
+        website_url: websiteURL,
+        agreement,
+        location,
+        address: embed_location,
       },
-      organizer_data: { name: organizerName, description: organizerDescription,
-        email, phone_number: phoneNumber, social_media_handles: filteredSocial },
-      package_data: { type: packageOption?.type, quantity: packageOption?.quantity },
+      organizer_data: {
+        name: organizerName,
+        description: organizerDescription,
+        email,
+        phone_number: phoneNumber,
+        social_media_handles: filteredSocial,
+      },
+      package_data: {
+        type: packageOption?.type,
+        quantity: packageOption?.quantity,
+      },
     };
 
     const files = { flyer: discountFlyer, images: discountImages };
@@ -844,11 +904,14 @@ const DiscountForm = (props) => {
     formData.append("flyer", files.flyer);
     formData.append("images_length", files.images.length);
 
-    if (props.discount) {
+    if (discount) {
       files.images.forEach((img, i) => {
-        formData.append(`image-${i}`, img.file ? img.file : JSON.stringify(img));
+        formData.append(
+          `image-${i}`,
+          img.file ? img.file : JSON.stringify(img),
+        );
       });
-      props.updateDiscount?.({ formData, discount_id: props.discount.id });
+      props.updateDiscount?.({ formData, discount_id: discount.id });
     } else {
       files.images.forEach((img, i) => formData.append(`image-${i}`, img.file));
       props.postDiscount?.(formData);
@@ -869,7 +932,10 @@ const DiscountForm = (props) => {
   // ─────────────────────────────────────────────────────────────────────────
   // STEP CONTENT
   // ─────────────────────────────────────────────────────────────────────────
-  const StepContent = () => {
+  // Called as renderStepContent(), NOT as <StepContent /> — avoids React
+  // treating it as a new component type each render (which would unmount/
+  // remount all inputs, losing focus and resetting scroll on every keystroke).
+  const renderStepContent = () => {
     switch (step) {
       // ── Step 0: Discount Details ────────────────────────────────────────
       case 0:
@@ -949,11 +1015,19 @@ const DiscountForm = (props) => {
             <TwoCol>
               <FieldGroup>
                 <FieldLabel>Start Time</FieldLabel>
-                <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                <Input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
               </FieldGroup>
               <FieldGroup>
                 <FieldLabel>End Time</FieldLabel>
-                <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                <Input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
               </FieldGroup>
             </TwoCol>
 
@@ -969,7 +1043,9 @@ const DiscountForm = (props) => {
                 {allCategories.map((cat) => (
                   <Chip
                     key={cat.id}
-                    active={discountCategories?.some((c) => c.name === cat.name)}
+                    active={discountCategories?.some(
+                      (c) => c.name === cat.name,
+                    )}
                     onClick={() => toggleCategory(cat)}
                     type="button"
                   >
@@ -1039,7 +1115,11 @@ const DiscountForm = (props) => {
                   placeholder="https://yoursite.com"
                   onChange={(e) => {
                     setWebsiteUrl(e.target.value);
-                    setWebsiteURLError(isValidURL(e.target.value) || !e.target.value ? "" : "Invalid URL");
+                    setWebsiteURLError(
+                      isValidURL(e.target.value) || !e.target.value
+                        ? ""
+                        : "Invalid URL",
+                    );
                   }}
                 />
                 {websiteURLError && <FieldError>{websiteURLError}</FieldError>}
@@ -1061,26 +1141,37 @@ const DiscountForm = (props) => {
 
             <SectionHeading>
               <SectionIcon>◉</SectionIcon>
-              <SectionTitle>Social Handles <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>(optional)</span></SectionTitle>
+              <SectionTitle>
+                Social Handles{" "}
+                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
+                  (optional)
+                </span>
+              </SectionTitle>
             </SectionHeading>
 
-            {["whatsapp", "facebook", "instagram", "twitter"].map((platform) => (
-              <SocialRow key={platform}>
-                <SocialHandle>{platform}</SocialHandle>
-                <SocialInput
-                  type="url"
-                  value={socialMediaHandles[platform] ?? ""}
-                  hasError={!!socialMediaHandlesURLError[`${platform}Error`]}
-                  placeholder={`https://${platform}.com/…`}
-                  onChange={(e) => handleSocialChange(platform, e.target.value)}
-                />
-                {socialMediaHandlesURLError[`${platform}Error`] && (
-                  <FieldError style={{ fontSize: "0.72rem", whiteSpace: "nowrap" }}>
-                    {socialMediaHandlesURLError[`${platform}Error`]}
-                  </FieldError>
-                )}
-              </SocialRow>
-            ))}
+            {["whatsapp", "facebook", "instagram", "twitter"].map(
+              (platform) => (
+                <SocialRow key={platform}>
+                  <SocialHandle>{platform}</SocialHandle>
+                  <SocialInput
+                    type="url"
+                    value={socialMediaHandles[platform] ?? ""}
+                    hasError={!!socialMediaHandlesURLError[`${platform}Error`]}
+                    placeholder={`https://${platform}.com/…`}
+                    onChange={(e) =>
+                      handleSocialChange(platform, e.target.value)
+                    }
+                  />
+                  {socialMediaHandlesURLError[`${platform}Error`] && (
+                    <FieldError
+                      style={{ fontSize: "0.72rem", whiteSpace: "nowrap" }}
+                    >
+                      {socialMediaHandlesURLError[`${platform}Error`]}
+                    </FieldError>
+                  )}
+                </SocialRow>
+              ),
+            )}
           </StepSlide>
         );
 
@@ -1094,7 +1185,8 @@ const DiscountForm = (props) => {
             </SectionHeading>
 
             <InfoNote>
-              A high-quality flyer significantly improves click-through rate. Use a 1:1 or 4:5 ratio image for best results.
+              A high-quality flyer significantly improves click-through rate.
+              Use a 1:1 or 4:5 ratio image for best results.
             </InfoNote>
 
             <AssetGrid>
@@ -1134,7 +1226,12 @@ const DiscountForm = (props) => {
 
             <SectionHeading>
               <SectionIcon>▷</SectionIcon>
-              <SectionTitle>Video <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>(optional)</span></SectionTitle>
+              <SectionTitle>
+                Video{" "}
+                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
+                  (optional)
+                </span>
+              </SectionTitle>
             </SectionHeading>
 
             <FieldGroup>
@@ -1146,7 +1243,11 @@ const DiscountForm = (props) => {
                 placeholder="https://youtube.com/watch?v=…"
                 onChange={(e) => {
                   setVideoURL(e.target.value);
-                  setVideoURLError(isValidURL(e.target.value) || !e.target.value ? "" : "Invalid URL");
+                  setVideoURLError(
+                    isValidURL(e.target.value) || !e.target.value
+                      ? ""
+                      : "Invalid URL",
+                  );
                 }}
               />
               {videoURLError && <FieldError>{videoURLError}</FieldError>}
@@ -1172,7 +1273,12 @@ const DiscountForm = (props) => {
                       key={pkg.id}
                       active={active}
                       type="button"
-                      onClick={() => setPackageOption({ ...pkg, quantity: packageOption?.quantity || 1 })}
+                      onClick={() =>
+                        setPackageOption({
+                          ...pkg,
+                          quantity: packageOption?.quantity || 1,
+                        })
+                      }
                     >
                       <PackageCheck active={active}>✓</PackageCheck>
                       <PackageName active={active}>{pkg.type}</PackageName>
@@ -1193,18 +1299,37 @@ const DiscountForm = (props) => {
                   <QtyButton
                     type="button"
                     onClick={() =>
-                      setPackageOption((p) => ({ ...p, quantity: Math.max(1, p.quantity - 1) }))
+                      setPackageOption((p) => ({
+                        ...p,
+                        quantity: Math.max(1, p.quantity - 1),
+                      }))
                     }
-                  >−</QtyButton>
+                  >
+                    −
+                  </QtyButton>
                   <QtyValue>{packageOption.quantity}</QtyValue>
                   <QtyButton
                     type="button"
                     onClick={() =>
-                      setPackageOption((p) => ({ ...p, quantity: p.quantity + 1 }))
+                      setPackageOption((p) => ({
+                        ...p,
+                        quantity: p.quantity + 1,
+                      }))
                     }
-                  >+</QtyButton>
-                  <span style={{ color: T.textMuted, fontSize: "0.85rem", marginLeft: 8 }}>
-                    Total: GHS {(parseFloat(packageOption.price) * packageOption.quantity).toFixed(2)}
+                  >
+                    +
+                  </QtyButton>
+                  <span
+                    style={{
+                      color: T.textMuted,
+                      fontSize: "0.85rem",
+                      marginLeft: 8,
+                    }}
+                  >
+                    Total: GHS{" "}
+                    {(
+                      parseFloat(packageOption.price) * packageOption.quantity
+                    ).toFixed(2)}
                   </span>
                 </QuantityRow>
               </FieldGroup>
@@ -1219,7 +1344,9 @@ const DiscountForm = (props) => {
 
             <AgreementBox
               checked={agreement === "agreed"}
-              onClick={() => setAgreement(agreement === "agreed" ? "" : "agreed")}
+              onClick={() =>
+                setAgreement(agreement === "agreed" ? "" : "agreed")
+              }
             >
               <Checkbox
                 id="agreement"
@@ -1230,7 +1357,12 @@ const DiscountForm = (props) => {
               />
               <AgreementText>
                 I have read and agree to the{" "}
-                <a href="/terms" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Terms and Conditions
                 </a>{" "}
                 and confirm that all information provided is accurate.
@@ -1239,7 +1371,10 @@ const DiscountForm = (props) => {
 
             {/* Payment component sits below when triggered */}
             {props.payment && (
-              <Payment payment={props.payment} package_type={packageOption?.type} />
+              <Payment
+                payment={props.payment}
+                package_type={packageOption?.type}
+              />
             )}
           </StepSlide>
         );
@@ -1259,7 +1394,7 @@ const DiscountForm = (props) => {
         <CardHeader>
           <Eyebrow>Quick Discount</Eyebrow>
           <FormTitle>
-            {props.discount ? "Update Discount Ad" : "Create Discount Ad"}
+            {discount ? "Update Discount Ad" : "Create Discount Ad"}
           </FormTitle>
 
           {/* Step indicators */}
@@ -1277,9 +1412,7 @@ const DiscountForm = (props) => {
                   </StepDot>
                   <StepLabel active={i === step}>{s.label}</StepLabel>
                 </StepItem>
-                {i < STEPS.length - 1 && (
-                  <StepConnector done={i < step} />
-                )}
+                {i < STEPS.length - 1 && <StepConnector done={i < step} />}
               </React.Fragment>
             ))}
           </StepRow>
@@ -1288,13 +1421,13 @@ const DiscountForm = (props) => {
         </CardHeader>
 
         {/* ── Body ── */}
-        <CardBody>
-          <StepContent />
-        </CardBody>
+        <CardBody>{renderStepContent()}</CardBody>
 
         {/* ── Footer ── */}
         <CardFooter>
-          <StepCounter>{step + 1} / {STEPS.length}</StepCounter>
+          <StepCounter>
+            {step + 1} / {STEPS.length}
+          </StepCounter>
 
           {step > 0 && (
             <PrevButton type="button" onClick={() => goTo(step - 1)}>
@@ -1316,7 +1449,7 @@ const DiscountForm = (props) => {
               disabled={!canProceed[step]}
               onClick={handlePostDiscount}
             >
-              {props.discount ? "Update Ad" : "Submit Ad"} →
+              {discount ? "Update Ad" : "Submit Ad"} →
             </NextButton>
           )}
         </CardFooter>
