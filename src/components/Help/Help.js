@@ -843,6 +843,7 @@ const LocationSteps = styled.ol`
   flex-direction: column;
   gap: 0;
   position: relative;
+  text-align: left;
 
   &::before {
     content: '';

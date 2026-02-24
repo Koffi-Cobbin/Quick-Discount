@@ -292,10 +292,10 @@ const FadeInSection = styled.div`
  */
 const FilterBar = styled.div`
   position: sticky;
-  top: 52px; /* mobile default — sits flush under the 52px mobile navbar */
+  top: 50px; /* mobile default — sits flush under the 52px mobile navbar */
   z-index: 100;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  background: rgba(14, 9, 4, 0.82);
+  background: rgba(255, 255, 255, 0.55);
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.22),
     0 1px 0 rgba(255, 255, 255, 0.04) inset,
