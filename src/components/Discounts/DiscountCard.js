@@ -8,11 +8,11 @@ const DiscountCard = (props) => {
     if (data.length <= size) {
       return data;
     }
-    const words = data.split(' ');
-    let truncatedString = '';
+    const words = data.split(" ");
+    let truncatedString = "";
     for (let i = 0; i < words.length; i++) {
       if (truncatedString.length + words[i].length <= size) {
-        truncatedString += words[i] + ' ';
+        truncatedString += words[i] + " ";
       } else {
         break;
       }
@@ -22,47 +22,88 @@ const DiscountCard = (props) => {
 
   return (
     <>
-    {props.discount && 
-    <Card href={`/discounts/${props.discount.id}`} $index={props.index || 0}>
-        <ImageWrapper>
-          <BackgroundImage style={{ backgroundImage: `url(${props.discount.flyer})` }} />
-          <ShineOverlay />
-          <DiscountBadge>
-            {props.discount.percentage_discount
-              ? handleSlice(props.discount.percentage_discount, 20)
-              : "Deal"}
-          </DiscountBadge>
-        </ImageWrapper>
+      {props.discount && (
+        <Card
+          href={`/discounts/${props.discount.id}`}
+          $index={props.index || 0}
+        >
+          <ImageWrapper>
+            <BackgroundImage
+              style={{ backgroundImage: `url(${props.discount.flyer})` }}
+            />
+            <ShineOverlay />
+            <DiscountBadge>
+              {props.discount.percentage_discount
+                ? handleSlice(props.discount.percentage_discount, 20)
+                : "Deal"}
+            </DiscountBadge>
+          </ImageWrapper>
 
-      <EventInfo>
-        <Title>
-          {handleSlice(props.discount.title, 50)}
-        </Title>
+          <EventInfo>
+            <Title>{handleSlice(props.discount.title, 50)}</Title>
 
-        <Address>
-          <LocationIcon>📍</LocationIcon>
-          <span>{props.discount.location}</span>
-        </Address>
+            <Address>
+              <LocationIcon>
+                {/* Map pin — outline style with filled dot, matches 16px star size */}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2a7 7 0 0 0-7 7c0 4.418 5.686 11.617 6.7 12.802a.4.4 0 0 0 .6 0C13.314 20.617 19 13.418 19 9a7 7 0 0 0-7-7z"
+                    fill="currentColor"
+                    fillOpacity="0.18"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="12" cy="9" r="2.5" fill="currentColor" />
+                </svg>
+              </LocationIcon>
+              <span>{props.discount.location}</span>
+            </Address>
 
-        <DateTimeWrapper>
-          <Date>
-            <p>
-              <span>{formatDate(props.discount.start_date, false)} 
-              &nbsp; to {formatDate(props.discount.end_date, false)}</span> 
-            </p>
-          </Date>
-        </DateTimeWrapper>
+            <DateTimeWrapper>
+              <Date>
+                <p>
+                  <span>
+                    {formatDate(props.discount.start_date, false)}
+                    &nbsp; to {formatDate(props.discount.end_date, false)}
+                  </span>
+                </p>
+              </Date>
+            </DateTimeWrapper>
 
-        <SocialActions>
-          <Left><LikesCount>♥ <b>{props.discount.likes}</b></LikesCount></Left>
-          <Right>
-            <StarRating rating={props.discount.total_rating} showRate={true}/>
-          </Right>
-        </SocialActions>
-      </EventInfo>
-    </Card>
-    }
-   </>
+            <SocialActions>
+              <Left>
+                <LikesCount>
+                  {/* Heart — rounded, filled, matches 16px star size */}
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3z" />
+                  </svg>
+                  <b>{props.discount.likes}</b>
+                </LikesCount>
+              </Left>
+              <Right>
+                <StarRating
+                  rating={props.discount.total_rating}
+                  showRate={true}
+                />
+              </Right>
+            </SocialActions>
+          </EventInfo>
+        </Card>
+      )}
+    </>
   );
 };
 
@@ -131,7 +172,8 @@ const Card = styled.a`
     transition-duration: 0.1s;
   }
 
-  &:visited, &:focus {
+  &:visited,
+  &:focus {
     text-decoration: none;
     color: inherit;
     outline: none;
@@ -213,7 +255,7 @@ const EventInfo = styled.div`
   position: relative;
   padding: 12px;
   font-size: 16px;
-  font-family: Lato, 'Roboto', sans-serif;
+  font-family: Lato, "Roboto", sans-serif;
   flex: 1;
 
   transition: background-color 0.25s ease;
@@ -274,8 +316,21 @@ const Address = styled.p`
 `;
 
 const LocationIcon = styled.span`
-  font-size: 12px;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #fa8128;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+
+  ${Card}:hover & {
+    color: #e05a00;
+    transform: scale(1.15);
+  }
 `;
 
 const SocialActions = styled.div`
@@ -293,14 +348,24 @@ const Right = styled.div``;
 
 const LikesCount = styled.span`
   font-size: 13px;
-  color: #aaa;
-  display: flex;
+  color: #ccc;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   transition: color 0.25s ease;
+
+  svg {
+    flex-shrink: 0;
+    transition:
+      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      color 0.25s ease;
+  }
 
   ${Card}:hover & {
     color: #fa8128;
+    svg {
+      transform: scale(1.2);
+    }
   }
 
   b {
