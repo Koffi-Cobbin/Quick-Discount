@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { isEmailValid } from "../../utils/middleware";
 
-
 const Footer = (props) => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
@@ -14,28 +13,28 @@ const Footer = (props) => {
     // ERRORS
     const [emailError, setEmailError] = useState("");
 
-    const validateEmail = (value) => { 
+    const validateEmail = (value) => {
         setEmail(value);
         let emailRes = isEmailValid(value);
         setEmailError(emailRes[1] ? emailRes[1] : "");
-    }; 
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-    
+
         if (e.target !== e.currentTarget) {
-          return;
+            return;
         }
-    
+
         const payload = {
             name: username,
             email: email,
-            message: message
+            message: message,
         };
 
         props.sendMessage(payload);
         reset();
-      }
+    };
 
     const reset = () => {
         setEmail("");
@@ -44,8 +43,8 @@ const Footer = (props) => {
     };
 
     useEffect(() => {
-        if (props.errors){
-            if (props.errors.email){
+        if (props.errors) {
+            if (props.errors.email) {
                 setEmailError(props.errors.email[0]);
             }
         }
@@ -55,50 +54,134 @@ const Footer = (props) => {
         <FooterSection>
             <Layout>
                 <LeftSide>
-                    <h3><b>Sitemap</b></h3>
-                    <p><a href="/">Home</a></p>                    
-                    <p><a href="/discounts">Discounts</a></p>
-                    <p><a href="/discounts/add">Post</a></p>                   
-                    <p><a href="/help">Help</a></p>
-                    <p><a href="/login">Login</a></p>
-                    <p><a href="/signup">Sign up</a></p>
+                    <h3>
+                        <b>Sitemap</b>
+                    </h3>
+                    <p>
+                        <a href="/">Home</a>
+                    </p>
+                    <p>
+                        <a href="/discounts">Discounts</a>
+                    </p>
+                    <p>
+                        <a href="/discounts/add">Post</a>
+                    </p>
+                    <p>
+                        <a href="/help">Help</a>
+                    </p>
+                    <p>
+                        <a href="/login">Login</a>
+                    </p>
+                    <p>
+                        <a href="/signup">Sign up</a>
+                    </p>
                 </LeftSide>
 
                 <Main>
-                    <h3><b>Let's Vybe</b></h3>
-                    <p><a href="https://wa.me/+233598972791" target="_blank" rel="noreferrer">WhatsApp</a></p>  
-                    <p><a href="https://x.com/quickdiscountgh" target="_blank" rel="noreferrer">Twitter / X</a></p>                    
-                    <p><a href="https://www.instagram.com/quickdiscountgh?igsh=bGZpeWltb284NXJs" target="_blank" rel="noreferrer">Instagram</a></p>
-                    <p><a href="https://web.facebook.com/people/Quick-Discount-Gh/61558936265288/" target="_blank" rel="noreferrer">Facebook</a></p>
-                    <p><a href="https://www.tiktok.com/@quickdiscountgh" target="_blank" rel="noreferrer">TikTok</a></p>
-                    <p><a href="https://www.youtube.com/channel/UCD33fbhaEHeK5rgfC-eWveg" target="_blank" rel="noreferrer">YouTube</a></p>
+                    <h3>
+                        <b>Let's Vybe</b>
+                    </h3>
+                    <p>
+                        <a
+                            href="https://wa.me/+233598972791"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            WhatsApp
+                        </a>
+                    </p>
+                    <p>
+                        <a
+                            href="https://x.com/quickdiscountgh"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Twitter / X
+                        </a>
+                    </p>
+                    <p>
+                        <a
+                            href="https://www.instagram.com/quickdiscountgh?igsh=bGZpeWltb284NXJs"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Instagram
+                        </a>
+                    </p>
+                    <p>
+                        <a
+                            href="https://web.facebook.com/people/Quick-Discount-Gh/61558936265288/"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Facebook
+                        </a>
+                    </p>
+                    <p>
+                        <a
+                            href="https://www.tiktok.com/@quickdiscountgh"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            TikTok
+                        </a>
+                    </p>
+                    <p>
+                        <a
+                            href="https://www.youtube.com/channel/UCD33fbhaEHeK5rgfC-eWveg"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            YouTube
+                        </a>
+                    </p>
                 </Main>
 
-                <RightSide>                 
+                <RightSide>
                     <div className="footer-logo">
                         <img src="/images/logo-w.png" alt="QuickDiscount" />
                     </div>
                     <p>Ablekuma-Pokuase, Accra</p>
                     <p>Greater Accra Region</p>
-                    <p>Call Us: <a href="tel:+233598972791">+233598972791</a></p>
-                    <p><a href="mailto:quickdiscountgh@gmail.com" className="footer-mail">Leave a mail</a></p>
+                    <p>
+                        Call Us: <a href="tel:+233598972791">+233598972791</a>
+                    </p>
+                    <p>
+                        <a
+                            href="mailto:quickdiscountgh@gmail.com"
+                            className="footer-mail"
+                        >
+                            Leave a mail
+                        </a>
+                    </p>
                 </RightSide>
             </Layout>
             <Copyright>
-                <p className="text-center">Copyright © 2024 <a href="/" className="text-center">QuickDiscountGhLtd</a>. All rights reserved.</p>
-                <p className="text-center">Designed by <a href="#" className="text-center">Koffi Cobbin</a></p>
+                <p className="text-center">
+                    Copyright © 2024{" "}
+                    <a href="/" className="text-center">
+                        QuickDiscountGhLtd
+                    </a>
+                    . All rights reserved.
+                </p>
+                <p className="text-center">
+                    Designed by{" "}
+                    <a href="#" className="text-center">
+                        Koffi Cobbin
+                    </a>
+                </p>
             </Copyright>
         </FooterSection>
-    )
+    );
 };
 
 const FooterSection = styled.div`
     margin-top: 10px;
-    background-color:  #67309b;
+    background-color: rgba(220, 103, 14, 0.78); /* #67309b; */
     color: white;
     padding: 10px;
     margin-bottom: 0;
-    font-family: Inter, 'Roboto', sans-serif;
+    font-family: Inter, "Roboto", sans-serif;
     font-size: 14px;
     @media (max-width: 768px) {
     }
@@ -147,23 +230,22 @@ const Main = styled.div`
 
 const RightSide = styled.div`
     width: 30%;
-    & .footer-logo{
+    & .footer-logo {
         margin: 20px 0;
-        &>img{
+        & > img {
             width: 200px;
-        }        
+        }
     }
-    & .footer-mail{
+    & .footer-mail {
         border: 1px solid white;
         padding: 2px 5px;
-        border-radius: 5px;       
+        border-radius: 5px;
     }
     @media (max-width: 480px) {
         text-align: center;
         width: 100%;
     }
 `;
-
 
 const FormSection = styled.div`
     width: fit-content;
@@ -179,11 +261,10 @@ const FormSection = styled.div`
     }
 `;
 
-
 const Form = styled.div`
     border-radius: 10px;
     margin: 20px;
-  
+
     & .inputbox-wrap {
         & p {
             text-align: left;
@@ -241,9 +322,11 @@ const Form = styled.div`
         display: flex;
         justify-content: left;
         margin-bottom: 10px;
-        flex-direction: column;        
+        flex-direction: column;
 
-        label {display: block;}
+        label {
+            display: block;
+        }
 
         .textinput {
             border-radius: 10px;
@@ -264,7 +347,6 @@ const Form = styled.div`
     }
 `;
 
-
 const Copyright = styled.div`
     margin-top: 30px;
     p {
@@ -284,9 +366,9 @@ const Copyright = styled.div`
 const mapStateToProps = (state) => {
     return {
         categories: state.discountState.categories,
-    }
-  };
-  
+    };
+};
+
 const mapDispatchToProps = (dispatch) => ({});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Footer);

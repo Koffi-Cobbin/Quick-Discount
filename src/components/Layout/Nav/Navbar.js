@@ -5,7 +5,6 @@ import { NavLink, Link, useLocation } from "react-router-dom";
 import { logOutAPI } from "../../../actions";
 import Search from "./Search";
 
-
 const Navbar = (props) => {
     const [pressedEnter, setPressedEnter] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -27,12 +26,16 @@ const Navbar = (props) => {
     // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target)
+            ) {
                 setOpenDropdown(null);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () =>
+            document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     // Close dropdown on route change
@@ -52,9 +55,7 @@ const Navbar = (props) => {
     // State: 'transparent' — home hero, not yet scrolled (see-through)
     // State: 'scrolled'    — home after scrolling (orange glass)
     // State: 'blur'        — any other page (dark frosted glass — always visible)
-    const navState = isHome
-        ? (scrolled ? "scrolled" : "transparent")
-        : "blur";
+    const navState = isHome ? (scrolled ? "scrolled" : "transparent") : "blur";
 
     // Add KeyDown event to search input
     const addSearchEvent = () => {
@@ -71,11 +72,7 @@ const Navbar = (props) => {
     };
 
     return (
-        <Container
-            id="top"
-            $navState={navState}
-            style={props.style}
-        >
+        <Container id="top" $navState={navState} style={props.style}>
             <Content>
                 {/* Logo */}
                 <Logo>
@@ -111,8 +108,13 @@ const Navbar = (props) => {
 
                 {/* Hamburger — mobile only */}
                 <Menu id="sidenav">
-                    <HamburgerBtn onClick={props.sidenav} aria-label="Open menu">
-                        <span /><span /><span />
+                    <HamburgerBtn
+                        onClick={props.sidenav}
+                        aria-label="Open menu"
+                    >
+                        <span />
+                        <span />
+                        <span />
                     </HamburgerBtn>
                 </Menu>
 
@@ -121,7 +123,13 @@ const Navbar = (props) => {
                     <NavListWrap>
                         {/* Home */}
                         <NavItem>
-                            <NavLink to="/" end className={({ isActive }) => isActive ? "active current" : ""}>
+                            <NavLink
+                                to="/"
+                                end
+                                className={({ isActive }) =>
+                                    isActive ? "active current" : ""
+                                }
+                            >
                                 <span>Home</span>
                             </NavLink>
                         </NavItem>
@@ -136,8 +144,13 @@ const Navbar = (props) => {
                             >
                                 <span>
                                     Discounts
-                                    <ChevronIcon isOpen={openDropdown === "discounts"}>
-                                        <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    <ChevronIcon
+                                        isOpen={openDropdown === "discounts"}
+                                    >
+                                        <img
+                                            src="/images/icons/down-arrow-w.svg"
+                                            alt=""
+                                        />
                                     </ChevronIcon>
                                 </span>
                             </DropdownTrigger>
@@ -162,8 +175,13 @@ const Navbar = (props) => {
                             >
                                 <span>
                                     Help
-                                    <ChevronIcon isOpen={openDropdown === "help"}>
-                                        <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                    <ChevronIcon
+                                        isOpen={openDropdown === "help"}
+                                    >
+                                        <img
+                                            src="/images/icons/down-arrow-w.svg"
+                                            alt=""
+                                        />
                                     </ChevronIcon>
                                 </span>
                             </DropdownTrigger>
@@ -175,13 +193,19 @@ const Navbar = (props) => {
                                         Basics
                                     </DropdownItem>
                                 </Link>
-                                <Link to="/help/accounts" onClick={closeDropdown}>
+                                <Link
+                                    to="/help/accounts"
+                                    onClick={closeDropdown}
+                                >
                                     <DropdownItem>
                                         <DropdownIcon>👤</DropdownIcon>
                                         Account
                                     </DropdownItem>
                                 </Link>
-                                <Link to="/help/payment" onClick={closeDropdown}>
+                                <Link
+                                    to="/help/payment"
+                                    onClick={closeDropdown}
+                                >
                                     <DropdownItem>
                                         <DropdownIcon>💳</DropdownIcon>
                                         Payments
@@ -192,7 +216,12 @@ const Navbar = (props) => {
 
                         {/* Post */}
                         <NavItem>
-                            <NavLink to="/discounts/add" className={({ isActive }) => isActive ? "active current" : ""}>
+                            <NavLink
+                                to="/discounts/add"
+                                className={({ isActive }) =>
+                                    isActive ? "active current" : ""
+                                }
+                            >
                                 <span>Post</span>
                             </NavLink>
                         </NavItem>
@@ -208,25 +237,45 @@ const Navbar = (props) => {
                                 >
                                     <UserAvatar>
                                         {props.user.photoURL ? (
-                                            <img src={props.user.photoURL} alt="avatar" className="avatar" />
+                                            <img
+                                                src={props.user.photoURL}
+                                                alt="avatar"
+                                                className="avatar"
+                                            />
                                         ) : (
-                                            <img src="/images/icons/user.svg" alt="user" className="avatar placeholder" />
+                                            <img
+                                                src="/images/icons/user.svg"
+                                                alt="user"
+                                                className="avatar placeholder"
+                                            />
                                         )}
                                         <span className="me-label">
                                             Me
-                                            <ChevronIcon isOpen={openDropdown === "user"}>
-                                                <img src="/images/icons/down-arrow-w.svg" alt="" />
+                                            <ChevronIcon
+                                                isOpen={openDropdown === "user"}
+                                            >
+                                                <img
+                                                    src="/images/icons/down-arrow-w.svg"
+                                                    alt=""
+                                                />
                                             </ChevronIcon>
                                         </span>
                                     </UserAvatar>
                                 </DropdownTrigger>
-                                <DropdownMenu isOpen={openDropdown === "user"} align="right">
+                                <DropdownMenu
+                                    isOpen={openDropdown === "user"}
+                                    align="right"
+                                >
                                     <DropdownArrow align="right" />
                                     <UserDropdownHeader>
-                                        {props.user.displayName || props.user.email}
+                                        {props.user.displayName ||
+                                            props.user.email}
                                     </UserDropdownHeader>
                                     <DropdownDivider />
-                                    <Link to="/dashboard" onClick={closeDropdown}>
+                                    <Link
+                                        to="/dashboard"
+                                        onClick={closeDropdown}
+                                    >
                                         <DropdownItem>
                                             <DropdownIcon>📊</DropdownIcon>
                                             Dashboard
@@ -242,7 +291,12 @@ const Navbar = (props) => {
                             </NavItem>
                         ) : (
                             <NavItem>
-                                <NavLink to="/login" className={({ isActive }) => isActive ? "active" : ""}>
+                                <NavLink
+                                    to="/login"
+                                    className={({ isActive }) =>
+                                        isActive ? "active" : ""
+                                    }
+                                >
                                     <LoginBtn>Login</LoginBtn>
                                 </NavLink>
                             </NavItem>
@@ -274,60 +328,70 @@ const Container = styled.div`
     top: 0;
     width: 100%;
     z-index: 1000;
-    font-family: Inter, 'Roboto', sans-serif;
+    font-family: Inter, "Roboto", sans-serif;
 
     /* Glassmorphism layer — always present, intensity shifts per state */
-    backdrop-filter: ${({ $navState }) => ($navState === "transparent" ? "none" : "blur(20px) saturate(1.8)")};
-    -webkit-backdrop-filter: ${({ $navState }) => ($navState === "transparent" ? "none" : "blur(20px) saturate(1.8)")};
+    backdrop-filter: ${({ $navState }) =>
+        $navState === "transparent" ? "none" : "blur(20px) saturate(1.8)"};
+    -webkit-backdrop-filter: ${({ $navState }) =>
+        $navState === "transparent" ? "none" : "blur(20px) saturate(1.8)"};
 
     transition:
         background-color 0.4s ease,
-        box-shadow       0.4s ease,
-        border-color     0.4s ease,
-        padding          0.35s ease;
+        box-shadow 0.4s ease,
+        border-color 0.4s ease,
+        padding 0.35s ease;
 
     /*
      * State: 'transparent' — Home hero, not yet scrolled
      *   Barely-there black tint. Hero bleeds through.
      *   No border, no shadow — it's floating above the image.
      */
-    ${({ $navState }) => $navState === "transparent" && css`
-        background-color: rgba(0, 0, 0, 0.08);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        box-shadow: none;
-        padding: 14px 0;
-    `}
+    ${({ $navState }) =>
+        $navState === "transparent" &&
+        css`
+            background-color: rgba(0, 0, 0, 0);
+            /* border-bottom: 1px solid rgba(255, 255, 255, 0.06); */
+            box-shadow: none;
+            padding: 14px 0;
+        `}
 
     /*
      * State: 'scrolled' — Home after scrolling
      *   Orange glass: brand colour, dense blur, crisp shadow. 
-     *   rgba(220, 103, 14, 0.78)
+     *   rgba(103, 48, 155, 0.78)
      */
-    ${({ $navState }) => $navState === "scrolled" && css`
-        background-color: rgba(103, 48, 155, 0.78);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow:
-            0 4px 28px rgba(0, 0, 0, 0.18),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12);
-        padding: 6px 0;
-    `}
+    ${({ $navState }) =>
+        $navState === "scrolled" &&
+        css`
+            background-color: rgba(220, 103, 14, 0.78);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow:
+                0 4px 28px rgba(0, 0, 0, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            padding: 6px 0;
+        `}
 
     /*
      * State: 'blur' — All other pages
      */
-    ${({ $navState }) => $navState === "blur" && css`
-        background: rgba(14, 9, 4, 0.82) !important;
-        border-bottom: 2px solid rgba(220, 103, 14, 0.55) !important;
-        box-shadow:
-            0 4px 24px rgba(0, 0, 0, 0.22),
-            0 1px 0 rgba(255, 255, 255, 0.04) inset,
-            0 -1px 0 rgba(220, 103, 14, 0.2) inset !important;
-        padding: 6px 0;
-    `}
+    ${({ $navState }) =>
+        $navState === "blur" &&
+        css`
+            background: rgba(14, 9, 4, 0.82) !important;
+            border-bottom: 2px solid rgba(220, 103, 14, 0.55) !important;
+            box-shadow:
+                0 4px 24px rgba(0, 0, 0, 0.22),
+                0 1px 0 rgba(255, 255, 255, 0.04) inset,
+                0 -1px 0 rgba(220, 103, 14, 0.2) inset !important;
+            padding: 6px 0;
+        `}
 
     /* Hide hamburger on desktop */
     @media (min-width: 768px) {
-        #sidenav { display: none; }
+        #sidenav {
+            display: none;
+        }
     }
 `;
 
@@ -341,9 +405,15 @@ const Content = styled.div`
     margin: 0 auto;
     position: relative;
 
-    @media (min-width: 768px)  { width: 90%; }
-    @media (min-width: 1920px) { width: 80%; }
-    @media (min-width: 2560px) { width: 60%; }
+    @media (min-width: 768px) {
+        width: 90%;
+    }
+    @media (min-width: 1920px) {
+        width: 80%;
+    }
+    @media (min-width: 2560px) {
+        width: 60%;
+    }
 `;
 
 /* ─── Logo ───────────────────────────────────────────────────────────────── */
@@ -362,7 +432,9 @@ const Logo = styled.span`
     }
 
     @media (max-width: 768px) {
-        img { height: 40px; }
+        img {
+            height: 40px;
+        }
     }
 `;
 
@@ -373,7 +445,9 @@ const SearchWrapper = styled.div`
     width: 380px;
     flex-shrink: 0;
 
-    @media (max-width: 1020px) { display: none; }
+    @media (max-width: 1020px) {
+        display: none;
+    }
 `;
 
 const SearchEntryDisplayButton = styled.button`
@@ -384,10 +458,17 @@ const SearchEntryDisplayButton = styled.button`
     display: flex;
     align-items: center;
 
-    img { width: 20px; height: 20px; }
+    img {
+        width: 20px;
+        height: 20px;
+    }
 
-    @media (max-width: 767px)  { display: none; }
-    @media (min-width: 1021px) { display: none; }
+    @media (max-width: 767px) {
+        display: none;
+    }
+    @media (min-width: 1021px) {
+        display: none;
+    }
 `;
 
 const SearchButton = styled.button`
@@ -395,7 +476,10 @@ const SearchButton = styled.button`
     border: none;
     cursor: pointer;
     padding: 4px;
-    img { width: 22px; height: 22px; }
+    img {
+        width: 22px;
+        height: 22px;
+    }
 `;
 
 const SearchEntryDisplay = styled.div`
@@ -427,11 +511,15 @@ const SearchEntryDisplay = styled.div`
             font-size: 15px;
             outline: none;
 
-            &:focus { border-color: #fa8128; }
+            &:focus {
+                border-color: #fa8128;
+            }
         }
     }
 
-    @media (min-width: 1021px) { display: none !important; }
+    @media (min-width: 1021px) {
+        display: none !important;
+    }
 `;
 
 const CloseBtn = styled.button`
@@ -452,7 +540,9 @@ const Menu = styled.li`
     display: flex;
     align-items: center;
 
-    @media (min-width: 600px) { display: none; }
+    @media (min-width: 600px) {
+        display: none;
+    }
 `;
 
 const HamburgerBtn = styled.button`
@@ -473,7 +563,9 @@ const HamburgerBtn = styled.button`
         transition: transform 0.2s ease;
     }
 
-    &:hover span { background: rgba(255,255,255,0.8); }
+    &:hover span {
+        background: rgba(255, 255, 255, 0.8);
+    }
 `;
 
 /* ─── Top Nav ────────────────────────────────────────────────────────────── */
@@ -483,7 +575,9 @@ const TopNav = styled.nav`
     display: flex;
     align-items: center;
 
-    @media (max-width: 600px) { display: none; }
+    @media (max-width: 600px) {
+        display: none;
+    }
 `;
 
 const NavListWrap = styled.ul`
@@ -511,23 +605,30 @@ const NavItem = styled.li`
         font-weight: 500;
         padding: 8px 12px;
         border-radius: 8px;
-        transition: color 0.2s ease, background-color 0.2s ease;
+        transition:
+            color 0.2s ease,
+            background-color 0.2s ease;
         position: relative;
         white-space: nowrap;
 
-        span { display: flex; align-items: center; gap: 4px; }
+        span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
 
         &:hover {
             color: #fff;
             background-color: rgba(255, 255, 255, 0.12);
         }
 
-        &.active, &.current {
+        &.active,
+        &.current {
             color: #fff;
             font-weight: 600;
 
             &::after {
-                content: '';
+                content: "";
                 position: absolute;
                 bottom: 2px;
                 left: 12px;
@@ -554,10 +655,16 @@ const DropdownTrigger = styled.button`
     font-family: inherit;
     padding: 8px 12px;
     border-radius: 8px;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
     white-space: nowrap;
 
-    span { display: flex; align-items: center; gap: 4px; }
+    span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
 
     &:hover {
         color: #fff;
@@ -578,7 +685,11 @@ const ChevronIcon = styled.span`
     transition: transform 0.25s ease;
     transform: ${({ isOpen }) => (isOpen ? "rotate(180deg)" : "rotate(0deg)")};
 
-    img { width: 11px; height: 11px; display: block; }
+    img {
+        width: 11px;
+        height: 11px;
+        display: block;
+    }
 `;
 
 /* ─── Dropdown Menu ──────────────────────────────────────────────────────── */
@@ -586,38 +697,47 @@ const ChevronIcon = styled.span`
 const DropdownMenu = styled.div`
     position: absolute;
     top: calc(100% + 10px);
-    ${({ align }) => align === "right" ? "right: 0;" : "left: 0;"}
+    ${({ align }) => (align === "right" ? "right: 0;" : "left: 0;")}
     min-width: 190px;
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.18),
+        0 2px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     z-index: 1200;
     pointer-events: ${({ isOpen }) => (isOpen ? "auto" : "none")};
     opacity: ${({ isOpen }) => (isOpen ? 1 : 0)};
-    transform: ${({ isOpen }) => (isOpen ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.97)")};
-    transition: opacity 0.22s ease, transform 0.22s ease;
+    transform: ${({ isOpen }) =>
+        isOpen ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.97)"};
+    transition:
+        opacity 0.22s ease,
+        transform 0.22s ease;
 
     a {
         display: block;
         text-decoration: none;
         color: #1a1a1a;
 
-        &:hover > div { background-color: #fff5ee; }
-        &:last-child > div { border-bottom: none; }
+        &:hover > div {
+            background-color: #fff5ee;
+        }
+        &:last-child > div {
+            border-bottom: none;
+        }
     }
 `;
 
 const DropdownArrow = styled.div`
     position: absolute;
     top: -6px;
-    ${({ align }) => align === "right" ? "right: 18px;" : "left: 18px;"}
+    ${({ align }) => (align === "right" ? "right: 18px;" : "left: 18px;")}
     width: 12px;
     height: 12px;
     background: #fff;
     transform: rotate(45deg);
     border-radius: 2px 0 0 0;
-    box-shadow: -2px -2px 4px rgba(0,0,0,0.06);
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.06);
 `;
 
 const DropdownItem = styled.div`
@@ -629,7 +749,9 @@ const DropdownItem = styled.div`
     font-weight: 500;
     color: ${({ danger }) => (danger ? "#e53e3e" : "#1a1a1a")};
     border-bottom: 1px solid #f5f5f5;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
 
     &:hover {
         background-color: ${({ danger }) => (danger ? "#fff5f5" : "#fff5ee")};
@@ -679,7 +801,7 @@ const UserAvatar = styled.span`
 
         &.placeholder {
             padding: 3px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
     }
 
@@ -687,7 +809,7 @@ const UserAvatar = styled.span`
         display: flex;
         align-items: center;
         gap: 3px;
-        color: rgba(255,255,255,0.9);
+        color: rgba(255, 255, 255, 0.9);
         font-size: 14px;
         font-weight: 500;
     }
@@ -703,7 +825,9 @@ const LoginBtn = styled.span`
     font-size: 14px;
     font-weight: 600;
     color: #fff !important;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 
     &:hover {
         background: rgba(255, 255, 255, 0.28) !important;
