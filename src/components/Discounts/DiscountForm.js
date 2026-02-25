@@ -91,7 +91,11 @@ const PageWrap = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 80px 16px 100px;
+  padding: 80px 16px 120px;
+
+  @media (max-width: 480px) {
+    padding: 72px 12px 140px;
+  }
 
   &::before {
     content: "";
@@ -160,7 +164,6 @@ const Card = styled.div`
   border: 1px solid rgba(240, 236, 230, 0.07);
   border-top: 1px solid rgba(250, 129, 40, 0.2);
   border-radius: 16px;
-  overflow: hidden;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.4),
     0 32px 80px rgba(0, 0, 0, 0.45),
@@ -171,6 +174,7 @@ const Card = styled.div`
 const CardHeader = styled.div`
   padding: 24px 16px 20px;
   border-bottom: 1px solid ${T.border};
+  border-radius: 16px 16px 0 0;
 
   @media (min-width: 400px) {
     padding: 28px 24px 22px;
@@ -652,6 +656,11 @@ const AssetGrid = styled.div`
   }
 `;
 
+const AssetSlot = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 const AssetLabel = styled.p`
   font-family: "Courier New", monospace;
   font-size: 10px;
@@ -666,10 +675,9 @@ const CardFooter = styled.div`
   display: flex;
   align-items: center;
   border-top: 1px solid ${T.border};
-  padding: 14px 16px 18px;
+  border-radius: 0 0 16px 16px;
+  padding: 14px 16px 24px;
   gap: 10px;
-
-  /* On mobile: Next fills remaining space, Back is compact, counter is left */
   flex-wrap: nowrap;
 
   @media (min-width: 480px) {
@@ -1344,7 +1352,7 @@ const DiscountForm = (props) => {
             </InfoNote>
 
             <AssetGrid>
-              <div>
+              <AssetSlot>
                 <AssetLabel>Discount Flyer *</AssetLabel>
                 <Dropzone
                   onDrop={flyerImageHandler}
@@ -1358,8 +1366,8 @@ const DiscountForm = (props) => {
                   isEmpty={isFlyerEmpty}
                   error={imageError.flyer}
                 />
-              </div>
-              <div>
+              </AssetSlot>
+              <AssetSlot>
                 <AssetLabel>Gallery Images (up to 3)</AssetLabel>
                 <Dropzone
                   onDrop={onDrop}
@@ -1369,7 +1377,7 @@ const DiscountForm = (props) => {
                   maxFiles={3}
                   error={imageError.images}
                 />
-              </div>
+              </AssetSlot>
             </AssetGrid>
 
             {readDiscountImages?.length > 0 && (
