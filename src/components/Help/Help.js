@@ -386,7 +386,7 @@ const Page = styled.div`
   min-height: 100vh;
   background-color: #0e0c0b;
   color: #f0ece6;
-  font-family: "Georgia", "Times New Roman", serif;
+  font-family: serif, "Georgia";
 `;
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
