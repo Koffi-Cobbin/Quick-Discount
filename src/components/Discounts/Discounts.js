@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import styled, { keyframes, css, createGlobalStyle } from "styled-components";
+import { connect } from "react-redux";
+import { getDiscountsAPI } from "../../actions";
 
 // ─── Theme tokens (matches QuickDiscount app) ─────────────────────────────────
 const T = {
@@ -18,115 +20,12 @@ const T = {
   radiusSm: "8px",
 };
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_DISCOUNTS = [
-  {
-    id: 1,
-    title: "50% Off Fresh Groceries",
-    location: "Accra Mall, Accra",
-    likes: 214,
-    categories: [{ name: "Food" }],
-    discount_pct: 50,
-    expiry: "Mar 2",
-    img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
-  },
-  {
-    id: 2,
-    title: "Nike Trainers Flash Sale",
-    location: "Okaishie, Accra",
-    likes: 189,
-    categories: [{ name: "Fashion" }],
-    discount_pct: 35,
-    expiry: "Mar 5",
-    img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80",
-  },
-  {
-    id: 3,
-    title: "Nairobi Spa Weekend Deal",
-    location: "East Legon, Accra",
-    likes: 97,
-    categories: [{ name: "Wellness" }],
-    discount_pct: 40,
-    expiry: "Mar 10",
-    img: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
-  },
-  {
-    id: 4,
-    title: "Samsung Galaxy S24 Ultra",
-    location: "Tema, Greater Accra",
-    likes: 305,
-    categories: [{ name: "Electronics" }],
-    discount_pct: 20,
-    expiry: "Mar 3",
-    img: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&q=80",
-  },
-  {
-    id: 5,
-    title: "Rooftop Dining Experience",
-    location: "Cantonments, Accra",
-    likes: 152,
-    categories: [{ name: "Food" }],
-    discount_pct: 25,
-    expiry: "Mar 8",
-    img: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80",
-  },
-  {
-    id: 6,
-    title: "Kente & Fabric Sale",
-    location: "Kumasi Central",
-    likes: 78,
-    categories: [{ name: "Fashion" }],
-    discount_pct: 60,
-    expiry: "Mar 12",
-    img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80",
-  },
-  {
-    id: 7,
-    title: "Gym Membership — 3 Months",
-    location: "Labone, Accra",
-    likes: 43,
-    categories: [{ name: "Wellness" }],
-    discount_pct: 45,
-    expiry: "Mar 15",
-    img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80",
-  },
-  {
-    id: 8,
-    title: "HP Laptop Clearance",
-    location: "Tesano, Accra",
-    likes: 261,
-    categories: [{ name: "Electronics" }],
-    discount_pct: 30,
-    expiry: "Mar 4",
-    img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80",
-  },
-  {
-    id: 9,
-    title: "Weekend Brunch Buffet",
-    location: "Airport Hills, Accra",
-    likes: 119,
-    categories: [{ name: "Food" }],
-    discount_pct: 15,
-    expiry: "Mar 9",
-    img: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&q=80",
-  },
-];
-
-const CATS = ["All", "Food", "Fashion", "Electronics", "Wellness"];
 const SORTS = ["Popular", "Newest", "Biggest Deal"];
 
 // ─── Animations ───────────────────────────────────────────────────────────────
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(22px); }
   to   { opacity: 1; transform: translateY(0); }
-`;
-const shimmer = keyframes`
-  0%   { background-position: -600px 0; }
-  100% { background-position:  600px 0; }
-`;
-const pulseGlow = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(250,129,40,0); }
-  50%       { box-shadow: 0 0 22px 4px rgba(250,129,40,0.18); }
 `;
 const grain = keyframes`
   0%,100% { transform: translate(0,0); }
@@ -198,17 +97,13 @@ const Inner = styled.div`
 
 // ─── Header band ─────────────────────────────────────────────────────────────
 const Header = styled.div`
-  padding: 64px 0 0;
+  padding: 72px 0 0;
+  text-align: center;
   animation: ${fadeUp} 0.55s ease both;
-`;
 
-const Eyebrow = styled.p`
-  font-family: "Courier New", monospace;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: ${T.orange};
-  margin-bottom: 12px;
+  @media (min-width: 600px) {
+    padding-top: 96px;
+  }
 `;
 
 const Headline = styled.h1`
@@ -217,48 +112,10 @@ const Headline = styled.h1`
   font-weight: 700;
   line-height: 1.08;
   color: ${T.text};
+  text-align: center;
   em {
     font-style: italic;
     color: ${T.orange};
-  }
-`;
-
-const Sub = styled.p`
-  margin-top: 14px;
-  font-size: 0.95rem;
-  color: ${T.textSub};
-  max-width: 480px;
-  line-height: 1.65;
-`;
-
-const HeaderRow = styled.div`
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-`;
-
-const PostBtn = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 22px;
-  background: ${T.orange};
-  color: #fff;
-  font-family: "DM Sans", sans-serif;
-  font-weight: 600;
-  font-size: 0.88rem;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-  animation: ${pulseGlow} 3s ease-in-out infinite;
-
-  &:hover {
-    background: #e06510;
-    transform: translateY(-1px);
   }
 `;
 
@@ -273,11 +130,16 @@ const Rule = styled.div`
 const Controls = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
   justify-content: space-between;
   margin-bottom: 32px;
   animation: ${fadeUp} 0.55s 0.1s ease both;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const CatRail = styled.div`
@@ -316,8 +178,13 @@ const Chip = styled.button`
 const RightControls = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
+
+  @media (max-width: 480px) {
+    width: 100%;
+    flex-shrink: 1;
+  }
 `;
 
 const SortSelect = styled.select`
@@ -327,12 +194,18 @@ const SortSelect = styled.select`
   font-family: "Courier New", monospace;
   font-size: 0.78rem;
   letter-spacing: 0.04em;
-  padding: 7px 14px;
+  padding: 7px 12px;
   border-radius: 30px;
   cursor: pointer;
   outline: none;
   appearance: none;
   transition: border-color 0.2s;
+  min-width: 0;
+  flex-shrink: 1;
+
+  @media (max-width: 480px) {
+    flex: 1;
+  }
 
   &:focus,
   &:hover {
@@ -342,30 +215,6 @@ const SortSelect = styled.select`
 
   option {
     background: #1a1a16;
-  }
-`;
-
-const ViewToggle = styled.div`
-  display: flex;
-  background: ${T.surface};
-  border: 1px solid ${T.border};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const ViewBtn = styled.button`
-  padding: 7px 12px;
-  border: none;
-  background: ${({ $active }) => ($active ? T.orangeDim : "transparent")};
-  color: ${({ $active }) => ($active ? T.orange : T.textMuted)};
-  cursor: pointer;
-  transition: all 0.18s;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-
-  &:hover {
-    color: ${T.orange};
   }
 `;
 
@@ -414,14 +263,7 @@ const FilterPill = styled.span`
 const Grid = styled.div`
   display: grid;
   gap: 20px;
-  ${({ $view }) =>
-    $view === "grid"
-      ? css`
-          grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-        `
-      : css`
-          grid-template-columns: 1fr;
-        `}
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   animation: ${fadeUp} 0.5s 0.2s ease both;
 `;
 
@@ -438,13 +280,6 @@ const Card = styled.div`
     transform 0.25s,
     box-shadow 0.25s;
 
-  ${({ $list }) =>
-    $list &&
-    css`
-      display: flex;
-      align-items: stretch;
-    `}
-
   &:hover {
     border-color: rgba(250, 129, 40, 0.35);
     transform: translateY(-3px);
@@ -456,26 +291,9 @@ const Card = styled.div`
 
 const CardImg = styled.div`
   position: relative;
-  ${({ $list }) =>
-    $list
-      ? css`
-          width: 200px;
-          flex-shrink: 0;
-          height: auto;
-        `
-      : css`
-          height: 190px;
-        `}
+  height: 190px;
   overflow: hidden;
   background: #1a1a16;
-
-  @media (max-width: 500px) {
-    ${({ $list }) =>
-      $list &&
-      css`
-        width: 130px;
-      `}
-  }
 
   img {
     width: 100%;
@@ -684,8 +502,12 @@ const EmptySub = styled.p`
 const SearchWrap = styled.div`
   position: relative;
   flex: 1;
-  min-width: 220px;
+  min-width: 0;
   max-width: 340px;
+
+  @media (max-width: 480px) {
+    max-width: none;
+  }
 `;
 
 const SearchInput = styled.input`
@@ -719,25 +541,38 @@ const SearchIcon = styled.span`
 `;
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function DiscountsPage() {
+function DiscountsPage(props) {
   const [activeCat, setActiveCat] = useState("All");
   const [sort, setSort] = useState("Popular");
-  const [view, setView] = useState("grid");
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(new Set());
 
-  // Simulate loading
+  const { getDiscounts, discounts, loading: propsLoading } = props;
+
+  // Fetch discounts on mount if not already loaded
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(t);
-  }, []);
+    if (!discounts?.results) {
+      getDiscounts();
+    }
+  }, [discounts, getDiscounts]);
+
+  // Derive unique category list from live data
+  const allDiscounts = discounts?.results || [];
+  const cats = [
+    "All",
+    ...[
+      ...new Set(allDiscounts.flatMap((d) => d.categories.map((c) => c.name))),
+    ],
+  ];
+
+  const loading = propsLoading || !discounts?.results;
 
   // Filter + sort
-  const filtered = MOCK_DISCOUNTS.filter(
-    (d) =>
-      activeCat === "All" || d.categories.some((c) => c.name === activeCat),
-  )
+  const filtered = allDiscounts
+    .filter(
+      (d) =>
+        activeCat === "All" || d.categories.some((c) => c.name === activeCat),
+    )
     .filter(
       (d) =>
         !query ||
@@ -745,8 +580,9 @@ export default function DiscountsPage() {
         d.location.toLowerCase().includes(query.toLowerCase()),
     )
     .sort((a, b) => {
-      if (sort === "Popular") return b.likes - a.likes;
-      if (sort === "Biggest Deal") return b.discount_pct - a.discount_pct;
+      if (sort === "Popular") return (b.likes || 0) - (a.likes || 0);
+      if (sort === "Biggest Deal")
+        return (b.percentage_discount || 0) - (a.percentage_discount || 0);
       return 0;
     });
 
@@ -759,6 +595,13 @@ export default function DiscountsPage() {
     });
   };
 
+  // Format end_date for display
+  const formatExpiry = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  };
+
   return (
     <>
       <Global />
@@ -769,23 +612,9 @@ export default function DiscountsPage() {
         <Inner>
           {/* ── Header ── */}
           <Header>
-            <HeaderRow>
-              <div>
-                <Eyebrow>🔥 QuickDiscount — Browse</Eyebrow>
-                <Headline>
-                  Fresh deals,
-                  <br />
-                  <em>no wahala.</em>
-                </Headline>
-                <Sub>
-                  All the latest discounts from across Ghana, curated and
-                  updated daily.
-                </Sub>
-              </div>
-              <PostBtn>
-                <span>+</span> Post a Discount
-              </PostBtn>
-            </HeaderRow>
+            <Headline>
+              Fresh deals, <em>no wahala.</em>
+            </Headline>
           </Header>
 
           <Rule />
@@ -793,7 +622,7 @@ export default function DiscountsPage() {
           {/* ── Controls ── */}
           <Controls>
             <CatRail>
-              {CATS.map((cat) => (
+              {cats.map((cat) => (
                 <Chip
                   key={cat}
                   $active={activeCat === cat}
@@ -822,23 +651,6 @@ export default function DiscountsPage() {
                   <option key={s}>{s}</option>
                 ))}
               </SortSelect>
-
-              <ViewToggle>
-                <ViewBtn
-                  $active={view === "grid"}
-                  onClick={() => setView("grid")}
-                  title="Grid view"
-                >
-                  ⊞
-                </ViewBtn>
-                <ViewBtn
-                  $active={view === "list"}
-                  onClick={() => setView("list")}
-                  title="List view"
-                >
-                  ☰
-                </ViewBtn>
-              </ViewToggle>
             </RightControls>
           </Controls>
 
@@ -865,7 +677,7 @@ export default function DiscountsPage() {
           )}
 
           {/* ── Grid ── */}
-          <Grid $view={view}>
+          <Grid>
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonCard key={i}>
@@ -883,11 +695,15 @@ export default function DiscountsPage() {
               </Empty>
             ) : (
               filtered.map((d) => (
-                <Card key={d.id} $list={view === "list"}>
-                  <CardImg $list={view === "list"}>
-                    <img src={d.img} alt={d.title} />
-                    <Badge>-{d.discount_pct}%</Badge>
-                    <ExpiryTag>Ends {d.expiry}</ExpiryTag>
+                <Card key={d.id}>
+                  <CardImg>
+                    <img src={d.flyer} alt={d.title} />
+                    {d.percentage_discount && (
+                      <Badge>-{d.percentage_discount}%</Badge>
+                    )}
+                    {d.end_date && (
+                      <ExpiryTag>Ends {formatExpiry(d.end_date)}</ExpiryTag>
+                    )}
                   </CardImg>
                   <CardBody>
                     <CardMeta>
@@ -933,3 +749,14 @@ export default function DiscountsPage() {
     </>
   );
 }
+
+const mapStateToProps = (state) => ({
+  discounts: state.discountState.discounts,
+  loading: state.discountState.loading,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  getDiscounts: () => dispatch(getDiscountsAPI()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(DiscountsPage);

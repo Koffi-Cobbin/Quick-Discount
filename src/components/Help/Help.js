@@ -5,11 +5,11 @@ import styled, { keyframes, css } from "styled-components";
 
 // ─── Section data ────────────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: "basics",      label: "Basics",            icon: "✦" },
-  { id: "accounts",   label: "Account",            icon: "◈" },
-  { id: "payment",    label: "Payment",            icon: "◎" },
-  { id: "packages",   label: "Ad Packages",        icon: "◇" },
-  { id: "location",   label: "Google Location",    icon: "◉" },
+  { id: "basics", label: "Basics", icon: "✦" },
+  { id: "accounts", label: "Account", icon: "◈" },
+  { id: "payment", label: "Payment", icon: "◎" },
+  { id: "packages", label: "Ad Packages", icon: "◇" },
+  { id: "location", label: "Google Location", icon: "◉" },
 ];
 
 function Help() {
@@ -43,7 +43,7 @@ function Help() {
             setRevealed((prev) => ({ ...prev, [id]: true }));
           }
         },
-        { threshold: 0.15, rootMargin: "-80px 0px -30% 0px" }
+        { threshold: 0.15, rootMargin: "-80px 0px -30% 0px" },
       );
 
       observer.observe(el);
@@ -65,16 +65,15 @@ function Help() {
         <HeroGrain />
         <HeroBadge>Help Center</HeroBadge>
         <HeroTitle>
-          Everything you need<br />
+          Everything you need
+          <br />
           <HeroAccent>to get started.</HeroAccent>
         </HeroTitle>
-        <HeroSub>
-          QuickDiscount — Ghana's fastest way to run and find discount promos.
-          No wahala.
-        </HeroSub>
         <HeroChips>
           {SECTIONS.map(({ id, label }) => (
-            <HeroChip key={id} onClick={() => scrollTo(id)}>{label}</HeroChip>
+            <HeroChip key={id} onClick={() => scrollTo(id)}>
+              {label}
+            </HeroChip>
           ))}
         </HeroChips>
       </Hero>
@@ -92,21 +91,26 @@ function Help() {
                   active={activeSection === id}
                   onClick={() => scrollTo(id)}
                 >
-                  <SidebarIcon active={activeSection === id}>{icon}</SidebarIcon>
-                  <SidebarText active={activeSection === id}>{label}</SidebarText>
+                  <SidebarIcon active={activeSection === id}>
+                    {icon}
+                  </SidebarIcon>
+                  <SidebarText active={activeSection === id}>
+                    {label}
+                  </SidebarText>
                   {activeSection === id && <SidebarPip />}
                 </SidebarItem>
               ))}
             </SidebarNav>
             <SidebarFooter>
-              <SidebarFooterLink to="/discounts/add">Post a Discount →</SidebarFooterLink>
+              <SidebarFooterLink to="/discounts/add">
+                Post a Discount →
+              </SidebarFooterLink>
             </SidebarFooter>
           </SidebarInner>
         </Sidebar>
 
         {/* Main content */}
         <Content>
-
           {/* ── Basics ── */}
           <Section id="basics" revealed={revealed["basics"]}>
             <SectionTag>01</SectionTag>
@@ -118,10 +122,26 @@ function Help() {
             </Lead>
             <StepGrid>
               {[
-                { n: "01", title: "Create an account", body: "Sign up or log in if you already have one. Takes 30 seconds." },
-                { n: "02", title: 'Click "Post"', body: "Hit Post in the navigation bar to begin your discount ad creation." },
-                { n: "03", title: "Set your deal", body: "Enter percentage discounts, prices, dates, and all relevant promo info." },
-                { n: "04", title: "Go live", body: "Once submitted, your ad is reviewed and goes live. Customers can start purchasing." },
+                {
+                  n: "01",
+                  title: "Create an account",
+                  body: "Sign up or log in if you already have one. Takes 30 seconds.",
+                },
+                {
+                  n: "02",
+                  title: 'Click "Post"',
+                  body: "Hit Post in the navigation bar to begin your discount ad creation.",
+                },
+                {
+                  n: "03",
+                  title: "Set your deal",
+                  body: "Enter percentage discounts, prices, dates, and all relevant promo info.",
+                },
+                {
+                  n: "04",
+                  title: "Go live",
+                  body: "Once submitted, your ad is reviewed and goes live. Customers can start purchasing.",
+                },
               ].map(({ n, title, body }) => (
                 <StepCard key={n}>
                   <StepNum>{n}</StepNum>
@@ -145,9 +165,18 @@ function Help() {
             <FeatureList>
               {[
                 { icon: "✏️", text: "Create, edit, and delete discount ads." },
-                { icon: "💰", text: "Set up payment preferences and receive payments directly." },
-                { icon: "📊", text: "View discount statistics and engagement details." },
-                { icon: "💬", text: "Communicate with customers through our messaging system." },
+                {
+                  icon: "💰",
+                  text: "Set up payment preferences and receive payments directly.",
+                },
+                {
+                  icon: "📊",
+                  text: "View discount statistics and engagement details.",
+                },
+                {
+                  icon: "💬",
+                  text: "Communicate with customers through our messaging system.",
+                },
               ].map(({ icon, text }) => (
                 <FeatureItem key={text}>
                   <FeatureEmoji>{icon}</FeatureEmoji>
@@ -169,14 +198,31 @@ function Help() {
             <SectionHeading>Payment</SectionHeading>
             <Lead>
               QuickDiscount provides secure payment processing for your discount
-              sales, supporting multiple payment methods for shops and customers.
+              sales, supporting multiple payment methods for shops and
+              customers.
             </Lead>
             <PaymentGrid>
               {[
-                { label: "Choose Gateway", detail: "Select your preferred payment gateway — MoMo or Bank transfer." },
-                { label: "Enter Details", detail: "Input your payment details to receive discount sales revenue securely." },
-                { label: "Customer Checkout", detail: "Customers pay via their preferred method through our encrypted checkout." },
-                { label: "Track Earnings", detail: "Monitor payouts and earnings in real time from your account dashboard." },
+                {
+                  label: "Choose Gateway",
+                  detail:
+                    "Select your preferred payment gateway — MoMo or Bank transfer.",
+                },
+                {
+                  label: "Enter Details",
+                  detail:
+                    "Input your payment details to receive discount sales revenue securely.",
+                },
+                {
+                  label: "Customer Checkout",
+                  detail:
+                    "Customers pay via their preferred method through our encrypted checkout.",
+                },
+                {
+                  label: "Track Earnings",
+                  detail:
+                    "Monitor payouts and earnings in real time from your account dashboard.",
+                },
               ].map(({ label, detail }) => (
                 <PaymentCard key={label}>
                   <PaymentCardLabel>{label}</PaymentCardLabel>
@@ -193,17 +239,21 @@ function Help() {
             <SectionTag>04</SectionTag>
             <SectionHeading>Ad Packages</SectionHeading>
             <Lead>
-              Choose the package that matches your promo goals and budget.
-              Every package includes homepage visibility.
+              Choose the package that matches your promo goals and budget. Every
+              package includes homepage visibility.
             </Lead>
             <PackagesRow>
               <PackageCard accent="#fa8128">
                 <PackageName>Daily</PackageName>
-                <PackagePrice>GHS 20 <PackagePriceSub>/ day</PackagePriceSub></PackagePrice>
-                <PackagePriceAlt>or GHS 50 for unlimited visibility</PackagePriceAlt>
+                <PackagePrice>
+                  GHS 20 <PackagePriceSub>/ day</PackagePriceSub>
+                </PackagePrice>
+                <PackagePriceAlt>
+                  or GHS 50 for unlimited visibility
+                </PackagePriceAlt>
                 <PackageDesc>
-                  Visible on the main page for 24 hours. One clickthrough per day.
-                  Perfect for limited-time offers or new product launches.
+                  Visible on the main page for 24 hours. One clickthrough per
+                  day. Perfect for limited-time offers or new product launches.
                 </PackageDesc>
                 <PackageBadge>Best for quick promos</PackageBadge>
               </PackageCard>
@@ -211,7 +261,9 @@ function Help() {
               <PackageCard accent="#e05a00" featured>
                 <PackageFeaturedBadge>Most Popular</PackageFeaturedBadge>
                 <PackageName>Weekly</PackageName>
-                <PackagePrice>GHS 75 <PackagePriceSub>up to 10 clicks</PackagePriceSub></PackagePrice>
+                <PackagePrice>
+                  GHS 75 <PackagePriceSub>up to 10 clicks</PackagePriceSub>
+                </PackagePrice>
                 <PackagePriceAlt>GHS 100 for 10+ clicks</PackagePriceAlt>
                 <PackageDesc>
                   Homepage visibility for a full week with multiple clicks
@@ -222,7 +274,9 @@ function Help() {
 
               <PackageCard accent="#b84500">
                 <PackageName>Monthly</PackageName>
-                <PackagePrice>GHS 300 <PackagePriceSub>/ month</PackagePriceSub></PackagePrice>
+                <PackagePrice>
+                  GHS 300 <PackagePriceSub>/ month</PackagePriceSub>
+                </PackagePrice>
                 <PackagePriceAlt>Top banner position</PackagePriceAlt>
                 <PackageDesc>
                   Premium top-banner placement on the home screen for an entire
@@ -248,7 +302,19 @@ function Help() {
                 {
                   n: "1",
                   title: "Open Google Maps",
-                  body: <>Go to <ExternalLink href="https://www.google.com/maps" target="_blank" rel="noreferrer">google.com/maps</ExternalLink> in your browser.</>,
+                  body: (
+                    <>
+                      Go to{" "}
+                      <ExternalLink
+                        href="https://www.google.com/maps"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        google.com/maps
+                      </ExternalLink>{" "}
+                      in your browser.
+                    </>
+                  ),
                 },
                 {
                   n: "2",
@@ -286,12 +352,11 @@ function Help() {
               ))}
             </LocationSteps>
             <SuccessBox>
-              🎉 Congratulations! You've successfully added your location.
-              Reach out via the{" "}
-              <Link to="/help">Help Center</Link> if you need further assistance.
+              🎉 Congratulations! You've successfully added your location. Reach
+              out via the <Link to="/help">Help Center</Link> if you need
+              further assistance.
             </SuccessBox>
           </Section>
-
         </Content>
       </Body>
     </Page>
@@ -321,7 +386,7 @@ const Page = styled.div`
   min-height: 100vh;
   background-color: #0e0c0b;
   color: #f0ece6;
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: "Georgia", "Times New Roman", serif;
 `;
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
@@ -334,7 +399,11 @@ const Hero = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(250, 129, 40, 0.18) 0%, transparent 70%);
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    rgba(250, 129, 40, 0.18) 0%,
+    transparent 70%
+  );
   border-bottom: 1px solid rgba(250, 129, 40, 0.15);
 
   @media (max-width: 768px) {
@@ -353,7 +422,7 @@ const HeroGrain = styled.div`
 
 const HeroBadge = styled.span`
   display: inline-block;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -371,7 +440,7 @@ const HeroTitle = styled.h1`
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.02em;
-  margin: 0 0 20px;
+  margin: 0 0 40px;
   color: #f5f0e8;
   animation: ${fadeUp} 0.6s 0.1s ease both;
 `;
@@ -382,18 +451,9 @@ const HeroAccent = styled.span`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: ${shimmer} 4s linear infinite, ${fadeUp} 0.6s 0.15s ease both;
-`;
-
-const HeroSub = styled.p`
-  font-size: clamp(1rem, 2vw, 1.2rem);
-  color: rgba(240, 236, 230, 0.55);
-  max-width: 480px;
-  line-height: 1.6;
-  margin: 0 auto 40px;
-  text-align: center;
-  font-family: 'Georgia', serif;
-  animation: ${fadeUp} 0.6s 0.2s ease both;
+  animation:
+    ${shimmer} 4s linear infinite,
+    ${fadeUp} 0.6s 0.15s ease both;
 `;
 
 const HeroChips = styled.div`
@@ -405,18 +465,21 @@ const HeroChips = styled.div`
 `;
 
 const HeroChip = styled.button`
-  background: rgba(250, 129, 40, 0.10);
+  background: rgba(250, 129, 40, 0.1);
   border: 1px solid rgba(250, 129, 40, 0.25);
   color: rgba(250, 129, 40, 0.9);
   padding: 8px 18px;
   border-radius: 20px;
   font-size: 13px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
 
   &:hover {
-    background: rgba(250, 129, 40, 0.20);
+    background: rgba(250, 129, 40, 0.2);
     border-color: rgba(250, 129, 40, 0.55);
     color: #fa8128;
   }
@@ -462,7 +525,7 @@ const SidebarInner = styled.div`
 `;
 
 const SidebarLabel = styled.p`
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -481,10 +544,12 @@ const SidebarItem = styled.button`
   display: flex;
   align-items: center;
   gap: 10px;
-  background: ${({ active }) => active ? "rgba(250, 129, 40, 0.08)" : "transparent"};
+  background: ${({ active }) =>
+    active ? "rgba(250, 129, 40, 0.08)" : "transparent"};
   border: none;
-  border-left: 2px solid ${({ active }) => active ? "#fa8128" : "rgba(240,236,230,0.08)"};
-  color: ${({ active }) => active ? "#fa8128" : "rgba(240, 236, 230, 0.45)"};
+  border-left: 2px solid
+    ${({ active }) => (active ? "#fa8128" : "rgba(240,236,230,0.08)")};
+  color: ${({ active }) => (active ? "#fa8128" : "rgba(240, 236, 230, 0.45)")};
   padding: 10px 14px;
   cursor: pointer;
   text-align: left;
@@ -494,21 +559,22 @@ const SidebarItem = styled.button`
   width: 100%;
 
   &:hover {
-    color: ${({ active }) => active ? "#fa8128" : "rgba(240, 236, 230, 0.75)"};
+    color: ${({ active }) =>
+      active ? "#fa8128" : "rgba(240, 236, 230, 0.75)"};
     background: rgba(250, 129, 40, 0.05);
   }
 `;
 
 const SidebarIcon = styled.span`
   font-size: 13px;
-  opacity: ${({ active }) => active ? 1 : 0.5};
+  opacity: ${({ active }) => (active ? 1 : 0.5)};
   transition: opacity 0.2s;
 `;
 
 const SidebarText = styled.span`
   font-size: 13px;
-  font-weight: ${({ active }) => active ? "600" : "400"};
-  font-family: 'Georgia', serif;
+  font-weight: ${({ active }) => (active ? "600" : "400")};
+  font-family: "Georgia", serif;
   letter-spacing: 0.01em;
 `;
 
@@ -531,14 +597,16 @@ const SidebarFooter = styled.div`
 `;
 
 const SidebarFooterLink = styled(Link)`
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 11px;
   color: rgba(250, 129, 40, 0.7);
   text-decoration: none;
   padding-left: 4px;
   transition: color 0.2s;
 
-  &:hover { color: #fa8128; }
+  &:hover {
+    color: #fa8128;
+  }
 `;
 
 // ─── Content ─────────────────────────────────────────────────────────────────
@@ -551,12 +619,15 @@ const Content = styled.main`
 const Section = styled.section`
   padding: 0 0 12px;
   opacity: ${({ revealed }) => (revealed ? 1 : 0)};
-  transform: ${({ revealed }) => (revealed ? "translateY(0)" : "translateY(24px)")};
-  transition: opacity 0.65s ease, transform 0.65s ease;
+  transform: ${({ revealed }) =>
+    revealed ? "translateY(0)" : "translateY(24px)"};
+  transition:
+    opacity 0.65s ease,
+    transform 0.65s ease;
 `;
 
 const SectionTag = styled.span`
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 11px;
   letter-spacing: 0.15em;
   color: rgba(250, 129, 40, 0.5);
@@ -619,7 +690,9 @@ const SuccessBox = styled.div`
   a {
     color: #fa8128;
     text-decoration: none;
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
@@ -636,7 +709,9 @@ const StepCard = styled.div`
   border: 1px solid rgba(240, 236, 230, 0.07);
   border-radius: 14px;
   padding: 24px 22px;
-  transition: border-color 0.25s, background 0.25s;
+  transition:
+    border-color 0.25s,
+    background 0.25s;
 
   &:hover {
     border-color: rgba(250, 129, 40, 0.3);
@@ -645,7 +720,7 @@ const StepCard = styled.div`
 `;
 
 const StepNum = styled.div`
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 11px;
   letter-spacing: 0.12em;
   color: #fa8128;
@@ -691,7 +766,9 @@ const FeatureItem = styled.li`
   line-height: 1.55;
   transition: background 0.2s;
 
-  &:hover { background: rgba(255, 255, 255, 0.04); }
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
 `;
 
 const FeatureEmoji = styled.span`
@@ -717,7 +794,9 @@ const PaymentCard = styled.div`
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(240, 236, 230, 0.06);
   border-radius: 12px;
-  transition: border-color 0.25s, background 0.25s;
+  transition:
+    border-color 0.25s,
+    background 0.25s;
 
   &:hover {
     border-color: rgba(250, 129, 40, 0.25);
@@ -732,7 +811,7 @@ const PaymentCardLabel = styled.h4`
   text-transform: uppercase;
   color: #fa8128;
   margin: 0 0 10px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 `;
 
 const PaymentCardDetail = styled.p`
@@ -761,10 +840,13 @@ const PackageCard = styled.div`
     featured
       ? "linear-gradient(135deg, rgba(250,129,40,0.14) 0%, rgba(180,70,0,0.10) 100%)"
       : "rgba(255, 255, 255, 0.025)"};
-  border: 1px solid ${({ featured, accent }) =>
-    featured ? `rgba(250, 129, 40, 0.45)` : "rgba(240, 236, 230, 0.07)"};
+  border: 1px solid
+    ${({ featured, accent }) =>
+      featured ? `rgba(250, 129, 40, 0.45)` : "rgba(240, 236, 230, 0.07)"};
   border-radius: 16px;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 
   &:hover {
     transform: translateY(-4px);
@@ -780,7 +862,7 @@ const PackageFeaturedBadge = styled.div`
   transform: translateX(-50%);
   background: #fa8128;
   color: #0e0c0b;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -814,7 +896,7 @@ const PackagePriceSub = styled.span`
 const PackagePriceAlt = styled.div`
   font-size: 0.78rem;
   color: rgba(240, 236, 230, 0.35);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   margin-bottom: 18px;
 `;
 
@@ -827,7 +909,7 @@ const PackageDesc = styled.p`
 
 const PackageBadge = styled.div`
   font-size: 0.75rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: rgba(250, 129, 40, 0.6);
   border-top: 1px solid rgba(240, 236, 230, 0.07);
   padding-top: 14px;
@@ -846,13 +928,17 @@ const LocationSteps = styled.ol`
   text-align: left;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 19px;
     top: 20px;
     bottom: 20px;
     width: 1px;
-    background: linear-gradient(to bottom, rgba(250,129,40,0.4), rgba(250,129,40,0.05));
+    background: linear-gradient(
+      to bottom,
+      rgba(250, 129, 40, 0.4),
+      rgba(250, 129, 40, 0.05)
+    );
   }
 `;
 
@@ -869,7 +955,7 @@ const LocationStepNum = styled.div`
   border: 1px solid rgba(250, 129, 40, 0.4);
   background: rgba(250, 129, 40, 0.08);
   color: #fa8128;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -901,7 +987,9 @@ const LocationStepBody = styled.p`
 const ExternalLink = styled.a`
   color: #fa8128;
   text-decoration: none;
-  &:hover { text-decoration: underline; }
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 export default Help;
