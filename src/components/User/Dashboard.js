@@ -185,6 +185,7 @@ const Dashboard = (props) => {
                         <AvatarOverlay>📷</AvatarOverlay>
                         <AvatarRing />
                     </Avatar>
+
                     <HeroText>
                         <Greeting>{greeting},</Greeting>
                         <UserName>
@@ -194,6 +195,14 @@ const Dashboard = (props) => {
                             Member · QuickDiscount
                             {isOrganizer && <OrgPip>· Organizer</OrgPip>}
                         </UserMeta>
+                        {isOrganizer && (
+                            <OrgButton
+                                style={{ marginTop: "10px" }}
+                                onClick={() => navigate("/organizer-dashboard")}
+                            >
+                                Go to Organizer Dashboard →
+                            </OrgButton>
+                        )}
                     </HeroText>
                 </HeroLeft>
 
@@ -218,27 +227,6 @@ const Dashboard = (props) => {
                     </Stat>
                 </StatRow>
             </Hero>
-
-            {/* ── Organizer Banner ─────────────────────────────────── */}
-            {isOrganizer && (
-                <OrgBanner>
-                    <OrgBannerLeft>
-                        <OrgBannerIcon>🏢</OrgBannerIcon>
-                        <div>
-                            <OrgBannerTitle>
-                                You have an Organizer account
-                            </OrgBannerTitle>
-                            <OrgBannerSub>
-                                Manage your listings, analytics and settings
-                                from your Organizer Dashboard.
-                            </OrgBannerSub>
-                        </div>
-                    </OrgBannerLeft>
-                    <OrgButton onClick={() => navigate("/organizer-dashboard")}>
-                        Go to Organizer Dashboard →
-                    </OrgButton>
-                </OrgBanner>
-            )}
 
             {/* ── Tab bar ──────────────────────────────────────────── */}
             <TabBar>
@@ -522,6 +510,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);
 
 const Page = styled.div`
     min-height: 100vh;
+    padding-top: 60px; /* matches Navbar height */
     background-color: ${T.bg};
     color: ${T.text};
     font-family: "Georgia", "Times New Roman", serif;
@@ -544,11 +533,9 @@ const Hero = styled.div`
     position: relative;
     z-index: 1;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 24px;
-    padding: 40px 40px 28px;
+    flex-direction: column;
+    gap: 20px;
+    padding: 28px 40px 24px;
     border-bottom: 1px solid ${T.border};
     background: radial-gradient(
         ellipse 70% 120% at 0% 0%,
@@ -556,9 +543,7 @@ const Hero = styled.div`
         transparent 60%
     );
     @media (max-width: 640px) {
-        padding: 28px 20px 20px;
-        flex-direction: column;
-        align-items: flex-start;
+        padding: 20px 20px 18px;
     }
 `;
 const HeroLeft = styled.div`
@@ -643,6 +628,7 @@ const OrgPip = styled.span`
 const StatRow = styled.div`
     display: flex;
     align-items: center;
+    width: 100%;
     background: ${T.surface};
     border: 1px solid ${T.border};
     border-radius: ${T.radius};
@@ -682,49 +668,6 @@ const StatDivider = styled.div`
     flex-shrink: 0;
 `;
 
-/* ── Organizer Banner ── */
-const OrgBanner = styled.div`
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 18px 40px;
-    background: linear-gradient(
-        135deg,
-        rgba(250, 129, 40, 0.08) 0%,
-        rgba(180, 70, 0, 0.05) 100%
-    );
-    border-bottom: 1px solid rgba(250, 129, 40, 0.15);
-    animation: ${css`
-        ${fadeUp} .4s ease both
-    `};
-    @media (max-width: 640px) {
-        padding: 16px 20px;
-    }
-`;
-const OrgBannerLeft = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 14px;
-`;
-const OrgBannerIcon = styled.div`
-    font-size: 1.5rem;
-`;
-const OrgBannerTitle = styled.div`
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: ${T.text};
-    margin-bottom: 2px;
-`;
-const OrgBannerSub = styled.div`
-    font-family: "Courier New", monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.05em;
-    color: ${T.textMuted};
-`;
 const OrgButton = styled.button`
     font-family: "Courier New", monospace;
     font-size: 11px;
