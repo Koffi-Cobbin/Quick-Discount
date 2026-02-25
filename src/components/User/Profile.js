@@ -1,71 +1,40 @@
 import React from "react";
 import styled from "styled-components";
-import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import LeftSide from "./LeftSide";
-import Main from "./Main";
+import { useEffect } from "react";
+import Dashboard from "./Dashboard";
 import { getUserNotificationsAPI, getWishlistAPI } from "../../actions";
 
-
 const Profile = (props) => {
-  const [currentSection, setCurrentSection] = useState();
-
-  const toggleSection = (id) => {
-    setCurrentSection(id);
-  };
+  const { wishlist, notifications, getWishlist, getUserNotifications } = props;
 
   useEffect(() => {
-    // props.getWishlist();
-    // props.getUserNotifications();
-  }, []);
+    if (!wishlist) getWishlist();
+    if (!notifications) getUserNotifications();
+  }, [wishlist, notifications, getWishlist, getUserNotifications]);
 
   return (
-      <Wrapper>
-        <Container>
-          <Layout>
-              <LeftSide toggleSection={toggleSection} />
-              <Main currentSection={currentSection} />
-          </Layout>
-        </Container>
-      </Wrapper>
+    <Wrapper>
+      <Dashboard />
+    </Wrapper>
   );
 };
 
 const Wrapper = styled.div`
   margin-top: 60px;
   min-height: 100vh;
+  background-color: #0b0905;
 `;
 
-
-const Container = styled.div`
-    margin: 0;
-`;
-
-const Layout = styled.div`
-    display: grid;
-    grid-template-areas: "leftside rightside";
-    grid-template-columns: minmax(0, 3fr) minmax(0, 12fr) ;
-    column-gap: 25px;
-    row-gap: 25px;
-    grid-template-rows: auto;
-    margin: 25px 0;
-    @media (max-width: 768px) {
-        display: flex;
-        flex-direction: column;
-        padding: 0 5px;
-    }
-`;
-
-
-const mapStateToProps = (state) => {
-    return {
-        user: state.userState.user,
-    }
-};
+const mapStateToProps = (state) => ({
+  user: state.userState.user,
+  wishlist: state.discountState.wishlist,
+  notifications: state.userState.notifications,
+});
 
 const mapDispatchToProps = (dispatch) => ({
-  getWishlist: () => {dispatch(getWishlistAPI())}, 
-  getUserNotifications: () => {dispatch(getUserNotificationsAPI())}
+  getWishlist: () => dispatch(getWishlistAPI()),
+  getUserNotifications: () => dispatch(getUserNotificationsAPI()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);
