@@ -197,7 +197,6 @@ const Dashboard = (props) => {
                         </UserMeta>
                         {isOrganizer && (
                             <OrgButton
-                                style={{ marginTop: "10px" }}
                                 onClick={() => navigate("/organizer-dashboard")}
                             >
                                 Go to Organizer Dashboard →
@@ -510,7 +509,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);
 
 const Page = styled.div`
     min-height: 100vh;
-    padding-top: 60px; /* matches Navbar height */
+    padding-top: 60px;
     background-color: ${T.bg};
     color: ${T.text};
     font-family: "Georgia", "Times New Roman", serif;
@@ -535,22 +534,20 @@ const Hero = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 28px 40px 24px;
+    padding: 28px 20px 24px;
     border-bottom: 1px solid ${T.border};
     background: radial-gradient(
         ellipse 70% 120% at 0% 0%,
         rgba(250, 129, 40, 0.07) 0%,
         transparent 60%
     );
-    @media (max-width: 640px) {
-        padding: 20px 20px 18px;
-    }
 `;
 const HeroLeft = styled.div`
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
 `;
+
 const Avatar = styled.div`
     width: 64px;
     height: 64px;
@@ -589,6 +586,7 @@ const AvatarOverlay = styled.div`
         opacity: 1;
     }
 `;
+
 const AvatarRing = styled.div`
     position: absolute;
     inset: -5px;
@@ -596,7 +594,14 @@ const AvatarRing = styled.div`
     border: 1px dashed rgba(250, 129, 40, 0.18);
     pointer-events: none;
 `;
-const HeroText = styled.div``;
+
+const HeroText = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+`;
+
 const Greeting = styled.p`
     font-family: "Courier New", monospace;
     font-size: 11px;
@@ -625,6 +630,7 @@ const UserMeta = styled.p`
 const OrgPip = styled.span`
     color: rgba(250, 129, 40, 0.85);
 `;
+
 const StatRow = styled.div`
     display: flex;
     align-items: center;
@@ -635,17 +641,17 @@ const StatRow = styled.div`
     padding: 14px 0;
     backdrop-filter: blur(8px);
 `;
+
 const Stat = styled.div`
+    flex: 1;
     text-align: center;
-    padding: 0 28px;
+    padding: 0 12px;
     animation: ${css`
         ${fadeUp} .5s ease both
     `};
     animation-delay: ${({ delay }) => delay || 0}ms;
-    @media (max-width: 480px) {
-        padding: 0 16px;
-    }
 `;
+
 const StatNum = styled.div`
     font-size: 1.65rem;
     font-weight: 700;
@@ -677,7 +683,8 @@ const OrgButton = styled.button`
     background: ${T.orangeDim};
     border: 1px solid rgba(250, 129, 40, 0.32);
     border-radius: 8px;
-    padding: 10px 20px;
+    padding: 8px 14px;
+    margin-top: 10px;
     cursor: pointer;
     white-space: nowrap;
     transition:
