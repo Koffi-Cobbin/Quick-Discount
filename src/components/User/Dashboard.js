@@ -1039,3 +1039,17 @@ const Spinner = styled.span`
         ${spin} .7s linear infinite
     `};
 `;
+
+
+const FieldGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+const FieldLabel = styled.label`
+    font-family: "Courier New", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: ${T.textMuted};
+    margin-bottom: 8px;
+`;
