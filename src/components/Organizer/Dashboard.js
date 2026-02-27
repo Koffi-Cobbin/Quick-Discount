@@ -312,21 +312,22 @@ const FixedBarChartWrap = styled.div`
 `;
 
 const Grid = styled.div`
-  display: flex;
-  /* align-items: center; */
-  /* justify-content: space-around; */
-  @media (max-width: 540px) {
-    flex-wrap: wrap;
-    justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 580px) {
+    grid-template-columns: 1fr;
   }
 `;
 
 const GridItem = styled.div`
-  width: 270px;
-  @media (max-width: 540px) {
-    /* width: 200px; */
-    margin-bottom: 10px;
-  }
+  width: 100%;
 `;
 
 const FilterOptions = styled.div`
