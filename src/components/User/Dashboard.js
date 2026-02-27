@@ -1,2283 +1,410 @@
 import { useState, useEffect, useRef } from "react";
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const ORGANIZER = {
-    name: "Kwame Asante",
-    plan: "Premium",
-    avatar: "🎭",
-    joined: "Jan 2024",
-    location: "Accra, Ghana",
+/* ─── MOCK DATA (replaced by Redux props in production) ─── */
+const MOCK = {
+  user: {
+    name: "Ama Owusu",
+    email: "ama@quickdiscount.gh",
+    contact: "+233 55 123 4567",
+    profile_pic: null,
+    organizer_detail: true,
+  },
+  discounts: [
+    { id:1, title:"Lagos Food Festival",    pct:30, end:"2025-04-15", start:"2025-03-15", loc:"Lagos, Nigeria",     img:"https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80", cats:["Food"],   org:"Taste Lagos",  likes:240, rating:4.8 },
+    { id:2, title:"Tech Summit Accra",       pct:20, end:"2025-04-02", start:"2025-04-02", loc:"Accra, Ghana",      img:"https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80", cats:["Tech"],   org:"GhTech Hub",   likes:180, rating:4.6 },
+    { id:3, title:"Nairobi Jazz Night",      pct:15, end:"2025-05-10", start:"2025-05-10", loc:"Nairobi, Kenya",    img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80", cats:["Music"],  org:"Jazz Kenya",   likes:310, rating:4.9 },
+    { id:4, title:"Fitness Bootcamp GH",     pct:40, end:"2025-03-28", start:"2025-03-28", loc:"East Legon, Accra", img:"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80", cats:["Sports"], org:"FitGhana",     likes:88,  rating:4.4 },
+    { id:5, title:"Abuja Furniture Fair",    pct:25, end:"2025-06-01", start:"2025-06-01", loc:"Abuja, Nigeria",    img:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80", cats:["Home"],   org:"FurnishNg",    likes:122, rating:4.2 },
+    { id:6, title:"Cape Coast Street Food",  pct:10, end:"2025-04-20", start:"2025-04-05", loc:"Cape Coast, GH",    img:"https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600&q=80", cats:["Food"],   org:"CC Eats",      likes:67,  rating:3.9 },
+  ],
+  savedIds: new Set([1, 3]),
+  notifications: [
+    { id:1, msg:"Your order for Lagos Food Festival has been confirmed.", time:"2m ago",  read:false },
+    { id:2, msg:"Fitness Bootcamp GH is 88% sold — grab your spot!",     time:"1h ago",  read:false },
+    { id:3, msg:"Tech Summit Accra starts tomorrow. Don't forget!",       time:"5h ago",  read:true  },
+    { id:4, msg:"Your profile was updated successfully.",                  time:"1d ago",  read:true  },
+  ],
 };
 
-const STATS = {
-    packagesSold: 1284,
-    totalRevenue: 48320,
-    activeDiscounts: 7,
-    conversionRate: 68,
-    savedByUsers: 342,
-    totalViews: 9810,
+const fmtDate = s => s ? new Date(s).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) : "";
+const fmtExpiry = s => {
+  if (!s) return null;
+  const d = Math.ceil((new Date(s) - Date.now()) / 86400000);
+  if (d <= 0) return { label:"Expired", expired:true };
+  return { label: d === 1 ? "1 day left" : `${d}d left`, expired:false };
 };
 
-const CHART_DATA = [
-    { label: "Jan", tickets: 40, revenue: 3200 },
-    { label: "Feb", tickets: 65, revenue: 5200 },
-    { label: "Mar", tickets: 55, revenue: 4400 },
-    { label: "Apr", tickets: 90, revenue: 7200 },
-    { label: "May", tickets: 78, revenue: 6240 },
-    { label: "Jun", tickets: 110, revenue: 8800 },
-    { label: "Jul", tickets: 95, revenue: 7600 },
-    { label: "Aug", tickets: 130, revenue: 10400 },
-];
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(250,129,40,.2);border-radius:4px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-500px 0}100%{background-position:500px 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes avPulse{0%,100%{box-shadow:0 0 0 3px rgba(250,129,40,.2)}50%{box-shadow:0 0 0 7px rgba(250,129,40,.04)}}
 
-const MY_DISCOUNTS = [
-    {
-        id: 1,
-        title: "Lagos Food Festival",
-        status: "active",
-        sold: 240,
-        capacity: 300,
-        date: "Mar 15",
-        category: "Food",
-        price: "₵45",
-    },
-    {
-        id: 2,
-        title: "Tech Summit 2025",
-        status: "active",
-        sold: 180,
-        capacity: 250,
-        date: "Apr 2",
-        category: "Tech",
-        price: "₵120",
-    },
-    {
-        id: 3,
-        title: "Accra Jazz Night",
-        status: "pending",
-        sold: 0,
-        capacity: 150,
-        date: "Apr 20",
-        category: "Music",
-        price: "₵60",
-    },
-    {
-        id: 4,
-        title: "Fitness Bootcamp",
-        status: "active",
-        sold: 88,
-        capacity: 100,
-        date: "Mar 28",
-        category: "Sports",
-        price: "₵30",
-    },
-    {
-        id: 5,
-        title: "Art Gallery Opening",
-        status: "rejected",
-        sold: 0,
-        capacity: 80,
-        date: "—",
-        category: "Art",
-        price: "₵25",
-    },
-    {
-        id: 6,
-        title: "Street Food Tour",
-        status: "active",
-        sold: 55,
-        capacity: 80,
-        date: "Apr 5",
-        category: "Food",
-        price: "₵35",
-    },
-];
+.p{min-height:100vh;background:#0c0a07;color:#f2ede8;font-family:'Sora',sans-serif}
+.inn{max-width:80%;margin:0 auto}
 
-const SAVED_DISCOUNTS = [
-    {
-        id: 10,
-        title: "Nairobi Jazz Fest",
-        category: "Music",
-        date: "May 3",
-        price: "₵80",
-        rating: 4.8,
-        org: "Jazz Kenya",
-    },
-    {
-        id: 11,
-        title: "Lagos Art Expo",
-        category: "Art",
-        date: "May 10",
-        price: "₵50",
-        rating: 4.6,
-        org: "Art Lagos",
-    },
-    {
-        id: 12,
-        title: "Abuja Tech Conf",
-        category: "Tech",
-        date: "Jun 1",
-        price: "₵200",
-        rating: 4.9,
-        org: "TechAbuja",
-    },
-    {
-        id: 13,
-        title: "Cape Coast Beach Run",
-        category: "Sports",
-        date: "May 20",
-        price: "₵20",
-        rating: 4.5,
-        org: "Run GH",
-    },
-];
+/* hero */
+.hero{background:linear-gradient(155deg,#1a0e05 0%,#0c0a07 55%);border-bottom:1px solid rgba(255,255,255,.07);padding:30px 0 26px}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hleft{display:flex;align-items:center;gap:14px}
+.aring{width:58px;height:58px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#fa8128,rgba(250,129,40,.22));flex-shrink:0;animation:avPulse 3s ease-in-out infinite}
+.av{width:100%;height:100%;border-radius:50%;background:rgba(255,255,255,.06) center/cover no-repeat;border:2px solid #0c0a07;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avlt{font-size:20px;font-weight:700;color:#fa8128;font-family:'Playfair Display',serif}
+.hgreet{font-size:11px;color:rgba(242,237,232,.35);letter-spacing:.04em;margin-bottom:2px}
+.hname{font-family:'Playfair Display',serif;font-size:clamp(18px,2.6vw,23px);font-weight:600;color:#f2ede8;line-height:1.2;margin-bottom:3px}
+.hemail{font-size:11.5px;color:rgba(242,237,232,.38)}
 
-const NOTIFICATIONS = [
-    {
-        id: 1,
-        type: "sale",
-        msg: "12 new tickets sold for Lagos Food Festival",
-        time: "2m ago",
-        read: false,
-    },
-    {
-        id: 2,
-        type: "review",
-        msg: "Tech Summit 2025 is under review by admin",
-        time: "1h ago",
-        read: false,
-    },
-    {
-        id: 3,
-        type: "alert",
-        msg: "Fitness Bootcamp is 88% sold out!",
-        time: "3h ago",
-        read: false,
-    },
-    {
-        id: 4,
-        type: "sale",
-        msg: "5 tickets sold for Tech Summit 2025",
-        time: "5h ago",
-        read: true,
-    },
-    {
-        id: 5,
-        type: "info",
-        msg: "Your profile was updated successfully",
-        time: "1d ago",
-        read: true,
-    },
-];
+.orgbtn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;background:rgba(250,129,40,.1);border:1px solid rgba(250,129,40,.28);color:#fa8128;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Sora',sans-serif;transition:background .18s,transform .14s,box-shadow .18s;text-decoration:none}
+.orgbtn:hover{background:rgba(250,129,40,.2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(250,129,40,.22)}
+.orgbtn:active{transform:translateY(0)}
 
-const STATUS_CFG = {
-    active: { label: "Active", color: "#22c55e", bg: "rgba(34,197,94,0.12)" },
-    pending: {
-        label: "Pending",
-        color: "#f59e0b",
-        bg: "rgba(245,158,11,0.12)",
-    },
-    rejected: {
-        label: "Rejected",
-        color: "#ef4444",
-        bg: "rgba(239,68,68,0.12)",
-    },
-};
+/* tab bar */
+.tbo{position:sticky;top:0;z-index:20;background:rgba(12,10,7,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.07)}
+.tbar{display:flex;overflow-x:auto;scrollbar-width:none}
+.tbar::-webkit-scrollbar{display:none}
+.tbtn{position:relative;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:14px 18px 12px;font-size:12px;font-weight:400;letter-spacing:.03em;color:rgba(242,237,232,.45);background:none;border:none;cursor:pointer;font-family:'Sora',sans-serif;transition:color .16s;white-space:nowrap}
+.tbtn:hover{color:rgba(242,237,232,.72)}
+.tbtn.act{color:#fa8128;font-weight:600}
+.tpip{position:absolute;bottom:0;left:18px;right:18px;height:2px;background:#fa8128;border-radius:2px 2px 0 0;animation:fadeIn .16s ease both}
+.tbadge{padding:1px 6px;border-radius:10px;font-size:9.5px;font-weight:700;background:#fa8128;color:#fff;line-height:1.5}
 
-const NOTIF_CFG = {
-    sale: { icon: "💰", color: "#22c55e", bg: "rgba(34,197,94,0.1)" },
-    review: { icon: "🔍", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
-    alert: { icon: "⚡", color: "#ef4444", bg: "rgba(239,68,68,0.1)" },
-    info: { icon: "ℹ️", color: "#60a5fa", bg: "rgba(96,165,250,0.1)" },
-};
+/* content */
+.content{padding:28px 0 72px}
 
-const CAT_EMOJI = {
-    Food: "🍜",
-    Tech: "💻",
-    Music: "🎵",
-    Sports: "🏋️",
-    Art: "🎨",
-};
-const CAT_COLOR = {
-    Food: "#f97316",
-    Tech: "#60a5fa",
-    Music: "#a78bfa",
-    Sports: "#34d399",
-    Art: "#f472b6",
-};
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:860px){.grid{grid-template-columns:repeat(2,1fr);gap:12px}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
 
-// ─── useWindowWidth ───────────────────────────────────────────────────────────
-function useWindowWidth() {
-    const [w, setW] = useState(
-        typeof window !== "undefined" ? window.innerWidth : 900,
-    );
-    useEffect(() => {
-        const h = () => setW(window.innerWidth);
-        window.addEventListener("resize", h);
-        return () => window.removeEventListener("resize", h);
-    }, []);
-    return w;
+/* card */
+.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:rgba(255,255,255,.034);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .22s,box-shadow .22s;animation:fadeUp .38s ease both;animation-fill-mode:both}
+.card:hover{border-color:rgba(250,129,40,.35);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.42),0 0 0 1px rgba(250,129,40,.07)}
+.cimg{position:relative;height:178px;overflow:hidden;background:rgba(255,255,255,.04);flex-shrink:0}
+.cimg img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .42s ease}
+.card:hover .cimg img{transform:scale(1.06)}
+.cfb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:46px;background:linear-gradient(135deg,rgba(250,129,40,.07),rgba(0,0,0,.12))}
+.cbadge{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:6px;background:#fa8128;color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em}
+.cexp{position:absolute;bottom:9px;right:9px;padding:3px 9px;border-radius:20px;font-size:10px;letter-spacing:.04em;backdrop-filter:blur(8px)}
+.cexp.ok{background:rgba(14,12,8,.78);border:1px solid rgba(255,255,255,.1);color:rgba(242,237,232,.55)}
+.cexp.ex{background:rgba(248,113,113,.82);border:1px solid rgba(248,113,113,.4);color:#fff}
+.cheart{position:absolute;top:9px;right:9px;width:30px;height:30px;border-radius:50%;background:rgba(14,12,8,.72);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:color .15s,transform .15s;color:rgba(242,237,232,.4)}
+.cheart.sv{color:#fa8128}
+.cheart:hover{color:#fa8128;transform:scale(1.18)}
+.cbody{padding:12px 13px 11px;display:flex;flex-direction:column;gap:5px;flex:1}
+.cats{display:flex;gap:4px;flex-wrap:wrap}
+.cat{padding:2px 7px;border-radius:7px;font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:rgba(250,129,40,.1);border:1px solid rgba(250,129,40,.16);color:#fa8128}
+.ctitle{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:#f2ede8;line-height:1.38;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;transition:color .18s}
+.card:hover .ctitle{color:#fa8128}
+.cmeta{display:flex;flex-direction:column;gap:3px}
+.mrow{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(242,237,232,.35);overflow:hidden}
+.mtxt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfoot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,.07)}
+.likes{display:flex;align-items:center;gap:4px;font-size:11px;color:rgba(242,237,232,.35)}
+.stars{font-size:11px;color:rgba(242,237,232,.35)}
+
+/* notifs */
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.st{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:#f2ede8}
+.upill{padding:2px 9px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(250,129,40,.12);border:1px solid rgba(250,129,40,.25);color:#fa8128}
+.nlist{display:flex;flex-direction:column;gap:3px;max-width:620px}
+.nrow{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-radius:9px;border:1px solid transparent;transition:background .15s}
+.nrow:hover{background:rgba(255,255,255,.03)}
+.nrow.unr{background:rgba(250,129,40,.04);border-color:rgba(250,129,40,.1)}
+.ndot{width:7px;height:7px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.ndot.u{background:#fa8128}
+.ndot.r{border:1px solid rgba(255,255,255,.15)}
+.nmsg{font-size:13px;line-height:1.5;margin-bottom:3px}
+.nmsg.u{color:#f2ede8}
+.nmsg.r{color:rgba(242,237,232,.52)}
+.ntime{font-size:11px;color:rgba(242,237,232,.3)}
+
+/* settings */
+.sgrid{display:grid;grid-template-columns:160px 1fr;gap:40px;align-items:start}
+@media(max-width:640px){.sgrid{grid-template-columns:1fr;gap:24px}}
+.avcol{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.avedit{position:relative;width:92px;height:92px;border-radius:50%;overflow:hidden;border:2px solid rgba(250,129,40,.3);background:rgba(255,255,255,.05) center/cover no-repeat;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.avov{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;color:#fff;opacity:0;transition:opacity .16s}
+.avedit:hover .avov{opacity:1}
+.avname{font-size:13px;font-weight:600;color:#f2ede8}
+.aveml{font-size:11px;color:rgba(242,237,232,.35);word-break:break-all}
+.sform{display:flex;flex-direction:column;gap:16px;max-width:420px}
+.flbl{display:block;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:rgba(242,237,232,.35);margin-bottom:6px}
+.finp{width:100%;padding:10px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#f2ede8;font-size:13px;font-family:'Sora',sans-serif;outline:none;transition:border-color .16s,box-shadow .16s}
+.finp:focus{border-color:rgba(250,129,40,.45);box-shadow:0 0 0 3px rgba(250,129,40,.07)}
+.finp.err{border-color:rgba(248,113,113,.5)}
+.finp::placeholder{color:rgba(242,237,232,.28)}
+.ferr{font-size:11px;color:#f87171;margin-top:4px}
+.ffoot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px}
+.sbtn{display:inline-flex;align-items:center;gap:7px;padding:10px 24px;border-radius:9px;background:linear-gradient(135deg,#fa8128,#c05a0a);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;box-shadow:0 4px 16px rgba(250,129,40,.25);transition:opacity .16s,transform .14s,box-shadow .16s}
+.sbtn:hover:not(:disabled){opacity:.9;transform:translateY(-1px);box-shadow:0 8px 22px rgba(250,129,40,.32)}
+.sbtn:disabled{opacity:.5;cursor:not-allowed}
+.spin{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .65s linear infinite}
+
+/* skeleton shimmer */
+.shim{background:linear-gradient(90deg,rgba(255,255,255,.04)0%,rgba(255,255,255,.09)50%,rgba(255,255,255,.04)100%);background-size:500px 100%;animation:shimmer 1.5s linear infinite}
+
+/* empty */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 20px;text-align:center;gap:8px}
+.eico{font-size:40px;margin-bottom:6px}
+.etit{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:rgba(242,237,232,.55)}
+.ebod{font-size:13px;color:rgba(242,237,232,.3);max-width:250px;line-height:1.55}
+
+@media(max-width:1100px){.inn{max-width:92%}}
+@media(max-width:700px){.inn{max-width:96%}}
+@media(max-width:600px){.hero{padding:22px 0 20px}.orgbtn{width:100%;justify-content:center}}
+`;
+
+function DiscCard({ d, isSaved, onSave, idx }) {
+  const exp = fmtExpiry(d.end);
+  return (
+    <a className="card" href={`/discounts/${d.id}`} style={{animationDelay:`${Math.min(idx*0.055,0.28)}s`}}>
+      <div className="cimg">
+        {d.img ? <img src={d.img} alt={d.title} loading="lazy" /> : <div className="cfb">🎟</div>}
+        {d.pct && <div className="cbadge">−{d.pct}%</div>}
+        {exp && <div className={`cexp ${exp.expired?"ex":"ok"}`}>{exp.label}</div>}
+        <button className={`cheart${isSaved?" sv":""}`}
+          onClick={e=>{e.preventDefault();e.stopPropagation();onSave(d.id);}}
+          aria-label={isSaved?"Unsave":"Save"}
+        >{isSaved?"♥":"♡"}</button>
+      </div>
+      <div className="cbody">
+        <div className="cats">
+          {d.cats?.slice(0,2).map(c=><span key={c} className="cat">{c}</span>)}
+        </div>
+        <div className="ctitle">{d.title}</div>
+        <div className="cmeta">
+          {d.org   && <div className="mrow"><span>👤</span><span className="mtxt">{d.org}</span></div>}
+          {d.loc   && <div className="mrow"><span>📍</span><span className="mtxt">{d.loc}</span></div>}
+          {d.start && <div className="mrow"><span>📅</span><span className="mtxt">{fmtDate(d.start)}</span></div>}
+        </div>
+        <div className="cfoot">
+          <span className="likes">
+            <svg viewBox="0 0 24 24" fill="rgba(250,129,40,.55)" width="13" height="13">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            {d.likes}
+          </span>
+          {d.rating>0 && <span className="stars">★ {d.rating.toFixed(1)}</span>}
+        </div>
+      </div>
+    </a>
+  );
 }
 
-// ─── Animated Counter ─────────────────────────────────────────────────────────
-function AnimatedNumber({ target, prefix = "", suffix = "" }) {
-    const [v, setV] = useState(0);
-    useEffect(() => {
-        let n = 0;
-        const step = target / 36;
-        const t = setInterval(() => {
-            n += step;
-            if (n >= target) {
-                setV(target);
-                clearInterval(t);
-            } else setV(Math.floor(n));
-        }, 25);
-        return () => clearInterval(t);
-    }, [target]);
-    return (
-        <>
-            {prefix}
-            {v.toLocaleString()}
-            {suffix}
-        </>
-    );
+function Empty({icon,title,body}) {
+  return <div className="empty"><div className="eico">{icon}</div><div className="etit">{title}</div><div className="ebod">{body}</div></div>;
 }
 
-// ─── Bar Chart ────────────────────────────────────────────────────────────────
-function BarChart({ data, metric }) {
-    const max = Math.max(...data.map((d) => d[metric]));
-    return (
-        <div
-            style={{
-                display: "flex",
-                alignItems: "flex-end",
-                gap: "5px",
-                height: "72px",
-            }}
-        >
-            {data.map((d, i) => (
-                <div
-                    key={i}
-                    style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "3px",
-                        minWidth: 0,
-                    }}
-                >
-                    <div
-                        style={{
-                            width: "100%",
-                            height: `${(d[metric] / max) * 56}px`,
-                            background:
-                                "linear-gradient(180deg,#fa8128,#c05a0a)",
-                            borderRadius: "3px 3px 0 0",
-                            boxShadow: "0 0 6px rgba(250,129,40,0.4)",
-                            transition: "height 0.7s ease",
-                        }}
-                    />
-                    <span
-                        style={{
-                            fontSize: "8px",
-                            color: "rgba(240,236,230,0.35)",
-                            fontFamily: "monospace",
-                        }}
-                    >
-                        {d.label}
-                    </span>
+export default function UserDashboard(rawProps) {
+  const user          = rawProps.user          ?? MOCK.user;
+  const allDiscounts  = rawProps.discounts?.results ?? MOCK.discounts;
+  const rawWishlist   = rawProps.wishlist       ?? null;
+  const notifications = rawProps.notifications  ?? MOCK.notifications;
+  const isOrganizer   = !!(user?.organizer_detail || rawProps.organizer);
+
+  const [tab,       setTab]      = useState("discounts");
+  const [greeting,  setGreeting] = useState("Welcome");
+  const [savedIds,  setSavedIds] = useState(MOCK.savedIds);
+  const [wishlist,  setWishlist] = useState([]);
+
+  const [uName,     setUName]    = useState(user?.name    ?? "");
+  const [uEmail,    setUEmail]   = useState(user?.email   ?? "");
+  const [uPhone,    setUPhone]   = useState(user?.contact ?? "");
+  const [preview,   setPreview]  = useState(user?.profile_pic ?? null);
+  const [newFile,   setNewFile]  = useState(null);
+  const [emailErr,  setEmailErr] = useState("");
+  const [phoneErr,  setPhoneErr] = useState("");
+  const [saveState, setSave]     = useState(null);
+  const fileRef = useRef();
+
+  const unread = notifications.filter(n => !n.read).length;
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    setGreeting(h<12?"Good morning":h<17?"Good afternoon":"Good evening");
+  }, []);
+
+  useEffect(() => {
+    if (rawWishlist) {
+      const urls = rawWishlist.map(w => w.discount);
+      const wl   = allDiscounts.filter(d => urls.includes(d.url));
+      setWishlist(wl);
+      setSavedIds(new Set(wl.map(d=>d.id)));
+    } else if (rawProps.getWishlist) rawProps.getWishlist();
+  }, [rawWishlist]); // eslint-disable-line
+
+  const toggleSave = id => setSavedIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+  const savedItems = allDiscounts.filter(d => savedIds.has(d.id));
+
+  const handleFile = e => { const f=e.target.files[0]; if(!f)return; setNewFile(f); setPreview(URL.createObjectURL(f)); };
+  const handleSave = e => {
+    e.preventDefault();
+    if (emailErr||phoneErr) return;
+    setSave("saving");
+    if (rawProps.updateUser) {
+      const fd=new FormData();
+      fd.append("name",uName); fd.append("email",uEmail); fd.append("contact",uPhone);
+      if (newFile) fd.append("profile_pic",newFile);
+      rawProps.updateUser(fd);
+    }
+    setTimeout(()=>{setSave("saved"); setTimeout(()=>setSave(null),3000);}, 900);
+  };
+
+  const tabs = [
+    {id:"discounts",     label:"My Discounts"},
+    {id:"saved",         label:"Saved"},
+    {id:"notifications", label:"Notifications", badge:unread||null},
+    {id:"settings",      label:"Settings"},
+  ];
+
+  const avStyle = src => src ? {backgroundImage:`url(${src})`} : {};
+
+  return (
+    <div className="p">
+      <style>{CSS}</style>
+
+      {/* HERO */}
+      <div className="hero">
+        <div className="inn">
+          <div className="hrow">
+            <div className="hleft">
+              <div className="aring">
+                <div className="av" style={avStyle(preview || user?.profile_pic)}>
+                  {!preview && !user?.profile_pic && <span className="avlt">{(user?.name??"U")[0].toUpperCase()}</span>}
                 </div>
+              </div>
+              <div>
+                <div className="hgreet">{greeting},</div>
+                <div className="hname">{user?.name??"User"}</div>
+                <div className="hemail">{user?.email}</div>
+              </div>
+            </div>
+
+            {isOrganizer && (
+              <a className="orgbtn" href="/organizer-dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                </svg>
+                Organizer Dashboard
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* TABS */}
+      <div className="tbo">
+        <div className="inn">
+          <div className="tbar">
+            {tabs.map(t => (
+              <button key={t.id} className={`tbtn${tab===t.id?" act":""}`} onClick={()=>setTab(t.id)}>
+                {t.label}
+                {t.badge ? <span className="tbadge">{t.badge}</span> : null}
+                {tab===t.id && <span className="tpip"/>}
+              </button>
             ))}
+          </div>
         </div>
-    );
-}
+      </div>
 
-// ─── Ring Progress ────────────────────────────────────────────────────────────
-function Ring({ pct, size = 52, stroke = 5, color = "#fa8128" }) {
-    const r = (size - stroke) / 2;
-    const circ = 2 * Math.PI * r;
-    const dash = (pct / 100) * circ;
-    return (
-        <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-            <circle
-                cx={size / 2}
-                cy={size / 2}
-                r={r}
-                fill="none"
-                stroke="rgba(255,255,255,0.07)"
-                strokeWidth={stroke}
-            />
-            <circle
-                cx={size / 2}
-                cy={size / 2}
-                r={r}
-                fill="none"
-                stroke={color}
-                strokeWidth={stroke}
-                strokeDasharray={`${dash} ${circ}`}
-                strokeLinecap="round"
-                style={{ transition: "stroke-dasharray 1s ease" }}
-            />
-        </svg>
-    );
-}
+      {/* CONTENT */}
+      <div className="inn">
+        <div className="content" key={tab}>
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// MAIN
-// ═══════════════════════════════════════════════════════════════════════════════
-export default function OrganizerDashboard() {
-    const [tab, setTab] = useState("overview");
-    const [chartMetric, setChartMetric] = useState("tickets");
-    const [discountFilter, setDiscountFilter] = useState("all");
-    const [notifs, setNotifs] = useState(NOTIFICATIONS);
-    const [mounted, setMounted] = useState(false);
-    const tabBarRef = useRef(null);
+          {tab==="discounts" && (
+            allDiscounts.length===0
+              ? <Empty icon="🎟" title="No discounts yet" body="Browse deals on the homepage." />
+              : <div className="grid">{allDiscounts.map((d,i)=><DiscCard key={d.id} d={d} idx={i} isSaved={savedIds.has(d.id)} onSave={toggleSave}/>)}</div>
+          )}
 
-    const width = useWindowWidth();
-    const isTiny = width < 380;
-    const isMobile = width < 640;
-    const isDesktop = width >= 1024;
+          {tab==="saved" && (
+            savedItems.length===0
+              ? <Empty icon="♥" title="Nothing saved yet" body="Tap the heart on any discount to save it here." />
+              : <div className="grid">{savedItems.map((d,i)=><DiscCard key={d.id} d={d} idx={i} isSaved={true} onSave={toggleSave}/>)}</div>
+          )}
 
-    useEffect(() => {
-        setTimeout(() => setMounted(true), 60);
-    }, []);
-
-    const unread = notifs.filter((n) => !n.read).length;
-
-    const TABS = [
-        { id: "overview", label: "Overview", emoji: "📊" },
-        {
-            id: "my-discounts",
-            label: "My Discounts",
-            emoji: "🏷️",
-            count: MY_DISCOUNTS.length,
-        },
-        {
-            id: "saved",
-            label: "Saved",
-            emoji: "❤️",
-            count: SAVED_DISCOUNTS.length,
-        },
-        {
-            id: "notifications",
-            label: "Notifications",
-            emoji: "🔔",
-            count: unread || null,
-        },
-        { id: "settings", label: "Settings", emoji: "⚙️" },
-    ];
-
-    const filteredDiscounts =
-        discountFilter === "all"
-            ? MY_DISCOUNTS
-            : MY_DISCOUNTS.filter((d) => d.status === discountFilter);
-
-    const markAllRead = () =>
-        setNotifs(notifs.map((n) => ({ ...n, read: true })));
-
-    // ── Global CSS ─────────────────────────────────────────────────────────────
-    const css = `
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;500;600&display=swap');
-    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-    html { -webkit-text-size-adjust:100%; }
-    body { background:#080604; }
-    ::-webkit-scrollbar { width:3px; height:3px; }
-    ::-webkit-scrollbar-thumb { background:rgba(250,129,40,0.2); border-radius:2px; }
-    button { cursor:pointer; border:none; background:none; -webkit-tap-highlight-color:transparent; }
-    input, textarea { -webkit-appearance:none; }
-    @keyframes fadeUp   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
-    @keyframes shimmer  { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-    @keyframes glow     { 0%,100%{box-shadow:0 0 16px rgba(250,129,40,0.15)} 50%{box-shadow:0 0 32px rgba(250,129,40,0.35)} }
-    @keyframes slideDown{ from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-
-    .t-lift { transition:transform .2s ease,box-shadow .2s ease; }
-    .t-lift:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(250,129,40,0.18)!important; }
-    .t-fade { transition:opacity .18s,background .18s; }
-    .t-fade:hover { opacity:.85; }
-    .t-bg { transition:background .18s; }
-    .t-bg:hover { background:rgba(250,129,40,0.07)!important; }
-    input:focus,textarea:focus { outline:none; border-color:rgba(250,129,40,0.5)!important;
-      box-shadow:0 0 0 3px rgba(250,129,40,0.1); }
-    .tab-scroll { overflow-x:auto; scrollbar-width:none; }
-    .tab-scroll::-webkit-scrollbar { display:none; }
-  `;
-
-    // ── HERO HEADER ────────────────────────────────────────────────────────────
-    const Hero = () => (
-        <div
-            style={{
-                background:
-                    "linear-gradient(135deg, #1a0e06 0%, #0f0905 50%, #160b04 100%)",
-                borderBottom: "1px solid rgba(250,129,40,0.12)",
-                padding: isTiny
-                    ? "20px 14px 0"
-                    : isMobile
-                      ? "24px 20px 0"
-                      : "28px 40px 0",
-                position: "relative",
-                overflow: "hidden",
-                animation: mounted ? "fadeIn 0.5s ease both" : "none",
-            }}
-        >
-            {/* Ambient glow blobs */}
-            <div
-                style={{
-                    position: "absolute",
-                    top: "-40px",
-                    right: "-60px",
-                    width: "280px",
-                    height: "280px",
-                    background:
-                        "radial-gradient(circle, rgba(250,129,40,0.08) 0%, transparent 65%)",
-                    pointerEvents: "none",
-                }}
-            />
-            <div
-                style={{
-                    position: "absolute",
-                    bottom: "-30px",
-                    left: "30%",
-                    width: "200px",
-                    height: "200px",
-                    background:
-                        "radial-gradient(circle, rgba(220,103,14,0.05) 0%, transparent 70%)",
-                    pointerEvents: "none",
-                }}
-            />
-
-            {/* Profile row */}
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: isTiny ? "12px" : "18px",
-                    marginBottom: "22px",
-                    position: "relative",
-                }}
-            >
-                {/* Avatar */}
-                <div
-                    style={{
-                        width: isTiny ? "52px" : "64px",
-                        height: isTiny ? "52px" : "64px",
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background:
-                            "linear-gradient(135deg, rgba(250,129,40,0.22), rgba(220,103,14,0.1))",
-                        border: "2px solid rgba(250,129,40,0.45)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: isTiny ? "22px" : "28px",
-                        animation: "glow 3s ease-in-out infinite",
-                    }}
-                >
-                    {ORGANIZER.avatar}
-                </div>
-
-                {/* Name + meta */}
-                <div style={{ flex: 1, minWidth: 0, paddingTop: "4px" }}>
-                    <div
-                        style={{
-                            fontSize: isTiny ? "9px" : "10px",
-                            letterSpacing: "0.12em",
-                            color: "rgba(250,129,40,0.6)",
-                            fontFamily: "monospace",
-                            textTransform: "uppercase",
-                            marginBottom: "4px",
-                        }}
-                    >
-                        Organizer Account
-                    </div>
-                    <h1
-                        style={{
-                            fontFamily: "'Cinzel',serif",
-                            fontSize: isTiny
-                                ? "17px"
-                                : isMobile
-                                  ? "20px"
-                                  : "24px",
-                            fontWeight: 700,
-                            color: "#f0ece6",
-                            lineHeight: 1.1,
-                            marginBottom: "6px",
-                        }}
-                    >
-                        {ORGANIZER.name}
-                    </h1>
-                    <div
-                        style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "8px",
-                            alignItems: "center",
-                        }}
-                    >
-                        <span
-                            style={{
-                                fontSize: "11px",
-                                color: "rgba(240,236,230,0.45)",
-                            }}
-                        >
-                            📍 {ORGANIZER.location}
-                        </span>
-                        <span
-                            style={{
-                                fontSize: "11px",
-                                color: "rgba(240,236,230,0.3)",
-                            }}
-                        >
-                            ·
-                        </span>
-                        <span
-                            style={{
-                                fontSize: "11px",
-                                color: "rgba(240,236,230,0.45)",
-                            }}
-                        >
-                            Since {ORGANIZER.joined}
-                        </span>
-                        <span
-                            style={{
-                                padding: "2px 10px",
-                                borderRadius: "20px",
-                                fontSize: "10px",
-                                background:
-                                    "linear-gradient(135deg, rgba(250,129,40,0.25), rgba(220,103,14,0.15))",
-                                border: "1px solid rgba(250,129,40,0.35)",
-                                color: "#fa8128",
-                                fontFamily: "monospace",
-                                fontWeight: 700,
-                                letterSpacing: "0.05em",
-                            }}
-                        >
-                            {ORGANIZER.plan.toUpperCase()}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Notification bell (mobile) */}
-                <button
-                    style={{
-                        position: "relative",
-                        padding: "8px",
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(250,129,40,0.12)",
-                        borderRadius: "10px",
-                        color: "rgba(240,236,230,0.6)",
-                        flexShrink: 0,
-                    }}
-                    onClick={() => setTab("notifications")}
-                >
-                    🔔
-                    {unread > 0 && (
-                        <span
-                            style={{
-                                position: "absolute",
-                                top: "4px",
-                                right: "4px",
-                                width: "8px",
-                                height: "8px",
-                                borderRadius: "50%",
-                                background: "#fa8128",
-                                border: "1.5px solid #080604",
-                            }}
-                        />
-                    )}
-                </button>
-            </div>
-
-            {/* Quick stat strip */}
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: isTiny
-                        ? "repeat(3,1fr)"
-                        : "repeat(6,1fr)",
-                    gap: isTiny ? "0" : "0",
-                    borderTop: "1px solid rgba(250,129,40,0.08)",
-                    marginLeft: isTiny ? "-14px" : isMobile ? "-20px" : "-40px",
-                    marginRight: isTiny
-                        ? "-14px"
-                        : isMobile
-                          ? "-20px"
-                          : "-40px",
-                }}
-            >
-                {[
-                    {
-                        label: "Sold",
-                        value: STATS.packagesSold,
-                        prefix: "",
-                        suffix: "",
-                    },
-                    {
-                        label: "Revenue",
-                        value: STATS.totalRevenue,
-                        prefix: "₵",
-                        suffix: "",
-                    },
-                    {
-                        label: "Active",
-                        value: STATS.activeDiscounts,
-                        prefix: "",
-                        suffix: "",
-                    },
-                    {
-                        label: "Saved by",
-                        value: STATS.savedByUsers,
-                        prefix: "",
-                        suffix: "",
-                    },
-                    {
-                        label: "Views",
-                        value: STATS.totalViews,
-                        prefix: "",
-                        suffix: "",
-                    },
-                    {
-                        label: "Conversion",
-                        value: STATS.conversionRate,
-                        prefix: "",
-                        suffix: "%",
-                    },
-                ]
-                    .slice(0, isTiny ? 3 : 6)
-                    .map((s, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                padding: isTiny ? "12px 6px" : "14px 10px",
-                                textAlign: "center",
-                                borderRight:
-                                    i < (isTiny ? 2 : 5)
-                                        ? "1px solid rgba(250,129,40,0.07)"
-                                        : "none",
-                                borderLeft: i === 0 ? "none" : undefined,
-                            }}
-                        >
-                            <div
-                                style={{
-                                    fontFamily: "'Cinzel',serif",
-                                    fontSize: isTiny ? "15px" : "18px",
-                                    fontWeight: 700,
-                                    color: "#f0ece6",
-                                    lineHeight: 1,
-                                }}
-                            >
-                                <AnimatedNumber
-                                    target={s.value}
-                                    prefix={s.prefix}
-                                    suffix={s.suffix}
-                                />
-                            </div>
-                            <div
-                                style={{
-                                    fontSize: "9px",
-                                    color: "rgba(240,236,230,0.38)",
-                                    marginTop: "4px",
-                                    fontFamily: "monospace",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.06em",
-                                }}
-                            >
-                                {s.label}
-                            </div>
+          {tab==="notifications" && (
+            <>
+              <div className="sh">
+                <div className="st">Notifications</div>
+                {unread>0 && <span className="upill">{unread} unread</span>}
+              </div>
+              {notifications.length===0
+                ? <Empty icon="🔔" title="All caught up" body="No notifications right now." />
+                : <div className="nlist">
+                    {notifications.map((n,i)=>(
+                      <div key={n.id??i} className={`nrow${!n.read?" unr":""}`} style={{animation:`fadeUp .32s ${i*45}ms ease both`}}>
+                        <div className={`ndot ${!n.read?"u":"r"}`}/>
+                        <div>
+                          <div className={`nmsg ${!n.read?"u":"r"}`}>{n.msg??n.message}</div>
+                          <div className="ntime">{n.time??n.created_at??""}</div>
                         </div>
+                      </div>
                     ))}
-            </div>
+                  </div>
+              }
+            </>
+          )}
 
-            {/* Tab bar */}
-            <div
-                ref={tabBarRef}
-                className="tab-scroll"
-                style={{
-                    display: "flex",
-                    gap: 0,
-                    marginLeft: isTiny ? "-14px" : isMobile ? "-20px" : "-40px",
-                    marginRight: isTiny
-                        ? "-14px"
-                        : isMobile
-                          ? "-20px"
-                          : "-40px",
-                    marginTop: "1px",
-                }}
-            >
-                {TABS.map((t) => {
-                    const active = tab === t.id;
-                    return (
-                        <button
-                            key={t.id}
-                            onClick={() => setTab(t.id)}
-                            style={{
-                                flexShrink: 0,
-                                padding: isTiny ? "11px 12px" : "13px 18px",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                                fontFamily: "'Inter',sans-serif",
-                                fontSize: isTiny ? "11px" : "12px",
-                                fontWeight: active ? 600 : 400,
-                                color: active
-                                    ? "#fa8128"
-                                    : "rgba(240,236,230,0.45)",
-                                borderBottom: active
-                                    ? "2px solid #fa8128"
-                                    : "2px solid transparent",
-                                background: "transparent",
-                                transition: "color .18s, border-color .18s",
-                                whiteSpace: "nowrap",
-                                position: "relative",
-                            }}
-                        >
-                            <span
-                                style={{ fontSize: isTiny ? "13px" : "14px" }}
-                            >
-                                {t.emoji}
-                            </span>
-                            {(!isTiny ||
-                                ["overview", "my-discounts"].includes(t.id)) &&
-                                t.label}
-                            {t.count && (
-                                <span
-                                    style={{
-                                        background: active
-                                            ? "#fa8128"
-                                            : "rgba(250,129,40,0.2)",
-                                        color: active ? "#fff" : "#fa8128",
-                                        fontSize: "9px",
-                                        fontFamily: "monospace",
-                                        fontWeight: 700,
-                                        padding: "1px 5px",
-                                        borderRadius: "9px",
-                                        lineHeight: "14px",
-                                    }}
-                                >
-                                    {t.count}
-                                </span>
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
-    );
-
-    // ── OVERVIEW TAB ───────────────────────────────────────────────────────────
-    const OverviewTab = () => (
-        <div style={{ animation: "fadeUp 0.4s ease both" }}>
-            {/* Chart + Status row */}
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: isDesktop ? "1fr 260px" : "1fr",
-                    gap: "14px",
-                    marginBottom: "14px",
-                }}
-            >
-                {/* Bar chart */}
-                <div
-                    style={{
-                        background: "rgba(255,255,255,0.025)",
-                        border: "1px solid rgba(250,129,40,0.1)",
-                        borderRadius: "12px",
-                        padding: isTiny ? "14px 12px" : "18px 20px",
-                    }}
-                >
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginBottom: "14px",
-                            gap: "8px",
-                            flexWrap: "wrap",
-                        }}
-                    >
-                        <span
-                            style={{
-                                fontFamily: "'Cinzel',serif",
-                                fontSize: "13px",
-                                fontWeight: 600,
-                                color: "#f0ece6",
-                            }}
-                        >
-                            Analytics
-                        </span>
-                        <div style={{ display: "flex", gap: "4px" }}>
-                            {["tickets", "revenue"].map((m) => (
-                                <button
-                                    key={m}
-                                    onClick={() => setChartMetric(m)}
-                                    style={{
-                                        padding: "3px 10px",
-                                        borderRadius: "6px",
-                                        fontSize: "10px",
-                                        fontFamily: "monospace",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.05em",
-                                        background:
-                                            chartMetric === m
-                                                ? "rgba(250,129,40,0.15)"
-                                                : "transparent",
-                                        color:
-                                            chartMetric === m
-                                                ? "#fa8128"
-                                                : "rgba(240,236,230,0.38)",
-                                        border:
-                                            chartMetric === m
-                                                ? "1px solid rgba(250,129,40,0.3)"
-                                                : "1px solid transparent",
-                                        transition: "all .18s",
-                                    }}
-                                >
-                                    {m}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <BarChart data={CHART_DATA} metric={chartMetric} />
-                </div>
-
-                {/* Status */}
-                <div
-                    style={{
-                        background: "rgba(255,255,255,0.025)",
-                        border: "1px solid rgba(250,129,40,0.1)",
-                        borderRadius: "12px",
-                        padding: isTiny ? "14px 12px" : "18px 20px",
-                    }}
-                >
-                    <div
-                        style={{
-                            fontFamily: "'Cinzel',serif",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#f0ece6",
-                            marginBottom: "16px",
-                        }}
-                    >
-                        Discount Status
-                    </div>
-                    {[
-                        {
-                            label: "Active",
-                            n: STATS.activeDiscounts,
-                            color: "#22c55e",
-                            total: MY_DISCOUNTS.length,
-                        },
-                        {
-                            label: "Pending",
-                            n: 1,
-                            color: "#f59e0b",
-                            total: MY_DISCOUNTS.length,
-                        },
-                        {
-                            label: "Rejected",
-                            n: 1,
-                            color: "#ef4444",
-                            total: MY_DISCOUNTS.length,
-                        },
-                    ].map((s, i) => (
-                        <div key={i} style={{ marginBottom: "14px" }}>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginBottom: "6px",
-                                }}
-                            >
-                                <span
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "rgba(240,236,230,0.55)",
-                                        fontFamily: "'Inter',sans-serif",
-                                    }}
-                                >
-                                    {s.label}
-                                </span>
-                                <span
-                                    style={{
-                                        fontSize: "12px",
-                                        fontFamily: "monospace",
-                                        color: s.color,
-                                        fontWeight: 700,
-                                    }}
-                                >
-                                    {s.n}
-                                </span>
-                            </div>
-                            <div
-                                style={{
-                                    height: "3px",
-                                    background: "rgba(255,255,255,0.06)",
-                                    borderRadius: "2px",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        height: "100%",
-                                        width: `${(s.n / s.total) * 100}%`,
-                                        background: s.color,
-                                        borderRadius: "2px",
-                                        boxShadow: `0 0 6px ${s.color}55`,
-                                        transition: "width 1s ease",
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                    <div
-                        style={{
-                            marginTop: "16px",
-                            paddingTop: "14px",
-                            borderTop: "1px solid rgba(250,129,40,0.07)",
-                        }}
-                    >
-                        <div
-                            style={{
-                                fontSize: "9px",
-                                letterSpacing: "0.1em",
-                                color: "rgba(240,236,230,0.28)",
-                                textTransform: "uppercase",
-                                marginBottom: "5px",
-                            }}
-                        >
-                            Upcoming
-                        </div>
-                        <div
-                            style={{
-                                fontSize: "24px",
-                                fontFamily: "'Cinzel',serif",
-                                fontWeight: 700,
-                                color: "#fa8128",
-                            }}
-                        >
-                            3
-                        </div>
-                        <div
-                            style={{
-                                fontSize: "11px",
-                                color: "rgba(240,236,230,0.36)",
-                                marginTop: "2px",
-                            }}
-                        >
-                            events this week
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Category performance */}
-            <div
-                style={{
-                    background: "rgba(255,255,255,0.025)",
-                    border: "1px solid rgba(250,129,40,0.1)",
-                    borderRadius: "12px",
-                    padding: isTiny ? "14px 12px" : "18px 20px",
-                    marginBottom: "14px",
-                }}
-            >
-                <div
-                    style={{
-                        fontFamily: "'Cinzel',serif",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#f0ece6",
-                        marginBottom: "16px",
-                    }}
-                >
-                    Category Performance
-                </div>
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: isTiny
-                            ? "repeat(2,1fr)"
-                            : "repeat(5,1fr)",
-                        gap: "10px",
-                    }}
-                >
-                    {Object.entries(CAT_EMOJI).map(([cat, emoji]) => {
-                        const pct = Math.round(Math.random() * 60 + 30);
-                        const c = CAT_COLOR[cat];
-                        return (
-                            <div
-                                key={cat}
-                                style={{
-                                    background: "rgba(255,255,255,0.025)",
-                                    border: `1px solid ${c}22`,
-                                    borderRadius: "10px",
-                                    padding: "12px 10px",
-                                    textAlign: "center",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        fontSize: "22px",
-                                        marginBottom: "6px",
-                                    }}
-                                >
-                                    {emoji}
-                                </div>
-                                <Ring
-                                    pct={pct}
-                                    size={44}
-                                    stroke={4}
-                                    color={c}
-                                />
-                                <div
-                                    style={{
-                                        fontSize: "12px",
-                                        fontFamily: "'Cinzel',serif",
-                                        fontWeight: 700,
-                                        color: c,
-                                        margin: "5px 0 2px",
-                                    }}
-                                >
-                                    {pct}%
-                                </div>
-                                <div
-                                    style={{
-                                        fontSize: "9px",
-                                        color: "rgba(240,236,230,0.38)",
-                                        fontFamily: "monospace",
-                                    }}
-                                >
-                                    {cat}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Recent discounts preview */}
-            <div
-                style={{
-                    background: "rgba(255,255,255,0.025)",
-                    border: "1px solid rgba(250,129,40,0.1)",
-                    borderRadius: "12px",
-                    padding: isTiny ? "14px 12px" : "18px 20px",
-                }}
-            >
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: "14px",
-                    }}
-                >
-                    <span
-                        style={{
-                            fontFamily: "'Cinzel',serif",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#f0ece6",
-                        }}
-                    >
-                        Recent Discounts
+          {tab==="settings" && (
+            <div className="sgrid">
+              <div className="avcol">
+                <div className="avedit" style={avStyle(preview||user?.profile_pic)} onClick={()=>fileRef.current?.click()}>
+                  {!preview && !user?.profile_pic && (
+                    <span style={{fontSize:34,fontWeight:700,color:"#fa8128",fontFamily:"'Playfair Display',serif"}}>
+                      {(user?.name??"U")[0].toUpperCase()}
                     </span>
-                    <button
-                        onClick={() => setTab("my-discounts")}
-                        style={{
-                            fontSize: "11px",
-                            color: "#fa8128",
-                            fontFamily: "'Inter',sans-serif",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "3px",
-                        }}
-                    >
-                        View all →
-                    </button>
+                  )}
+                  <div className="avov">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                    Change
+                  </div>
                 </div>
-                {MY_DISCOUNTS.slice(0, 3).map((d, i) => {
-                    const sc = STATUS_CFG[d.status];
-                    const pct =
-                        d.capacity > 0
-                            ? Math.round((d.sold / d.capacity) * 100)
-                            : 0;
-                    return (
-                        <div
-                            key={d.id}
-                            className="t-bg"
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: isTiny ? "8px" : "12px",
-                                padding: isTiny ? "8px 6px" : "10px 8px",
-                                borderRadius: "8px",
-                                marginBottom: "2px",
-                                animation: `fadeUp 0.4s ${0.1 + i * 0.07}s ease both`,
-                            }}
-                        >
-                            <span style={{ fontSize: "18px", flexShrink: 0 }}>
-                                {CAT_EMOJI[d.category]}
-                            </span>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div
-                                    style={{
-                                        fontSize: isTiny ? "12px" : "13px",
-                                        fontWeight: 600,
-                                        color: "#f0ece6",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                >
-                                    {d.title}
-                                </div>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "5px",
-                                        marginTop: "4px",
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            flex: 1,
-                                            height: "2px",
-                                            background:
-                                                "rgba(255,255,255,0.07)",
-                                            borderRadius: "2px",
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                height: "100%",
-                                                width: `${pct}%`,
-                                                background:
-                                                    "linear-gradient(90deg,#fa8128,#dc670e)",
-                                                borderRadius: "2px",
-                                            }}
-                                        />
-                                    </div>
-                                    <span
-                                        style={{
-                                            fontSize: "9px",
-                                            color: "#fa8128",
-                                            fontFamily: "monospace",
-                                            flexShrink: 0,
-                                        }}
-                                    >
-                                        {pct}%
-                                    </span>
-                                </div>
-                            </div>
-                            <span
-                                style={{
-                                    padding: "2px 8px",
-                                    borderRadius: "10px",
-                                    fontSize: "9px",
-                                    background: sc.bg,
-                                    color: sc.color,
-                                    fontFamily: "monospace",
-                                    flexShrink: 0,
-                                }}
-                            >
-                                {sc.label}
-                            </span>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
+                <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
+                <div className="avname">{user?.name??"User"}</div>
+                <div className="aveml">{user?.email}</div>
+              </div>
 
-    // ── MY DISCOUNTS TAB ───────────────────────────────────────────────────────
-    const MyDiscountsTab = () => (
-        <div style={{ animation: "fadeUp 0.4s ease both" }}>
-            {/* Filter + Add */}
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "10px",
-                    marginBottom: "14px",
-                    flexWrap: "wrap",
-                }}
-            >
-                {/* Status filter pills */}
-                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                    {["all", "active", "pending", "rejected"].map((f) => (
-                        <button
-                            key={f}
-                            onClick={() => setDiscountFilter(f)}
-                            style={{
-                                padding: "5px 12px",
-                                borderRadius: "20px",
-                                fontSize: "11px",
-                                fontFamily: "monospace",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.05em",
-                                background:
-                                    discountFilter === f
-                                        ? "rgba(250,129,40,0.18)"
-                                        : "rgba(255,255,255,0.04)",
-                                color:
-                                    discountFilter === f
-                                        ? "#fa8128"
-                                        : "rgba(240,236,230,0.45)",
-                                border:
-                                    discountFilter === f
-                                        ? "1px solid rgba(250,129,40,0.35)"
-                                        : "1px solid rgba(255,255,255,0.07)",
-                                transition: "all .18s",
-                            }}
-                        >
-                            {f}
-                        </button>
-                    ))}
-                </div>
-                {/* New button */}
-                <button
-                    style={{
-                        padding: "7px 14px",
-                        background: "linear-gradient(135deg,#fa8128,#c05a0a)",
-                        borderRadius: "8px",
-                        color: "#fff",
-                        fontSize: "12px",
-                        fontFamily: "'Inter',sans-serif",
-                        fontWeight: 600,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        boxShadow: "0 4px 16px rgba(250,129,40,0.35)",
-                    }}
-                >
-                    + New Discount
-                </button>
-            </div>
-
-            {/* Cards grid */}
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: isTiny
-                        ? "1fr"
-                        : isMobile
-                          ? "1fr"
-                          : isDesktop
-                            ? "repeat(3,1fr)"
-                            : "repeat(2,1fr)",
-                    gap: "12px",
-                }}
-            >
-                {filteredDiscounts.map((d, i) => {
-                    const sc = STATUS_CFG[d.status];
-                    const pct =
-                        d.capacity > 0
-                            ? Math.round((d.sold / d.capacity) * 100)
-                            : 0;
-                    const c = CAT_COLOR[d.category];
-                    return (
-                        <div
-                            key={d.id}
-                            className="t-lift"
-                            style={{
-                                background: "rgba(255,255,255,0.025)",
-                                border: "1px solid rgba(250,129,40,0.1)",
-                                borderRadius: "12px",
-                                overflow: "hidden",
-                                animation: `fadeUp 0.4s ${i * 0.05}s ease both`,
-                                boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
-                            }}
-                        >
-                            {/* Top colour strip */}
-                            <div
-                                style={{
-                                    height: "3px",
-                                    background: `linear-gradient(90deg,${c},${c}55)`,
-                                }}
-                            />
-                            <div
-                                style={{
-                                    padding: isTiny ? "12px" : "14px 16px",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "flex-start",
-                                        justifyContent: "space-between",
-                                        marginBottom: "10px",
-                                        gap: "8px",
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "9px",
-                                            minWidth: 0,
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                fontSize: "20px",
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            {CAT_EMOJI[d.category]}
-                                        </span>
-                                        <div style={{ minWidth: 0 }}>
-                                            <div
-                                                style={{
-                                                    fontSize: isTiny
-                                                        ? "12px"
-                                                        : "13px",
-                                                    fontWeight: 600,
-                                                    color: "#f0ece6",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap",
-                                                }}
-                                            >
-                                                {d.title}
-                                            </div>
-                                            <div
-                                                style={{
-                                                    fontSize: "10px",
-                                                    color: "rgba(240,236,230,0.38)",
-                                                    marginTop: "2px",
-                                                }}
-                                            >
-                                                {d.category} · {d.date}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span
-                                        style={{
-                                            padding: "3px 9px",
-                                            borderRadius: "12px",
-                                            fontSize: "10px",
-                                            background: sc.bg,
-                                            color: sc.color,
-                                            fontFamily: "monospace",
-                                            flexShrink: 0,
-                                            fontWeight: 600,
-                                        }}
-                                    >
-                                        {sc.label}
-                                    </span>
-                                </div>
-
-                                {/* Progress */}
-                                <div style={{ marginBottom: "10px" }}>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            marginBottom: "5px",
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                fontSize: "10px",
-                                                color: "rgba(240,236,230,0.42)",
-                                                fontFamily: "monospace",
-                                            }}
-                                        >
-                                            {d.sold} / {d.capacity} sold
-                                        </span>
-                                        <span
-                                            style={{
-                                                fontSize: "10px",
-                                                color: c,
-                                                fontFamily: "monospace",
-                                                fontWeight: 700,
-                                            }}
-                                        >
-                                            {pct}%
-                                        </span>
-                                    </div>
-                                    <div
-                                        style={{
-                                            height: "4px",
-                                            background:
-                                                "rgba(255,255,255,0.07)",
-                                            borderRadius: "2px",
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                height: "100%",
-                                                width: `${pct}%`,
-                                                background: `linear-gradient(90deg,${c},${c}99)`,
-                                                borderRadius: "2px",
-                                                boxShadow: `0 0 6px ${c}44`,
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Price + actions */}
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
-                                    }}
-                                >
-                                    <span
-                                        style={{
-                                            fontFamily: "'Cinzel',serif",
-                                            fontSize: "14px",
-                                            fontWeight: 700,
-                                            color: "#fa8128",
-                                        }}
-                                    >
-                                        {d.price}
-                                    </span>
-                                    <div
-                                        style={{ display: "flex", gap: "6px" }}
-                                    >
-                                        <button
-                                            style={{
-                                                padding: "5px 12px",
-                                                borderRadius: "6px",
-                                                fontSize: "11px",
-                                                background:
-                                                    "rgba(250,129,40,0.1)",
-                                                border: "1px solid rgba(250,129,40,0.2)",
-                                                color: "#fa8128",
-                                                fontFamily:
-                                                    "'Inter',sans-serif",
-                                            }}
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            style={{
-                                                padding: "5px 10px",
-                                                borderRadius: "6px",
-                                                fontSize: "11px",
-                                                background:
-                                                    "rgba(255,255,255,0.04)",
-                                                border: "1px solid rgba(255,255,255,0.08)",
-                                                color: "rgba(240,236,230,0.5)",
-                                                fontFamily:
-                                                    "'Inter',sans-serif",
-                                            }}
-                                        >
-                                            ···
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {filteredDiscounts.length === 0 && (
-                <div
-                    style={{
-                        textAlign: "center",
-                        padding: "48px 20px",
-                        color: "rgba(240,236,230,0.3)",
-                        fontFamily: "'Inter',sans-serif",
-                    }}
-                >
-                    <div style={{ fontSize: "36px", marginBottom: "10px" }}>
-                        🏷️
-                    </div>
-                    <div style={{ fontSize: "14px" }}>
-                        No {discountFilter} discounts found
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-
-    // ── SAVED DISCOUNTS TAB ────────────────────────────────────────────────────
-    const SavedTab = () => (
-        <div style={{ animation: "fadeUp 0.4s ease both" }}>
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "16px",
-                }}
-            >
+              <form className="sform" onSubmit={handleSave}>
                 <div>
-                    <div
-                        style={{
-                            fontFamily: "'Cinzel',serif",
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            color: "#f0ece6",
-                        }}
-                    >
-                        Saved Discounts
-                    </div>
-                    <div
-                        style={{
-                            fontSize: "11px",
-                            color: "rgba(240,236,230,0.38)",
-                            marginTop: "3px",
-                            fontFamily: "'Inter',sans-serif",
-                        }}
-                    >
-                        {SAVED_DISCOUNTS.length} items bookmarked
-                    </div>
+                  <label className="flbl">Full Name</label>
+                  <input className="finp" value={uName} onChange={e=>setUName(e.target.value)} placeholder="Your name"/>
                 </div>
-            </div>
-
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: isTiny
-                        ? "1fr"
-                        : isMobile
-                          ? "1fr"
-                          : isDesktop
-                            ? "repeat(2,1fr)"
-                            : "1fr",
-                    gap: "10px",
-                }}
-            >
-                {SAVED_DISCOUNTS.map((d, i) => {
-                    const c = CAT_COLOR[d.category];
-                    return (
-                        <div
-                            key={d.id}
-                            className="t-lift"
-                            style={{
-                                background: "rgba(255,255,255,0.025)",
-                                border: "1px solid rgba(250,129,40,0.09)",
-                                borderRadius: "12px",
-                                overflow: "hidden",
-                                display: "flex",
-                                animation: `fadeUp 0.4s ${i * 0.06}s ease both`,
-                                boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
-                            }}
-                        >
-                            {/* Left accent */}
-                            <div
-                                style={{
-                                    width: "3px",
-                                    background: `linear-gradient(180deg,${c},${c}44)`,
-                                    flexShrink: 0,
-                                }}
-                            />
-                            <div
-                                style={{
-                                    flex: 1,
-                                    padding: isTiny ? "12px 10px" : "14px 16px",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "flex-start",
-                                        justifyContent: "space-between",
-                                        gap: "8px",
-                                    }}
-                                >
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "7px",
-                                                marginBottom: "4px",
-                                            }}
-                                        >
-                                            <span style={{ fontSize: "16px" }}>
-                                                {CAT_EMOJI[d.category]}
-                                            </span>
-                                            <div
-                                                style={{
-                                                    fontSize: isTiny
-                                                        ? "12px"
-                                                        : "13px",
-                                                    fontWeight: 600,
-                                                    color: "#f0ece6",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap",
-                                                }}
-                                            >
-                                                {d.title}
-                                            </div>
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: "10px",
-                                                color: "rgba(240,236,230,0.38)",
-                                                fontFamily:
-                                                    "'Inter',sans-serif",
-                                                marginBottom: "8px",
-                                            }}
-                                        >
-                                            By {d.org} · {d.date}
-                                        </div>
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "10px",
-                                                flexWrap: "wrap",
-                                            }}
-                                        >
-                                            <span
-                                                style={{
-                                                    fontFamily:
-                                                        "'Cinzel',serif",
-                                                    fontSize: "15px",
-                                                    fontWeight: 700,
-                                                    color: "#fa8128",
-                                                }}
-                                            >
-                                                {d.price}
-                                            </span>
-                                            <span
-                                                style={{
-                                                    fontSize: "10px",
-                                                    color: "rgba(240,236,230,0.4)",
-                                                }}
-                                            >
-                                                ⭐ {d.rating}
-                                            </span>
-                                            <span
-                                                style={{
-                                                    padding: "2px 8px",
-                                                    borderRadius: "10px",
-                                                    fontSize: "9px",
-                                                    background: `${c}15`,
-                                                    color: c,
-                                                    fontFamily: "monospace",
-                                                }}
-                                            >
-                                                {d.category}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    {/* Remove heart */}
-                                    <button
-                                        style={{
-                                            color: "#fa8128",
-                                            fontSize: "18px",
-                                            flexShrink: 0,
-                                            paddingTop: "2px",
-                                            transition: "transform .2s",
-                                        }}
-                                        onMouseEnter={(e) =>
-                                            (e.target.style.transform =
-                                                "scale(1.2)")
-                                        }
-                                        onMouseLeave={(e) =>
-                                            (e.target.style.transform =
-                                                "scale(1)")
-                                        }
-                                    >
-                                        ❤️
-                                    </button>
-                                </div>
-                                <button
-                                    style={{
-                                        marginTop: "10px",
-                                        width: "100%",
-                                        padding: "7px",
-                                        background: "rgba(250,129,40,0.07)",
-                                        border: "1px solid rgba(250,129,40,0.15)",
-                                        borderRadius: "7px",
-                                        color: "#fa8128",
-                                        fontSize: "11px",
-                                        fontFamily: "'Inter',sans-serif",
-                                        transition: "background .18s",
-                                    }}
-                                >
-                                    View Discount →
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {SAVED_DISCOUNTS.length === 0 && (
-                <div
-                    style={{
-                        textAlign: "center",
-                        padding: "48px 20px",
-                        color: "rgba(240,236,230,0.3)",
-                        fontFamily: "'Inter',sans-serif",
-                    }}
-                >
-                    <div style={{ fontSize: "36px", marginBottom: "10px" }}>
-                        ❤️
-                    </div>
-                    <div>
-                        No saved discounts yet. Browse and save ones you like!
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-
-    // ── NOTIFICATIONS TAB ──────────────────────────────────────────────────────
-    const NotificationsTab = () => (
-        <div style={{ animation: "fadeUp 0.4s ease both" }}>
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "14px",
-                }}
-            >
                 <div>
-                    <div
-                        style={{
-                            fontFamily: "'Cinzel',serif",
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            color: "#f0ece6",
-                        }}
-                    >
-                        Notifications
-                    </div>
-                    {unread > 0 && (
-                        <div
-                            style={{
-                                fontSize: "11px",
-                                color: "rgba(240,236,230,0.4)",
-                                marginTop: "2px",
-                                fontFamily: "'Inter',sans-serif",
-                            }}
-                        >
-                            {unread} unread
-                        </div>
-                    )}
+                  <label className="flbl">Email</label>
+                  <input className={`finp${emailErr?" err":""}`} type="email" value={uEmail}
+                    onChange={e=>{setUEmail(e.target.value); setEmailErr(e.target.value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value)?"Invalid email":"");}}
+                    placeholder="you@email.com"/>
+                  {emailErr && <div className="ferr">{emailErr}</div>}
                 </div>
-                {unread > 0 && (
-                    <button
-                        onClick={markAllRead}
-                        style={{
-                            fontSize: "11px",
-                            color: "#fa8128",
-                            fontFamily: "'Inter',sans-serif",
-                            padding: "5px 12px",
-                            borderRadius: "6px",
-                            background: "rgba(250,129,40,0.08)",
-                            border: "1px solid rgba(250,129,40,0.2)",
-                        }}
-                    >
-                        Mark all read
-                    </button>
-                )}
+                <div>
+                  <label className="flbl">Phone Number</label>
+                  <input className={`finp${phoneErr?" err":""}`} value={uPhone}
+                    onChange={e=>{setUPhone(e.target.value); setPhoneErr(e.target.value&&e.target.value.length<7?"Invalid number":"");}}
+                    placeholder="+233 XX XXX XXXX"/>
+                  {phoneErr && <div className="ferr">{phoneErr}</div>}
+                </div>
+                <div className="ffoot">
+                  <button type="submit" className="sbtn" disabled={!!emailErr||!!phoneErr||saveState==="saving"}>
+                    {saveState==="saving" ? <><span className="spin"/> Saving…</> : saveState==="saved" ? "✓ Saved!" : "Save Changes"}
+                  </button>
+                </div>
+              </form>
             </div>
+          )}
 
-            <div
-                style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-                {notifs.map((n, i) => {
-                    const nc = NOTIF_CFG[n.type];
-                    return (
-                        <div
-                            key={n.id}
-                            style={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: isTiny ? "10px" : "13px",
-                                padding: isTiny ? "12px 10px" : "13px 16px",
-                                background: n.read
-                                    ? "rgba(255,255,255,0.018)"
-                                    : "rgba(250,129,40,0.04)",
-                                border: n.read
-                                    ? "1px solid rgba(255,255,255,0.05)"
-                                    : "1px solid rgba(250,129,40,0.12)",
-                                borderRadius: "10px",
-                                animation: `fadeUp 0.4s ${i * 0.06}s ease both`,
-                                position: "relative",
-                            }}
-                        >
-                            {/* Unread dot */}
-                            {!n.read && (
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        top: "14px",
-                                        right: "12px",
-                                        width: "6px",
-                                        height: "6px",
-                                        borderRadius: "50%",
-                                        background: "#fa8128",
-                                    }}
-                                />
-                            )}
-                            <div
-                                style={{
-                                    width: isTiny ? "30px" : "34px",
-                                    height: isTiny ? "30px" : "34px",
-                                    borderRadius: "8px",
-                                    flexShrink: 0,
-                                    background: nc.bg,
-                                    border: `1px solid ${nc.color}28`,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: "15px",
-                                }}
-                            >
-                                {nc.icon}
-                            </div>
-                            <div
-                                style={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    paddingRight: "16px",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        fontSize: isTiny ? "12px" : "13px",
-                                        color: n.read
-                                            ? "rgba(240,236,230,0.6)"
-                                            : "#f0ece6",
-                                        lineHeight: 1.45,
-                                        marginBottom: "4px",
-                                        fontFamily: "'Inter',sans-serif",
-                                    }}
-                                >
-                                    {n.msg}
-                                </div>
-                                <div
-                                    style={{
-                                        fontSize: "10px",
-                                        color: "rgba(240,236,230,0.3)",
-                                        fontFamily: "monospace",
-                                    }}
-                                >
-                                    {n.time}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
         </div>
-    );
-
-    // ── SETTINGS TAB ───────────────────────────────────────────────────────────
-    const SettingsTab = () => {
-        const inputStyle = {
-            width: "100%",
-            padding: isTiny ? "9px 10px" : "10px 13px",
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(250,129,40,0.14)",
-            borderRadius: "8px",
-            color: "#f0ece6",
-            fontSize: "13px",
-            fontFamily: "'Inter',sans-serif",
-        };
-        const labelStyle = {
-            display: "block",
-            fontSize: "10px",
-            color: "rgba(240,236,230,0.4)",
-            marginBottom: "5px",
-            letterSpacing: "0.07em",
-            textTransform: "uppercase",
-            fontFamily: "monospace",
-        };
-        const sectionHead = (title, sub) => (
-            <div style={{ marginBottom: "18px" }}>
-                <div
-                    style={{
-                        fontFamily: "'Cinzel',serif",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#fa8128",
-                        letterSpacing: "0.06em",
-                    }}
-                >
-                    {title}
-                </div>
-                {sub && (
-                    <div
-                        style={{
-                            fontSize: "11px",
-                            color: "rgba(240,236,230,0.35)",
-                            marginTop: "3px",
-                            fontFamily: "'Inter',sans-serif",
-                        }}
-                    >
-                        {sub}
-                    </div>
-                )}
-            </div>
-        );
-
-        return (
-            <div style={{ animation: "fadeUp 0.4s ease both" }}>
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr",
-                        gap: "14px",
-                    }}
-                >
-                    {/* Profile card */}
-                    <div
-                        style={{
-                            background: "rgba(255,255,255,0.025)",
-                            border: "1px solid rgba(250,129,40,0.1)",
-                            borderRadius: "12px",
-                            padding: isTiny ? "16px 14px" : "20px 22px",
-                        }}
-                    >
-                        {sectionHead(
-                            "Profile",
-                            "Your public organizer information",
-                        )}
-
-                        {/* Avatar upload */}
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "14px",
-                                marginBottom: "20px",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    width: "52px",
-                                    height: "52px",
-                                    borderRadius: "50%",
-                                    flexShrink: 0,
-                                    background: "rgba(250,129,40,0.1)",
-                                    border: "2px solid rgba(250,129,40,0.3)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: "22px",
-                                }}
-                            >
-                                🎭
-                            </div>
-                            <div>
-                                <button
-                                    style={{
-                                        padding: "6px 14px",
-                                        borderRadius: "7px",
-                                        fontSize: "11px",
-                                        background: "rgba(250,129,40,0.1)",
-                                        border: "1px solid rgba(250,129,40,0.25)",
-                                        color: "#fa8128",
-                                        fontFamily: "'Inter',sans-serif",
-                                        marginBottom: "4px",
-                                        display: "block",
-                                    }}
-                                >
-                                    Upload Photo
-                                </button>
-                                <div
-                                    style={{
-                                        fontSize: "10px",
-                                        color: "rgba(240,236,230,0.3)",
-                                        fontFamily: "'Inter',sans-serif",
-                                    }}
-                                >
-                                    JPG, PNG up to 2MB
-                                </div>
-                            </div>
-                        </div>
-
-                        {[
-                            {
-                                label: "Organizer Name",
-                                placeholder: "Your business name",
-                            },
-                            {
-                                label: "Contact Email",
-                                placeholder: "contact@business.com",
-                            },
-                            {
-                                label: "Phone Number",
-                                placeholder: "+233 XX XXX XXXX",
-                            },
-                            { label: "Location", placeholder: "City, Country" },
-                        ].map((f, i) => (
-                            <div key={i} style={{ marginBottom: "14px" }}>
-                                <label style={labelStyle}>{f.label}</label>
-                                <input
-                                    style={inputStyle}
-                                    placeholder={f.placeholder}
-                                    defaultValue={
-                                        i === 0
-                                            ? ORGANIZER.name
-                                            : i === 3
-                                              ? ORGANIZER.location
-                                              : ""
-                                    }
-                                />
-                            </div>
-                        ))}
-
-                        <div style={{ marginBottom: "14px" }}>
-                            <label style={labelStyle}>Bio</label>
-                            <textarea
-                                style={{
-                                    ...inputStyle,
-                                    height: "80px",
-                                    resize: "vertical",
-                                    lineHeight: "1.5",
-                                }}
-                                placeholder="Describe your organization..."
-                            />
-                        </div>
-
-                        <button
-                            style={{
-                                width: "100%",
-                                padding: "11px",
-                                background:
-                                    "linear-gradient(135deg,#fa8128,#c05a0a)",
-                                border: "none",
-                                borderRadius: "8px",
-                                color: "#fff",
-                                fontSize: "13px",
-                                fontFamily: "'Inter',sans-serif",
-                                fontWeight: 600,
-                                boxShadow: "0 4px 16px rgba(250,129,40,0.3)",
-                            }}
-                        >
-                            Save Profile
-                        </button>
-                    </div>
-
-                    {/* Account + Preferences */}
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "14px",
-                        }}
-                    >
-                        {/* Account */}
-                        <div
-                            style={{
-                                background: "rgba(255,255,255,0.025)",
-                                border: "1px solid rgba(250,129,40,0.1)",
-                                borderRadius: "12px",
-                                padding: isTiny ? "16px 14px" : "20px 22px",
-                            }}
-                        >
-                            {sectionHead("Account", "Manage your credentials")}
-                            {[
-                                { label: "Username", placeholder: "@username" },
-                                {
-                                    label: "Current Password",
-                                    placeholder: "••••••••",
-                                    type: "password",
-                                },
-                                {
-                                    label: "New Password",
-                                    placeholder: "••••••••",
-                                    type: "password",
-                                },
-                            ].map((f, i) => (
-                                <div key={i} style={{ marginBottom: "14px" }}>
-                                    <label style={labelStyle}>{f.label}</label>
-                                    <input
-                                        style={inputStyle}
-                                        type={f.type || "text"}
-                                        placeholder={f.placeholder}
-                                    />
-                                </div>
-                            ))}
-                            <button
-                                style={{
-                                    width: "100%",
-                                    padding: "10px",
-                                    background: "rgba(250,129,40,0.08)",
-                                    border: "1px solid rgba(250,129,40,0.22)",
-                                    borderRadius: "8px",
-                                    color: "#fa8128",
-                                    fontSize: "13px",
-                                    fontFamily: "'Inter',sans-serif",
-                                    fontWeight: 600,
-                                }}
-                            >
-                                Update Password
-                            </button>
-                        </div>
-
-                        {/* Preferences */}
-                        <div
-                            style={{
-                                background: "rgba(255,255,255,0.025)",
-                                border: "1px solid rgba(250,129,40,0.1)",
-                                borderRadius: "12px",
-                                padding: isTiny ? "16px 14px" : "20px 22px",
-                            }}
-                        >
-                            {sectionHead(
-                                "Notifications",
-                                "Choose what you hear about",
-                            )}
-                            {[
-                                { label: "New ticket sales", on: true },
-                                { label: "Discount reviews", on: true },
-                                { label: "Low stock alerts", on: true },
-                                { label: "Marketing emails", on: false },
-                            ].map((p, i) => (
-                                <div
-                                    key={i}
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
-                                        padding: "9px 0",
-                                        borderBottom:
-                                            i < 3
-                                                ? "1px solid rgba(255,255,255,0.04)"
-                                                : "none",
-                                    }}
-                                >
-                                    <span
-                                        style={{
-                                            fontSize: "12px",
-                                            color: "rgba(240,236,230,0.6)",
-                                            fontFamily: "'Inter',sans-serif",
-                                        }}
-                                    >
-                                        {p.label}
-                                    </span>
-                                    {/* Toggle pill */}
-                                    <div
-                                        style={{
-                                            width: "36px",
-                                            height: "20px",
-                                            borderRadius: "10px",
-                                            background: p.on
-                                                ? "rgba(250,129,40,0.5)"
-                                                : "rgba(255,255,255,0.1)",
-                                            border: p.on
-                                                ? "1px solid rgba(250,129,40,0.5)"
-                                                : "1px solid rgba(255,255,255,0.12)",
-                                            position: "relative",
-                                            cursor: "pointer",
-                                            transition: "background .2s",
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                position: "absolute",
-                                                top: "2px",
-                                                left: p.on ? "18px" : "2px",
-                                                width: "14px",
-                                                height: "14px",
-                                                borderRadius: "50%",
-                                                background: p.on
-                                                    ? "#fa8128"
-                                                    : "rgba(255,255,255,0.3)",
-                                                transition: "left .2s",
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Danger zone */}
-                        <div
-                            style={{
-                                background: "rgba(239,68,68,0.04)",
-                                border: "1px solid rgba(239,68,68,0.12)",
-                                borderRadius: "12px",
-                                padding: isTiny ? "14px 12px" : "16px 20px",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    fontFamily: "'Cinzel',serif",
-                                    fontSize: "12px",
-                                    color: "#ef4444",
-                                    letterSpacing: "0.06em",
-                                    marginBottom: "10px",
-                                }}
-                            >
-                                DANGER ZONE
-                            </div>
-                            <div
-                                style={{
-                                    fontSize: "12px",
-                                    color: "rgba(240,236,230,0.4)",
-                                    fontFamily: "'Inter',sans-serif",
-                                    marginBottom: "12px",
-                                }}
-                            >
-                                Permanently delete your organizer account and
-                                all associated data.
-                            </div>
-                            <button
-                                style={{
-                                    padding: "8px 16px",
-                                    borderRadius: "7px",
-                                    fontSize: "12px",
-                                    background: "rgba(239,68,68,0.1)",
-                                    border: "1px solid rgba(239,68,68,0.25)",
-                                    color: "#ef4444",
-                                    fontFamily: "'Inter',sans-serif",
-                                }}
-                            >
-                                Delete Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    const renderTab = () => {
-        if (tab === "overview") return <OverviewTab />;
-        if (tab === "my-discounts") return <MyDiscountsTab />;
-        if (tab === "saved") return <SavedTab />;
-        if (tab === "notifications") return <NotificationsTab />;
-        if (tab === "settings") return <SettingsTab />;
-    };
-
-    // ── ROOT ───────────────────────────────────────────────────────────────────
-    return (
-        <div
-            style={{
-                minHeight: "100vh",
-                background: "#080604",
-                fontFamily: "'Inter',sans-serif",
-                color: "#f0ece6",
-            }}
-        >
-            <style>{css}</style>
-
-            {/* Hero + tabs */}
-            <Hero />
-
-            {/* Content */}
-            <div
-                style={{
-                    maxWidth: isDesktop ? "1100px" : "100%",
-                    margin: "0 auto",
-                    padding: isTiny
-                        ? "16px 12px 40px"
-                        : isMobile
-                          ? "18px 16px 40px"
-                          : "24px 32px 40px",
-                }}
-            >
-                {renderTab()}
-            </div>
-        </div>
-    );
+      </div>
+    </div>
+  );
 }
