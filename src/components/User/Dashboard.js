@@ -481,7 +481,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);
 
 const Page = styled.div`
     min-height: 100vh;
-    padding-top: 60px;
+    /* padding-top: 60px; */
     background-color: ${T.bg};
     color: ${T.text};
     font-family: "Georgia", "Times New Roman", serif;

@@ -41,7 +41,7 @@ const Main = (props) => {
 
 const Container = styled.div`
   grid-area: rightside;
-  padding-top: 10px;
+  /* padding-top: 10px; */
 `;
 
 const Section = styled.div`
