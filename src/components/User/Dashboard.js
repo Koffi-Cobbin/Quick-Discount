@@ -199,7 +199,7 @@ const Dashboard = (props) => {
                             <OrgButton
                                 onClick={() => navigate("/organizer-dashboard")}
                             >
-                                Go to Organizer Dashboard →
+                                Organizer Dashboard →
                             </OrgButton>
                         )}
                     </HeroText>
@@ -342,143 +342,115 @@ const Dashboard = (props) => {
                 {/* ── SETTINGS ── */}
                 {activeTab === "settings" && (
                     <Panel key="settings">
-                        <SettingsGrid>
-                            {/* Left: Avatar card */}
-                            <AvatarCard>
-                                <AvatarCardInner
-                                    style={{
-                                        backgroundImage: preview
-                                            ? `url(${preview})`
-                                            : "none",
-                                    }}
-                                    onClick={() => fileRef.current?.click()}
-                                    title="Click to change photo"
-                                >
-                                    {!preview && (
-                                        <AvatarCardInitial>
-                                            {(props.user?.name || "U")[0]}
-                                        </AvatarCardInitial>
+                        <SettingsWrapper>
+                            <SettingsHeader>
+                                <SettingsTitle>Profile Settings</SettingsTitle>
+                                <SettingsSub>Manage your public profile and account security</SettingsSub>
+                            </SettingsHeader>
+
+                            <SettingsGrid>
+                                {/* Left: Profile Preview & Photo */}
+                                <ProfileSidebar>
+                                    <AvatarUpload>
+                                        <AvatarPreview
+                                            style={{
+                                                backgroundImage: preview
+                                                    ? `url(${preview})`
+                                                    : "none",
+                                            }}
+                                            onClick={() => fileRef.current?.click()}
+                                        >
+                                            {!preview && (
+                                                <AvatarInitial>
+                                                    {(props.user?.name || "U")[0]}
+                                                </AvatarInitial>
+                                            )}
+                                            <UploadOverlay>
+                                                <span>Update Photo</span>
+                                            </UploadOverlay>
+                                        </AvatarPreview>
+                                        <input
+                                            ref={fileRef}
+                                            type="file"
+                                            accept="image/*"
+                                            style={{ display: "none" }}
+                                            onChange={handleFile}
+                                        />
+                                    </AvatarUpload>
+                                    
+                                    <SidebarInfo>
+                                        <SidebarName>{username || props.user?.name || "New User"}</SidebarName>
+                                        <SidebarEmail>{email || props.user?.email}</SidebarEmail>
+                                    </SidebarInfo>
+
+                                    {isOrganizer && (
+                                        <OrganizerBadge onClick={() => navigate("/organizer-dashboard")}>
+                                            <BadgeIcon>🏢</BadgeIcon>
+                                            <span>Organizer Account</span>
+                                            <BadgeArrow>→</BadgeArrow>
+                                        </OrganizerBadge>
                                     )}
-                                    <AvatarCardOverlay>
-                                        <span>📷</span>
-                                        <AvatarCardOverlayText>
-                                            Change Photo
-                                        </AvatarCardOverlayText>
-                                    </AvatarCardOverlay>
-                                </AvatarCardInner>
+                                </ProfileSidebar>
 
-                                <AvatarCardName>
-                                    {props.user?.name || "—"}
-                                </AvatarCardName>
-                                <AvatarCardMeta>
-                                    {props.user?.email}
-                                </AvatarCardMeta>
+                                {/* Right: Form Fields */}
+                                <FormContainer>
+                                    <FormSection>
+                                        <SectionHeader>Personal Information</SectionHeader>
+                                        <FormGrid>
+                                            <FieldGroup>
+                                                <FieldLabel>Full Name</FieldLabel>
+                                                <StyledInput
+                                                    type="text"
+                                                    value={username}
+                                                    onChange={(e) => setUsername(e.target.value)}
+                                                    placeholder="Your name"
+                                                />
+                                            </FieldGroup>
+                                            <FieldGroup>
+                                                <FieldLabel>Email Address</FieldLabel>
+                                                <StyledInput
+                                                    type="email"
+                                                    value={email}
+                                                    onChange={(e) => validateEmail(e.target.value)}
+                                                    placeholder="you@example.com"
+                                                    hasError={!!emailErr}
+                                                />
+                                                {emailErr && <ErrorText>{emailErr}</ErrorText>}
+                                            </FieldGroup>
+                                            <FieldGroup>
+                                                <FieldLabel>Phone Number</FieldLabel>
+                                                <StyledInput
+                                                    type="tel"
+                                                    value={contact}
+                                                    onChange={(e) => validateContact(e.target.value)}
+                                                    placeholder="+233 XX XXX XXXX"
+                                                    hasError={!!contactErr}
+                                                />
+                                                {contactErr && <ErrorText>{contactErr}</ErrorText>}
+                                            </FieldGroup>
+                                        </FormGrid>
+                                    </FormSection>
 
-                                {/* Hidden file input */}
-                                <input
-                                    ref={fileRef}
-                                    type="file"
-                                    accept="image/*"
-                                    style={{ display: "none" }}
-                                    onChange={handleFile}
-                                />
-
-                                {/* Organizer shortcut inside settings */}
-                                {isOrganizer && (
-                                    <OrgShortcut
-                                        onClick={() =>
-                                            navigate("/organizer-dashboard")
-                                        }
-                                    >
-                                        🏢 Organizer Dashboard
-                                    </OrgShortcut>
-                                )}
-                            </AvatarCard>
-
-                            {/* Right: Form card */}
-                            <FormCard>
-                                <FormTitle>Account Details</FormTitle>
-
-                                <FieldGroup>
-                                    <FieldLabel htmlFor="s-name">
-                                        Display Name
-                                    </FieldLabel>
-                                    <FieldInput
-                                        id="s-name"
-                                        type="text"
-                                        value={username}
-                                        onChange={(e) =>
-                                            setUsername(e.target.value)
-                                        }
-                                        placeholder="Your name"
-                                    />
-                                </FieldGroup>
-
-                                <FieldGroup>
-                                    <FieldLabel htmlFor="s-email">
-                                        Email Address
-                                    </FieldLabel>
-                                    <FieldInput
-                                        id="s-email"
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) =>
-                                            validateEmail(e.target.value)
-                                        }
-                                        placeholder="you@example.com"
-                                        hasError={!!emailErr}
-                                    />
-                                    {emailErr && (
-                                        <FieldError>{emailErr}</FieldError>
-                                    )}
-                                </FieldGroup>
-
-                                <FieldGroup>
-                                    <FieldLabel htmlFor="s-contact">
-                                        Phone Number
-                                    </FieldLabel>
-                                    <FieldInput
-                                        id="s-contact"
-                                        type="tel"
-                                        value={contact}
-                                        onChange={(e) =>
-                                            validateContact(e.target.value)
-                                        }
-                                        placeholder="+233 XX XXX XXXX"
-                                        hasError={!!contactErr}
-                                    />
-                                    {contactErr && (
-                                        <FieldError>{contactErr}</FieldError>
-                                    )}
-                                </FieldGroup>
-
-                                <SaveRow>
-                                    <SaveBtn
-                                        onClick={handleSave}
-                                        disabled={
-                                            !!emailErr ||
-                                            !!contactErr ||
-                                            saveStatus === "saving"
-                                        }
-                                    >
-                                        {saveStatus === "saving" ? (
-                                            <>
-                                                <Spinner /> Saving…
-                                            </>
-                                        ) : saveStatus === "saved" ? (
-                                            "✓ Saved"
-                                        ) : (
-                                            "Save Changes"
+                                    <ActionRow>
+                                        <SubmitButton
+                                            onClick={handleSave}
+                                            disabled={!!emailErr || !!contactErr || saveStatus === "saving"}
+                                        >
+                                            {saveStatus === "saving" ? (
+                                                <><Spinner /> Saving...</>
+                                            ) : saveStatus === "saved" ? (
+                                                "Changes Saved"
+                                            ) : (
+                                                "Update Profile"
+                                            )}
+                                        </SubmitButton>
+                                        {saveStatus === "saved" && (
+                                            <SuccessMsg>Your profile has been updated successfully.</SuccessMsg>
                                         )}
-                                    </SaveBtn>
-                                    {saveStatus === "saved" && (
-                                        <SaveFeedback>
-                                            Your details have been updated.
-                                        </SaveFeedback>
-                                    )}
-                                </SaveRow>
-                            </FormCard>
-                        </SettingsGrid>
+                                    </ActionRow>
+                                </FormContainer>
+                            </SettingsGrid>
+                        </SettingsWrapper>
                     </Panel>
                 )}
             </ContentArea>
@@ -863,199 +835,198 @@ const EmptyBody = styled.p`
     color: ${T.textMuted};
 `;
 
-/* ══ SETTINGS ══════════════════════════════════════════════════ */
+/* ══ SETTINGS REIMAGINED ════════════════════════════════════════ */
+const SettingsWrapper = styled.div`
+    animation: ${fadeUp} 0.5s ease both;
+`;
+const SettingsHeader = styled.div`
+    margin-bottom: 32px;
+`;
+const SettingsTitle = styled.h2`
+    font-family: "Playfair Display", serif;
+    font-size: 1.8rem;
+    color: ${T.text};
+    margin-bottom: 6px;
+`;
+const SettingsSub = styled.p`
+    font-size: 0.9rem;
+    color: ${T.textMuted};
+`;
 const SettingsGrid = styled.div`
     display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 28px;
-    max-width: 800px;
-    @media (max-width: 720px) {
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    align-items: start;
+    @media (max-width: 900px) {
         grid-template-columns: 1fr;
     }
 `;
-const AvatarCard = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+const ProfileSidebar = styled.div`
     background: ${T.surface};
     border: 1px solid ${T.border};
     border-radius: ${T.radius};
-    padding: 28px 20px;
-    animation: ${css`
-        ${fadeUp} .4s ease both
-    `};
-`;
-const AvatarCardInner = styled.div`
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    background-color: rgba(250, 129, 40, 0.1);
-    border: 2px solid rgba(250, 129, 40, 0.35);
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    overflow: hidden;
-    margin-bottom: 16px;
-    animation: ${css`
-        ${borderGlow} 4s ease-in-out infinite
-    `};
-`;
-const AvatarCardInitial = styled.span`
-    font-size: 2rem;
-    font-weight: 700;
-    color: ${T.orange};
-`;
-const AvatarCardOverlay = styled.div`
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
+`;
+const AvatarUpload = styled.div`
+    position: relative;
+    margin-bottom: 24px;
+`;
+const AvatarPreview = styled.div`
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: ${T.orangeDim};
+    border: 3px solid ${T.orange};
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+`;
+const UploadOverlay = styled.div`
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.2s;
-    ${AvatarCardInner}:hover & {
+    transition: 0.2s;
+    span {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    ${AvatarPreview}:hover & {
         opacity: 1;
     }
 `;
-const AvatarCardOverlayText = styled.span`
-    font-family: "Courier New", monospace;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    color: #fff;
-    margin-top: 4px;
+const SidebarInfo = styled.div`
+    margin-bottom: 24px;
 `;
-const AvatarCardName = styled.div`
-    font-size: 1rem;
+const SidebarName = styled.h3`
+    font-size: 1.1rem;
     font-weight: 700;
     color: ${T.text};
-    text-align: center;
+    margin-bottom: 4px;
 `;
-const AvatarCardMeta = styled.div`
-    font-family: "Courier New", monospace;
-    font-size: 10px;
-    letter-spacing: 0.06em;
+const SidebarEmail = styled.p`
+    font-size: 0.8rem;
     color: ${T.textMuted};
-    text-align: center;
-    margin-top: 4px;
 `;
-const OrgShortcut = styled.button`
-    margin-top: 20px;
+const OrganizerBadge = styled.div`
     width: 100%;
-    font-family: "Courier New", monospace;
-    font-size: 10px;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: ${T.orange};
-    background: ${T.orangeDim};
-    border: 1px solid rgba(250, 129, 40, 0.25);
+    background: linear-gradient(135deg, ${T.orangeDim} 0%, rgba(250,129,40,0.05) 100%);
+    border: 1px solid ${T.borderOrange};
     border-radius: ${T.radiusSm};
-    padding: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: 0.2s;
+    span {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: ${T.orange};
+        flex: 1;
+        text-align: left;
+    }
     &:hover {
-        background: rgba(250, 129, 40, 0.22);
+        transform: translateY(-2px);
+        background: ${T.orangeDim};
     }
 `;
-
-const FormCard = styled.div`
+const BadgeIcon = styled.div`
+    font-size: 1.2rem;
+`;
+const BadgeArrow = styled.div`
+    color: ${T.orange};
+    font-weight: 700;
+`;
+const FormContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+`;
+const FormSection = styled.div`
     background: ${T.surface};
     border: 1px solid ${T.border};
     border-radius: ${T.radius};
-    padding: 28px 28px 24px;
-    animation: ${css`
-        ${fadeUp} .45s ease both
-    `};
+    padding: 32px;
 `;
-const FormTitle = styled.h3`
-    font-size: 1rem;
+const SectionHeader = styled.h4`
+    font-size: 0.9rem;
     font-weight: 700;
-    color: ${T.text};
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: ${T.orange};
     margin-bottom: 24px;
-    padding-bottom: 14px;
+    padding-bottom: 12px;
     border-bottom: 1px solid ${T.border};
 `;
-const FieldGroup = styled.div`
-    margin-bottom: 20px;
+const FormGrid = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
 `;
-const FieldLabel = styled.label`
-    display: block;
-    font-family: "Courier New", monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: ${T.textMuted};
-    margin-bottom: 8px;
-`;
-const FieldInput = styled.input`
+const StyledInput = styled.input`
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid
-        ${({ hasError }) => (hasError ? "rgba(255,107,107,0.55)" : T.border)};
+    background: rgba(255,255,255,0.02);
+    border: 1px solid ${props => props.hasError ? T.error : T.border};
     border-radius: ${T.radiusSm};
-    padding: 11px 14px;
+    padding: 14px;
     color: ${T.text};
-    font-family: "Georgia", serif;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
-    &::placeholder {
-        color: ${T.textMuted};
-    }
+    font-size: 0.95rem;
+    transition: 0.2s;
     &:focus {
-        border-color: ${({ hasError }) =>
-            hasError ? "rgba(255,107,107,0.7)" : T.borderOrange};
+        outline: none;
+        border-color: ${T.orange};
+        background: rgba(255,255,255,0.05);
     }
 `;
-const FieldError = styled.p`
-    font-family: "Courier New", monospace;
-    font-size: 10px;
-    letter-spacing: 0.05em;
+const ErrorText = styled.p`
+    font-size: 0.75rem;
     color: ${T.error};
     margin-top: 6px;
 `;
-const SaveRow = styled.div`
+const ActionRow = styled.div`
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-top: 8px;
+    gap: 20px;
 `;
-const SaveBtn = styled.button`
-    font-family: "Courier New", monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #0b0905;
+const SubmitButton = styled.button`
     background: ${T.orange};
+    color: #000;
+    font-weight: 700;
+    padding: 16px 32px;
+    border-radius: ${T.radiusSm};
     border: none;
-    border-radius: 8px;
-    padding: 11px 24px;
-    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-    opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition:
-        background 0.2s,
-        transform 0.15s;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.95rem;
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
     &:hover:not(:disabled) {
-        background: #e0701f;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px ${T.orangeDim};
     }
 `;
-const SaveFeedback = styled.span`
-    font-family: "Courier New", monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.07em;
-    color: rgba(250, 129, 40, 0.75);
-    animation: ${css`
-        ${fadeUp} .3s ease both
-    `};
+const SuccessMsg = styled.p`
+    font-size: 0.9rem;
+    color: ${T.orange};
+    font-weight: 600;
 `;
 const Spinner = styled.span`
     display: inline-block;
