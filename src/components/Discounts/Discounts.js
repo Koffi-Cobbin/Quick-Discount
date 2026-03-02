@@ -365,13 +365,15 @@ const CatLabel = styled.span`
 `;
 
 const CardTitle = styled.h3`
-  font-family: "Playfair Display", Georgia, serif;
+  /* font-family: "Playfair Display", Georgia, serif; */
+  font-family: var(--font-sans);
   font-size: 1.08rem;
   font-weight: 700;
   color: ${T.text};
   line-height: 1.3;
   margin-bottom: 8px;
   transition: color 0.2s;
+  text-align: left;
 
   ${Card}:hover & {
     color: ${T.orange};
