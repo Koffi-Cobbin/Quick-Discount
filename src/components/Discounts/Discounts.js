@@ -129,7 +129,7 @@ const Rule = styled.div`
 // ─── Controls row ────────────────────────────────────────────────────────────
 const Controls = styled.div`
   display: flex;
-  align-items: center;
+  align-items: left;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: space-between;
