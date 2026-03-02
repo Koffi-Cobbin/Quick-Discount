@@ -21,7 +21,7 @@ const Profile = (props) => {
 };
 
 const Wrapper = styled.div`
-  margin-top: 60px;
+  /* margin-top: 60px; */
   min-height: 100vh;
   background-color: #0b0905;
 `;
