@@ -202,21 +202,31 @@ function Empty({icon,title,body}) {
 }
 
 export default function UserDashboard(rawProps) {
-  const user          = rawProps.user          ?? MOCK.user;
-  const allDiscounts  = rawProps.discounts?.results ?? MOCK.discounts;
-  const rawWishlist   = rawProps.wishlist       ?? null;
-  const notifications = rawProps.notifications  ?? MOCK.notifications;
+  const user          = rawProps.user;
+  const allDiscounts  = rawProps.discounts?.results || [];
+  const rawWishlist   = rawProps.wishlist;
+  const notifications = rawProps.notifications || [];
   const isOrganizer   = !!(user?.organizer_detail || rawProps.organizer);
 
   const [tab,       setTab]      = useState("discounts");
   const [greeting,  setGreeting] = useState("Welcome");
-  const [savedIds,  setSavedIds] = useState(MOCK.savedIds);
+  const [savedIds,  setSavedIds] = useState(new Set());
   const [wishlist,  setWishlist] = useState([]);
 
-  const [uName,     setUName]    = useState(user?.name    ?? "");
-  const [uEmail,    setUEmail]   = useState(user?.email   ?? "");
-  const [uPhone,    setUPhone]   = useState(user?.contact ?? "");
-  const [preview,   setPreview]  = useState(user?.profile_pic ?? null);
+  const [uName,     setUName]    = useState("");
+  const [uEmail,    setUEmail]   = useState("");
+  const [uPhone,    setUPhone]   = useState("");
+  const [preview,   setPreview]  = useState(null);
+
+  // Sync state with user prop
+  useEffect(() => {
+    if (user) {
+      setUName(user.name || "");
+      setUEmail(user.email || "");
+      setUPhone(user.contact || "");
+      setPreview(user.profile_pic || null);
+    }
+  }, [user]);
   const [newFile,   setNewFile]  = useState(null);
   const [emailErr,  setEmailErr] = useState("");
   const [phoneErr,  setPhoneErr] = useState("");
@@ -231,13 +241,15 @@ export default function UserDashboard(rawProps) {
   }, []);
 
   useEffect(() => {
-    if (rawWishlist) {
+    if (rawWishlist && allDiscounts.length > 0) {
       const urls = rawWishlist.map(w => w.discount);
       const wl   = allDiscounts.filter(d => urls.includes(d.url));
       setWishlist(wl);
       setSavedIds(new Set(wl.map(d=>d.id)));
-    } else if (rawProps.getWishlist) rawProps.getWishlist();
-  }, [rawWishlist]); // eslint-disable-line
+    } else if (!rawWishlist && rawProps.getWishlist) {
+      rawProps.getWishlist();
+    }
+  }, [rawWishlist, allDiscounts]); // eslint-disable-line
 
   const toggleSave = id => setSavedIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
   const savedItems = allDiscounts.filter(d => savedIds.has(d.id));
