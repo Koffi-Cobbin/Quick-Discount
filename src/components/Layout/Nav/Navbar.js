@@ -134,7 +134,7 @@ const Navbar = (props) => {
                     {/* ── Hamburger (≤599px) ── */}
                     <Menu>
                         <HamburgerBtn
-                            onClick={() => props.openNav && props.openNav()}
+                            onClick={() => props.sidenav && props.sidenav()}
                             aria-label="Open navigation"
                         >
                             <span />
