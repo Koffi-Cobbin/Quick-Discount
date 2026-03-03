@@ -1,19 +1,3 @@
-/**
- * DiscountForm — Reimagined
- *
- * Design direction: Warm-dark editorial, matching the rest of the QuickDiscount app.
- * - Deep near-black background, warm off-white text (#f5f0e8 family)
- * - #fa8128 orange as the sole accent / CTA colour
- * - Courier New for micro-labels and tags; Georgia serif for headings
- * - Glass-card panels with subtle border glow
- * - 4-step wizard with animated progress bar (replaces crude next/prev binary)
- * - Section grouping so each step feels purposeful, not an endless scroll
- * - Inline validation feedback, helper text, and smooth slide transitions
- *
- * NOTE: All prop connections (props.getCategories, props.postDiscount, etc.)
- * are preserved as-is from the original. Only the presentation layer changes.
- */
-
 import React, { useState, useEffect } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { connect } from "react-redux";

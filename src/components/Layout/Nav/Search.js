@@ -97,13 +97,14 @@ const Search = (props) => {
     }
 
     const styling = {
-        border: "none",
-        backgroundColor: "rgba(255, 255, 255, 0.4)",
+        border: "1.5px solid rgba(250, 129, 40, 0.6)",
+        backgroundColor: "transparent",
         color: "#fff",
         outline: "none",
         placeholderColor: "#FFF",
         iconColor: "#FFF",
         hoverBackgroundColor: "rgba(0,0,0,0.8)",
+        transition: "border-color 0.2s ease",
     };
 
     return (

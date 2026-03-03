@@ -124,7 +124,7 @@ const Navbar = (props) => {
                         aria-label="Open search"
                     >
                         <img
-                            src="/images/icons/search.svg"
+                            src="/images/icons/search-icon-w.svg"
                             alt="search"
                             width="18"
                             height="18"
@@ -486,7 +486,7 @@ const SearchEntryDisplayButton = styled.button`
     border: 1.5px solid
         ${({ $active }) =>
             $active ? "rgba(250, 129, 40, 0.7)" : "rgba(255, 255, 255, 0.3)"};
-    border-radius: 10px;
+    border-radius: 20px;
     cursor: pointer;
     padding: 7px 10px;
     display: flex;
@@ -539,7 +539,7 @@ const TabletSearchBackdrop = styled.div`
 
 const TabletSearchPanel = styled.div`
     position: fixed;
-    top: 76px;
+    top: 55px;
     left: 0;
     right: 0;
     z-index: 999;
@@ -595,10 +595,7 @@ const SearchPanelPip = styled.div`
 const SearchShell = styled.div`
     border-radius: 12px;
     overflow: hidden;
-    border: 1.5px solid
-        ${({ focused }) =>
-            focused ? "rgba(250, 129, 40, 0.6)" : "rgba(255, 255, 255, 0.12)"};
-    transition: border-color 0.2s ease;
+
 `;
 
 const SearchHints = styled.div`

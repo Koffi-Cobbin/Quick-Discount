@@ -6,13 +6,11 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
 
-// import CarouselSection from "../Shared/CarouselSection";
 import { LeftButton, RightButton} from "../Shared/CarouselControls";
 import Loading from "../Shared/Loading";
 import Gallery from "../Gallery/Gallery";
 import { connect } from "react-redux";
 import ReactPlayer from "react-player";
-import AddToWishlist from "../Wishlist/AddToWishlist";
 import CustomerReview from "./CustomerReview";
 import StarRating from "./StarRating";
 import CarouselFlex from "../Shared/CarouselFlex";
@@ -32,7 +30,8 @@ import { BASE_URL } from "../../utils/constants";
 
 
 const DiscountDetail = (props) => {
-    const clickLock = useRef(false);
+    const followClickLock = useRef(false);
+    const likeClickLock = useRef(false);
     let { discountId } = useParams();
     const [discount, setDiscount] = useState();
     const [readMore,setReadMore] = useState(false);
@@ -43,7 +42,6 @@ const DiscountDetail = (props) => {
     const [play, setPlay] = useState(false);
     const [following, setFollowing] = useState(false);
     const [liked, setLiked] = useState(false);
-    // const [disableLike, setDisableLike] = useState(false); 
     const [unfollowOrganizer, setUnfollowOrganizer] = useState(false);
 
     const linkName = readMore ? 'Read Less':'Read More'
@@ -51,7 +49,6 @@ const DiscountDetail = (props) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Other discounts from organizer: filter all discounts
     const getOrganizerDiscounts = () => {
         const newOrganizerDiscounts= props.discounts.results.filter((discount_item) => {
           return ((discount_item.id !== discount.id) && (discount_item.organizer.id === discount.organizer.id))
@@ -63,19 +60,14 @@ const DiscountDetail = (props) => {
         }          
       };
 
-    // Other discounts: filter all discounts for discounts sharing same category as this discount
     const getRecomendedDiscounts = () => {
         const newRecomendedDiscounts= props.discounts.results.filter((discount_item) => {
           return ((discount_item.id !== discount.id) &&
           (discount_item.categories.some((category) => {
-            // Create an empty Set to store unique values
             var categories_list = [];
-
-            // Loop through each sub-list in A and add its elements to the resultSet
             discount.categories.forEach((category) => {
                 categories_list.push(category.name);
                 });
-
             return categories_list.includes(category.name);
             })
         ))});
@@ -86,17 +78,12 @@ const DiscountDetail = (props) => {
         }        
       };
 
-
-    //   Check if description is overflowing
     const isOverflown = () => {
         let element = document.getElementById("discount-description");
         return setShowReadMore(element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth);
       };
 
-    
-    //   GET DISCOUNT
     useEffect(() => {
-        // Get the current discount
         const getDiscount = () => { 
             if (!props.discounts.results){
                 props.getDiscounts();
@@ -107,12 +94,9 @@ const DiscountDetail = (props) => {
                 setDiscount(current_discount);
 
                 if (current_discount && props.authToken){
-                    // Check if user follows organizer of current discount
                     props.isUserFollowing(current_discount.organizer.id);
                     props.isDiscountLikedByUser(current_discount.id)
                 }                
-                
-                // set current url as url to return to when action triggers login
                 props.setUrl(location.pathname);
             }
           }; 
@@ -122,15 +106,11 @@ const DiscountDetail = (props) => {
         };
         }, [discountId, props.discounts, props.authToken]);
 
-    
-    //   GET DISCOUNT REVIEWS
     useEffect(() => {
         props.getDiscountReviews(discountId);
         console.log("Discount Reviews >>> ");
         }, [discountId]);
 
-
-    //   GET DISCOUNT MEDIA
     useEffect(() => {
         if (!props.discount_media || (discount && props.discount_media.length > 0 && props.discount_media[0].discount !== discount.url)){
             props.getDiscountMedia(discountId);
@@ -138,8 +118,6 @@ const DiscountDetail = (props) => {
         };
         }, [props.discount_media]);
 
-    
-    //   GET ORGANIZER DISCOUNT 
     useEffect(() => {
         if ((!organizerDiscounts && discount) || (discount && discount.organizer.id !== organizerDiscounts[0].organizer.id)){
             console.log("Getting Organizer Discounts >>> ");
@@ -147,19 +125,13 @@ const DiscountDetail = (props) => {
         }  
         }, [discount]);
 
-
     useEffect(() => {  
-        // Get the recomended discounts
-        // (discount && recomendedDiscounts && recomendedDiscounts[0].categories.some(category => discount.categories.includes(category)))){
         if (!recomendedDiscounts && discount){
             getRecomendedDiscounts();
             console.log("Getting Recomended Discounts");
         };      
-        
-    }, [discount]); // 
+    }, [discount]); 
 
-
-    // SET FOLLOWING
     useEffect(() => {
         if (props.is_follower){
             console.log("Is following ", props.is_follower.user ? true : false);
@@ -168,22 +140,17 @@ const DiscountDetail = (props) => {
         else {
             setFollowing(false);
         }
-        
-        }, [props.is_follower]);
+    }, [props.is_follower]);
 
-    // SET liked on discount
     useEffect(() => {
         if (props.user_discount_like){
-            setLiked(true);
-            props.set_user_discount_like(null);
+            setLiked(true);            
         }
-        }, [props.user_discount_like]);
+    }, [props.user_discount_like]);
 
     const getDiscountURL = () => {
         let url = window.location.href;
         navigator.clipboard.writeText(url);
-
-        // Alert the copied text
         alert("Link copied: " + url);
     };
 
@@ -191,158 +158,185 @@ const DiscountDetail = (props) => {
         setReadMore(!readMore);
         let content = document.getElementById(id);
         if (content.style.maxHeight){
-            // wait for the transition to finish
             setTimeout(() => {
-                // set the max height to the given value
                 content.style.maxHeight = null;
             }, 10);
-            
         } else {
-            // wait for the transition to finish
             setTimeout(() => {
-                // set the max height to the given value
                 content.style.maxHeight = content.scrollHeight + "px";
             }, 10);            
         };
     };
 
-    // follow organizer
     const followOrganizerHandler = () => {
-        const searchUrl = `${BASE_URL}/discounts/organizer/followers/add/`;
-        console.log("Bearer ", props.authToken);
+        return new Promise((resolve, reject) => {
+            const searchUrl = `${BASE_URL}/discounts/organizer/followers/add/`;
+            console.log("Bearer ", props.authToken);
 
-        axios.post(searchUrl, {
-                organizer_pk: discount.organizer.id
-            },
-            { headers: {
-                'Accept': "application/json", 
-                "Content-Type": "application/json",
-                'Authorization': `Bearer ${props.authToken}`,
-              }
-            })
-            .then(response => {
-                if (response.data) {
-                    props.isFollower(response.data);
-                    console.log("Follow response ", response.data);
+            axios.post(searchUrl, {
+                    organizer_pk: discount.organizer.id
+                },
+                { headers: {
+                    'Accept': "application/json", 
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${props.authToken}`,
                 }
-            })
-            .catch(error => {
-                console.log(error);
+                })
+                .then(response => {
+                    if (response.data) {
+                        props.isFollower(response.data);
+                        console.log("Follow response ", response.data);
+                        resolve(response.data);
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    reject(error);
                 });
-        };
+        });
+    };
 
-    // unfollow organizer
     const unfollowOrganizerHandler = () => {
-        const searchUrl = `${BASE_URL}/discounts/organizer/followers/delete/${props.is_follower.id}/`;
+        return new Promise((resolve, reject) => {
+            const searchUrl = `${BASE_URL}/discounts/organizer/followers/delete/${props.is_follower.id}/`;
 
-        axios.delete(searchUrl, {
+            axios.delete(searchUrl, {
+                    headers: {
+                        Authorization: `Bearer ${props.authToken}`,
+                    }
+                })
+                .then(response => {
+                    if (response.status === 204) {
+                        console.log("Unfollow response ", response.data);
+                        props.isFollower(null);
+                        resolve(response);
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+        });
+    };
+
+    const handleFollow = async () => {
+        if (followClickLock.current) return;
+        followClickLock.current = true;
+
+        const previousFollowersCount = discount.organizer.followers;
+        const wasFollowing = following;
+
+        if (following) {
+            setDiscount({...discount, organizer: {...discount.organizer, followers: Math.max(0, discount.organizer.followers - 1)}});
+            try {
+                await unfollowOrganizerHandler();
+            } catch (error) {
+                setDiscount({...discount, organizer: {...discount.organizer, followers: previousFollowersCount}});
+                setFollowing(wasFollowing);
+            }
+        } else if (props.user) {
+            setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers + 1}});
+            try {
+                await followOrganizerHandler();
+            } catch (error) {
+                setDiscount({...discount, organizer: {...discount.organizer, followers: previousFollowersCount}});
+                setFollowing(wasFollowing);
+            }
+        } else {
+            followClickLock.current = false;
+            navigate(`/login`);
+            return;
+        }
+
+        followClickLock.current = false;
+    };
+
+    const likeDiscount = () => {
+        return new Promise((resolve, reject) => {
+            const searchUrl = `${BASE_URL}/discounts/likes/add/`;
+            axios.post(searchUrl, {
+                    discount_id: discount.id
+                },
+                { headers: {
+                    'Accept': "application/json", 
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${props.authToken}`,
+                }
+                })
+                .then(response => {
+                    if (response.data) {
+                        setLiked(true);
+                        props.set_user_discount_like(response.data);
+                        console.log("Like response ", response.data);
+                        resolve(response.data);
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+        });
+    };
+
+    const unlikeDiscount = () => {
+        return new Promise((resolve, reject) => {
+            const searchUrl = `${BASE_URL}/discounts/likes/delete/${props.user_discount_like?.id}/`;
+            axios.delete(searchUrl, {
                 headers: {
                     Authorization: `Bearer ${props.authToken}`,
                 }
             })
             .then(response => {
-                // if response status is 204
                 if (response.status === 204) {
-                    console.log("Unfollow response ", response.data);
-                    props.isFollower(null);
-                    }
-                })
-            .catch(error => {
-                console.log(error);
-                });
-        };
-
-    // handle follow
-    const handleFollow = async () => {
-        if (clickLock.current) return; // ignore spam clicks
-        clickLock.current = true;
-
-        if (following) {
-            setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers === 0 ?  0 : discount.organizer.followers - 1}});
-
-            unfollowOrganizerHandler();
-            } 
-        else if (props.user) {
-            setDiscount({...discount, organizer: {...discount.organizer, followers: discount.organizer.followers+1}});
-            followOrganizerHandler();            
-        } else {
-            navigate(`/login`);
-        }
-
-        setTimeout(() => {
-            clickLock.current = false;
-        }, 300);
-    };
-
-
-    // like discount
-    const likeDiscount = () => {
-        const searchUrl = `${BASE_URL}/discounts/likes/add/`;
-        axios.post(searchUrl, {
-                discount_id: discount.id
-            },
-            { headers: {
-                'Accept': "application/json", 
-                "Content-Type": "application/json",
-                'Authorization': `Bearer ${props.authToken}`,
-            }
-            })
-            .then(response => {
-                if (response.data) {
-                    setLiked(true);
-                    console.log("Like response ", response.data);
+                    console.log("Unlike response ", response.data);
+                    setLiked(false);
+                    props.set_user_discount_like(null);
+                    resolve(response);
                 }
             })
             .catch(error => {
                 console.log(error);
-                });
-            };
-
-
-    // TODO: Exclude this function to allow for only likes
-    const dislikeDiscount = () => {
-        const searchUrl = `${BASE_URL}/discounts/likes/delete/${liked.id}/`;
-        axios.delete(searchUrl, {
-            headers: {
-                Authorization: `Bearer ${props.authToken}`,
-            }
-        })
-        .then(response => {
-            if (response.status === 204) {
-                console.log("Dislike response ", response.data);
-                setLiked(false);
-                // props.set_user_discount_like(null);
-                }
-            })
-        .catch(error => {
-            console.log(error);
+                reject(error);
             });
-        };
-
-
-    // handle like
-    const handleLike = async () => {
-        if (clickLock.current) return; // ignore spam clicks
-        clickLock.current = true;
-        // if (liked) {
-        //     setDiscount({...discount, likes: discount.likes-1});
-        //     dislikeDiscount();
-        //     } 
-        if (!liked && props.user) {
-            setDiscount({...discount, likes: discount.likes+1});
-            likeDiscount();            
-        } else {
-            navigate(`/login`);
-        }
-        setTimeout(() => {
-            clickLock.current = false;
-        }, 300);
+        });
     };
 
+    const handleLike = async () => {
+        if (likeClickLock.current) return;
+        likeClickLock.current = true;
+
+        const previousLikesCount = discount.likes;
+        const wasLiked = liked;
+
+        if (!props.user) {
+            likeClickLock.current = false;
+            navigate(`/login`);
+            return;
+        }
+
+        if (liked) {
+            setDiscount({...discount, likes: Math.max(0, discount.likes - 1)});
+            try {
+                await unlikeDiscount();
+            } catch (error) {
+                setDiscount({...discount, likes: previousLikesCount});
+                setLiked(wasLiked);
+            }
+        } else {
+            setDiscount({...discount, likes: discount.likes + 1});
+            try {
+                await likeDiscount();
+            } catch (error) {
+                setDiscount({...discount, likes: previousLikesCount});
+                setLiked(wasLiked);
+            }
+        }
+
+        likeClickLock.current = false;
+    };
 
     useEffect(() => {
         const handleScroll = (event) => {
-            // Check if discount has video_url
             if (discount && discount.video_url){
                 const videoSection = document.getElementById('video-section');
                 const rect = videoSection.getBoundingClientRect();
@@ -350,12 +344,11 @@ const DiscountDetail = (props) => {
                 const inView = rect.top <= viewHeight && rect.bottom >= 0;
                 if (inView) {
                     setPlay(true);
-                    } 
+                } 
                 else {
                     setPlay(false);
-                    }
+                }
             };
-            // Is description overflowing?
             isOverflown();
         };
     
@@ -373,7 +366,6 @@ const DiscountDetail = (props) => {
         <Container>
             <DiscountImageWrapper>
                 <DiscountImage imgUrl={discount.flyer}/>
-                {/* <ImageOverlay /> */}
                 <ShareDiscount onClick={getDiscountURL}>
                     <img src="/images/icons/share-w.svg" alt=""/> 
                 </ShareDiscount>
@@ -384,8 +376,16 @@ const DiscountDetail = (props) => {
                 <DiscountInfo>
                     <Title>
                         <b>{ discount.title} &nbsp;</b>                        
-                        <Like disabled={liked} onClick={handleLike}>
-                            <img src="/images/icons/like.svg" alt=""/>
+                        <Like $liked={liked} onClick={handleLike}>
+                            {/* <svg viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg> */}
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <g>
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M15.9977 5.63891C16.2695 4.34931 15.433 3.00969 14.2102 2.59462C13.6171 2.37633 12.9892 2.4252 12.4662 2.60499C11.9449 2.78419 11.4461 3.12142 11.1369 3.58441L11.136 3.58573L7.49506 9.00272C8.05104 9.29585 8.43005 9.87954 8.43005 10.5518V21.3018H6.91003V21.3018H16.6801C18.2938 21.3018 19.2028 20.2977 19.8943 19.202C20.6524 18.0009 21.1453 16.7211 21.5116 15.5812C21.6808 15.0546 21.8252 14.5503 21.9547 14.0984L21.9863 13.9881C22.126 13.5007 22.2457 13.0904 22.366 12.7549C22.698 11.8292 22.5933 10.9072 22.067 10.2072C21.5476 9.5166 20.7005 9.15175 19.76 9.15175H15.76C15.6702 9.15175 15.6017 9.11544 15.5599 9.06803C15.5238 9.02716 15.4831 8.95058 15.502 8.81171L15.9977 5.63891Z"/>
+                                    <path d="M2.18005 10.6199C2.18005 10.03 2.62777 9.55176 3.18005 9.55176H6.68005C7.23234 9.55176 7.68005 10.03 7.68005 10.6199V21.3018H3.18005C2.62777 21.3018 2.18005 20.8235 2.18005 20.2336V10.6199Z"/>
+                                </g>
+                            </svg>
                             <span>{discount.likes}</span>
                         </Like>
                     </Title>
@@ -464,8 +464,6 @@ const DiscountDetail = (props) => {
                                 <img src="/images/icons/globe-v.svg" alt="website" width="14" height="14"/> 
                                 <b>Website</b>
                             </WebLinkButton>
-
-                            {/* <AddToWishlist type="btn" discount={discount}/> */}
                         </ContactButtons>
                     </ContactSectionContent>
                 </ContactSection>
@@ -474,11 +472,7 @@ const DiscountDetail = (props) => {
 
             <AboutOrganiserAndMap>
                 <SectionContent>
-                    <Map 
-                    id="mapIframe"                    
-                    >
-                        {/* style={{ backgroundImage: `url("/images/map.png")` }} */}
-                        {/* <MapImage src={discount.flyer}/> */}
+                    <Map id="mapIframe">
                         {parse(discount.address)}
                     </Map>
                     <AboutOrganiser>
@@ -627,21 +621,17 @@ const Container = styled.div`
   color: rgba(0, 0, 0, 0.6);
   text-align: left;
   background: #fff;
-  /* border: 1px solid red; */
-  /* font-family: Inter, 'Roboto', sans-serif; */
 
   @media (min-width: 768px) {
     width: 70%;
     margin: 0 auto;
   }
 
-  /* Largest devices such as desktops (1920px and up) */
   @media only screen and (min-width: 120em) {
     width: 60%;
     margin: 0 auto;
   }
 
-  /* Largest devices such as desktops (1280px and up) */
   @media only screen and (min-width: 160em) {
     width: 50%;
     margin: 0 auto;
@@ -653,7 +643,6 @@ const Wrapper = styled.div`
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    /* border: 1px solid black; */
     &.about-organizer{
         @media only screen and (min-width: 621px) and (max-width: 1200px) {
             flex-wrap: wrap;
@@ -661,42 +650,25 @@ const Wrapper = styled.div`
     }
 `;
 
-
 const VideoWrap = styled.div`
     margin-top: 8px;
     width: 100%;
     display: block;
     position: relative;
     background-color: #f9fafb;
-    /* border: 1px solid blue; */
 `;
-
 
 const DiscountImageWrapper = styled.div`
     width: 100%;
     height: 50vh;
-    /* background: black; */
-    /* border: 1px solid black; */
-    margin-top: 80px;
+    margin-top: 70px;
     position: relative;
     @media (max-width: 768px) {
-        margin-top: 60px; 
+        margin-top: 45px; 
     }
 `;
 
-const ImageOverlay = styled.div`
-    width: 100%;
-    height: 50vh;
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    background: black;
-    opacity: 0.556;
-`;
-
 const DiscountImage = styled.div`
-  /* width: 80%; */
   background-color: #333;
   background-position: center;
   background-size: cover;
@@ -704,9 +676,6 @@ const DiscountImage = styled.div`
   background-image: ${props => `url(${props.imgUrl})`};
   margin: 0 auto;
   border-radius: 0 0 30px 30px;
-  /* @media (min-width: 769px) {
-        width: 80%;
-    } */
 `;
 
 const ShareDiscount = styled.button`
@@ -729,31 +698,15 @@ const ShareDiscount = styled.button`
   }
 `;
 
-const SectionWrapper = styled.div`
-    /* border: 1px solid black; */
-`;
+const SectionWrapper = styled.div``;
 
 const SectionContent = styled.div`
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
-    /* border: 1px solid green; */
     @media (max-width: 620px) {
         flex-wrap: wrap;
     }
-
-    /* @media (min-width: 481px) {
-        width: 95%;
-    }
-
-    @media (min-width: 621px) {
-        width: 95%;
-    }
-
-    @media (min-width: 769px) {
-        width: 80%;
-        margin-top: 20px;
-    } */
 `;
 
 const ReviewSectionContent = styled(SectionContent)`
@@ -826,7 +779,6 @@ const DiscountInfo = styled.div`
     color: #36454F;
     padding: 10px;     
     width: 70%;
-    /* border: 1px solid red; */
     @media (max-width: 620px) {
         width: 100%;
     }
@@ -836,14 +788,8 @@ const Title = styled.h1`
     margin-top: 1px;
     padding-bottom: 2px;
     font-size: 30px;
-    /* border-bottom: 1px solid #36454F; */
     display: flex;
     align-items: baseline;
-    /* justify-content: space-between; */
-
-  /* @media (max-width: 768px) {
-    font-size: 24px; 
-    } */
 `;
 
 const DateTimeWrapper = styled.div`
@@ -851,7 +797,6 @@ const DateTimeWrapper = styled.div`
     align-items: center;
     justify-content: space-between;
     padding-top: 5px;
-    /* border: 1px solid black; */
 
   @media (max-width: 768px) {
     flex-wrap: wrap;
@@ -866,13 +811,10 @@ const Time = styled(Date)``;
 
 const Address = styled.div`
     font-weight: 600;
-    /* border: 1px solid black; */
 `;
 
 const ContactSection = styled.div`
     width: 30%;
-    /* border: 1px solid yellow;     */
-    /* flex-direction: row-reverse; */
     &>h4{
         text-align: center;
         margin: 30px auto;
@@ -887,14 +829,11 @@ const ContactSection = styled.div`
 `;
 
 const ContactSectionContent = styled.div`
-    /* margin-top: 30px; */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /* border: 1px solid black; */
 
     @media (max-width: 620px) {
-        /* width: 100%; */
         margin-top: 0;
     }
 `;
@@ -918,7 +857,6 @@ const ContactButton = styled.a`
     margin: 5px;
     color: blue;
     background-color: #fff;
-    /* border: 1px solid blue; */
     border-radius: 30px;
     outline: none;
     text-decoration: none;
@@ -983,7 +921,6 @@ const PhoneButton = styled.a`
         color: #fff;
     }
 `;
-
 
 const PhoneToolTip = styled.div`
     position: absolute;
@@ -1060,21 +997,31 @@ const Like = styled.button`
   height: 25px;
   display: flex;
   align-items: center;
-  color: #fa8128;
+  color: ${props => props.$liked ? '#fa8128' : '#fa8128'};
   font-size: 14px;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  outline: none;
 
-  img {
+  svg {
     width: 25px;
     height: 25px;
     margin-right: 8px;
+    fill: ${props => props.$liked ? '#fa8128' : '#888'};
+    // stroke: #fa8128;
+    // stroke-width: 2;
     padding: 3px;
-    border: none;
-    outline: none;
-    border-radius: 50%;
     background: #E5E4E2;
+    border-radius: 50%;
     opacity: 0.7;
+    transition: transform 0.15s ease, fill 0.2s ease;
   }
+
+  &:hover svg {
+    transform: scale(1.1);
+  }
+    
 `;
 
 const Description = styled.div`
@@ -1085,7 +1032,6 @@ const Description = styled.div`
         max-height: 100px;
         overflow: hidden;
         transition: max-height 0.5s ease-out;
-        /* border: 1px solid black; */
     }
     @media (max-width: 530px) {
     font-size: 16px;
@@ -1107,12 +1053,10 @@ const ReadMoreOrLess = styled.button`
     color: #818589;
 `;
 
-
 const AboutOrganiserAndMap = styled(SectionWrapper)`
     margin: 10px 0;
     padding: 30px 0;
     background: #FCFBF4;    
-    // background: #e0e0e0;
 `;
 
 const Map = styled.div`
@@ -1138,7 +1082,6 @@ const MapImage = styled.img`
   height: 100%;
 `;
 
-
 const AboutOrganiser = styled.div`
   width: 35%;
   height: fit-content;
@@ -1146,7 +1089,6 @@ const AboutOrganiser = styled.div`
   border: 1px solid #E5E4E2;
   border-radius: 10px;
   margin: 10px;
-  /* box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); */
   padding: 10px;
   text-align: center;
   h4 {
@@ -1180,7 +1122,6 @@ const OrganiserButtons = styled.div`
     margin-bottom: 10px;
 `;
 
-
 const FollowButton = styled.button`
     display: inline-block;
     text-align: center;
@@ -1202,12 +1143,10 @@ const FollowButton = styled.button`
 
 const OrganiserInfo = styled.div`
     margin: 0 15px;
-    /* text-align: left; */
 `;
 
 const CommentsSection = styled(SectionWrapper)`
     margin: 10px 0;
-    /* border: 1px solid black; */
 `;
 
 const SectionTitle = styled.h4`
@@ -1235,13 +1174,9 @@ const NoComments = styled.p`
 
 const SuggestedDiscounts = styled(SectionWrapper)`
     margin: 0;
-    /* border: 1px solid black; */
 `;
 
-const RecomendedDiscounts = styled.div`
-    /* border: 1px solid red; */
-`;
-
+const RecomendedDiscounts = styled.div``;
 
 const SuggestedDiscountsTitle = styled.div`
   color: #fa8128;
@@ -1267,7 +1202,6 @@ const SuggestedDiscountsTitle = styled.div`
 const DiscountGallery = styled.div`
     position: relative;
     margin: 0 10px;
-    /* border: 1px solid black; */
 `;
 
 const DiscountGalleryTitle = styled.h4`
@@ -1284,13 +1218,11 @@ const GallerySection = styled.div`
   scroll-behavior: smooth;
   padding: 20px 10px;
   position: relative;
-  /* border: 1px solid red; */
 
   &::-webkit-scrollbar {
       display: none;
   }
 `;
-
 
 const mapStateToProps = (state) => {
     return {
