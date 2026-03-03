@@ -25,3 +25,9 @@ yarn-debug.log*
 yarn-error.log*
 
 trash.js
+
+/client
+/.local
+/attached_assets
+/scripts
+/server
