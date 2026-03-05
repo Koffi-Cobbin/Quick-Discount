@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { PaystackButton } from "react-paystack";
-import styled from "styled-components";
-import { useEffect } from "react";
+import styled, { keyframes } from "styled-components";
 import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { verifyPaymentAPI, 
@@ -11,6 +10,229 @@ import { verifyPaymentAPI,
   setPayment
  } from "../../actions";
 import * as messages from "../../utils/messages";
+
+// ─── Theme tokens (matching DiscountForm) ─────────────────────────────────────
+const T = {
+  bg: "#0e0d0b",
+  surface: "rgba(255,255,255,0.035)",
+  surfaceHover: "rgba(255,255,255,0.06)",
+  border: "rgba(240,236,230,0.08)",
+  borderFocus: "rgba(250,129,40,0.55)",
+  orange: "#fa8128",
+  orangeDim: "rgba(250,129,40,0.18)",
+  orangeGlow: "rgba(250,129,40,0.08)",
+  text: "#f0ece6",
+  textMuted: "rgba(240,236,230,0.45)",
+  textSub: "rgba(240,236,230,0.65)",
+  error: "#ff6b6b",
+  errorBg: "rgba(255,107,107,0.07)",
+  radius: "12px",
+  radiusSm: "8px",
+};
+
+// ─── Animations ───────────────────────────────────────────────────────────────
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+`;
+
+// ─── Container with dark theme background ─────────────────────────────────────
+const Container = styled.div`
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  animation: ${fadeUp} 0.4s ease-out;
+
+  /* Wider on mobile/phone screens */
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+  }
+`;
+
+// ─── Payment Card ─────────────────────────────────────────────────────────────
+const PaymentCard = styled.div`
+  background: rgba(255, 255, 255, 0.032);
+  border: 1px solid rgba(240, 236, 230, 0.07);
+  border-top: 1px solid rgba(250, 129, 40, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 32px 80px rgba(0, 0, 0, 0.45),
+    0 0 120px rgba(250, 129, 40, 0.04);
+  width: 100%;
+  max-width: 360px;
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  /* Wider on mobile/phone screens */
+  @media (max-width: 480px) {
+    min-width: 90%;
+    padding: 24px 20px;
+  }
+
+  @media (max-width: 360px) {
+    min-width: 94%;
+    padding: 20px 16px;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(250, 129, 40, 0.5) 50%,
+      transparent 100%
+    );
+  }
+`;
+
+// ─── Payment Header ───────────────────────────────────────────────────────────
+const PaymentTitle = styled.h3`
+  font-family: "Georgia", serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${T.text};
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+`;
+
+const PaymentSubtitle = styled.p`
+  font-size: 0.85rem;
+  color: ${T.textMuted};
+  margin: 0 0 24px;
+  line-height: 1.5;
+`;
+
+// ─── Amount Display ──────────────────────────────────────────────────────────
+const AmountDisplay = styled.div`
+  background: linear-gradient(135deg, rgba(250,129,40,0.12) 0%, rgba(250,129,40,0.06) 100%);
+  border: 1px solid rgba(250,129,40,0.25);
+  border-radius: ${T.radius};
+  padding: 20px;
+  margin-bottom: 24px;
+`;
+
+const AmountLabel = styled.span`
+  display: block;
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: ${T.textMuted};
+  margin-bottom: 6px;
+`;
+
+const AmountValue = styled.span`
+  display: block;
+  font-family: "Georgia", serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: ${T.orange};
+  letter-spacing: -0.02em;
+`;
+
+const PackageInfo = styled.span`
+  display: block;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: ${T.textSub};
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(250,129,40,0.15);
+`;
+
+// ─── Paystack Button Wrapper ─────────────────────────────────────────────────
+const PaystackButtonWrap = styled.div`
+  .paystack-button {
+    width: 100%;
+    padding: 14px 28px;
+    border-radius: 40px;
+    font-family: "Courier New", monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: ${T.orange};
+    border: 1px solid ${T.orange};
+    color: #fff;
+    
+    &:hover {
+      background: #e67020;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(250, 129, 40, 0.35);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      background: rgba(250, 129, 40, 0.25);
+      border-color: transparent;
+      cursor: not-allowed;
+      color: rgba(255, 255, 255, 0.4);
+      transform: none;
+      box-shadow: none;
+    }
+  }
+`;
+
+// ─── Secure Note ─────────────────────────────────────────────────────────────
+const SecureNote = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 0.72rem;
+  color: ${T.textMuted};
+  animation: ${pulse} 2s infinite;
+`;
+
+// ─── Divider ─────────────────────────────────────────────────────────────────
+const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: ${T.border};
+  }
+`;
+
+const DividerText = styled.span`
+  padding: 0 12px;
+  font-family: "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: ${T.textMuted};
+`;
 
 
 const Paystack = (props) => {
@@ -30,114 +252,82 @@ const Paystack = (props) => {
   };
 
   // Handle successful payment
-  const handleSuccess = (paystack_response) => {
+  const handleSuccess = useCallback((paystack_response) => {
     console.log("Payment successful!", paystack_response);
     props.verifyPayment(paystack_response);
-  };
+  }, [props]);
 
   // Handle failed payment
-  const handleFailure = (error) => {
+  const handleFailure = useCallback((error) => {
     console.error("Payment failed!", error);
-  };
+  }, []);
 
+  // Handle redirect after user closes the loader
   useEffect(() => {
-    if (props.payment.paid) {
-      props.showLoader();
-      props.showSuccessMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE);
-      console.log("PAYMENT VERIFIED");
-      
-      // clear payment from local storage if payment is made to allow for adding new discounts.
-      props.clearPayment();
+    // Only proceed if payment is verified
+    if (!props.payment?.paid) return;
 
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 5000);   
-    };
-  }, [props.payment]);
+    // Show loader and success message when payment is verified
+    props.showLoader();
+    props.showSuccessMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE);
+    console.log("PAYMENT VERIFIED - Success message shown");
+  }, [props.payment?.paid]);
+
+  // Handle redirect after user closes the loader
+  useEffect(() => {
+    // Only proceed if payment is verified AND loading has been dismissed
+    if (!props.payment?.paid) return;
+    if (props.loading) return; // Wait for user to close loader
+
+    // User has closed the loader, redirect to dashboard
+    console.log("Loader dismissed, redirecting to dashboard...");
+    props.clearPayment();
+    navigate('/dashboard');
+  }, [props.payment?.paid, props.loading, navigate, props]);
 
 
   return (
     <Container>
-      <Content>
-        <p>Payment of <br />
-        <b>GH&#8373; {props.payment.amount}</b> <br />
-        for {props.package_type} package.</p>
+      <PaymentCard>
+        <PaymentTitle>Complete Payment</PaymentTitle>
+        <PaymentSubtitle>
+          Your discount ad is ready. Complete payment to publish.
+        </PaymentSubtitle>
+
+        <AmountDisplay>
+          <AmountLabel>Amount to Pay</AmountLabel>
+          <AmountValue>GH&#8373; {props.payment.amount}</AmountValue>
+          <PackageInfo>{props.package_type} Package</PackageInfo>
+        </AmountDisplay>
+
         <PaystackButtonWrap>
           <PaystackButton
-            text="Make Payment"
+            text="Pay Now"
             className="paystack-button"
             publicKey={publicKey}
             amount={amount}
             currency={currency}
             reference={reference}
             email={email}
-            metadata={extraData} // Pass extra data as metadata
+            metadata={extraData}
             onSuccess={handleSuccess}
             onClose={handleFailure}
           />
         </PaystackButtonWrap>
-        {/* <button onClick={verify}>Verify</button> */}
-      </Content>
+
+        <Divider>
+          <DividerText>Secure Payment</DividerText>
+        </Divider>
+
+        <SecureNote>
+          🔒 Powered by Paystack · SSL Encrypted
+        </SecureNote>
+      </PaymentCard>
     </Container>
   );
 };
 
-const Container = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  padding: 0px;
-  min-height: 90vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.8);
-  animation: fadeIn 0.4s;
-`;
-
-const Content = styled.div`
-  background-color: white;
-  border-radius: 5px;
-  width: 200px;
-  height: fit-content;
-  position: relative;
-  padding: 10px;
-  margin: 0 auto;
-  text-align: center;
-  z-index: 2;
-
-  p {
-    b {
-      color: #fa8128;
-    }
-    margin-bottom: 20px;
-  }
-`;
-
-// const Container = styled.div`
-//   text-align: center;
-//   min-height: 50vh;
-//   margin: 0 auto;
-//   h4 {
-//     b {
-//       color: #fa8128;
-//     }
-//     margin-bottom: 20px;
-//   }
-// `;
-
-const PaystackButtonWrap = styled.div`
-  padding: 10px;
-  width: fit-content;
-  color: #fff;
-  border: 3px solid blue;
-  border-radius: 10px;
-  margin: 0 auto;
-`;
-
+// ─── Redux mapStateToProps ─────────────────────────────────────────────────────
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
@@ -145,6 +335,7 @@ const mapStateToProps = (state) => {
   };
 };
 
+// ─── Redux mapDispatchToProps ────────────────────────────────────────────────
 const mapDispatchToProps = (dispatch) => ({
   showLoader: () => dispatch(setLoading(true)),
   verifyPayment: (payload) => dispatch(verifyPaymentAPI(payload)),

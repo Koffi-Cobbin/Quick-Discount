@@ -788,6 +788,7 @@ const STEPS = [
   { label: "Organizer", icon: "◈" },
   { label: "Media", icon: "◉" },
   { label: "Package", icon: "◇" },
+  { label: "Payment", icon: "◈" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -839,6 +840,12 @@ const DiscountForm = (props) => {
   // UI state
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState("forward");
+  
+  // Scroll to top on step change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
+
   // Errors
   const [emailError, setEmailError] = useState("");
   const [contactError, setContactError] = useState("");
@@ -1082,6 +1089,7 @@ const DiscountForm = (props) => {
     organizerName && email && !emailError,
     true, // media optional
     agreement === "agreed" && packageOption,
+    packageOption, // payment step - just need a package selected
   ];
 
   // ── Render helpers ────────────────────────────────────────────────────────
@@ -1514,14 +1522,33 @@ const DiscountForm = (props) => {
                 and confirm that all information provided is accurate.
               </AgreementText>
             </AgreementBox>
+          </StepSlide>
+        );
 
-            {/* Payment component sits below when triggered */}
-            {props.payment && (
-              <Payment
-                payment={props.payment}
-                package_type={packageOption?.type}
-              />
-            )}
+      // ── Step 4: Payment ─────────────────────────────────────────────────
+      case 4:
+        const totalAmount = parseFloat(packageOption?.price || 0) * (packageOption?.quantity || 1);
+        return (
+          <StepSlide direction={direction}>
+            <SectionHeading>
+              <SectionIcon>◈</SectionIcon>
+              <SectionTitle>Payment</SectionTitle>
+            </SectionHeading>
+
+            <InfoNote>
+              Complete your purchase to publish your discount ad.
+            </InfoNote>
+
+            <Payment
+              amount={totalAmount}
+              package_type={packageOption?.type}
+              user={{
+                name: organizerName,
+                email: email,
+                contact: phoneNumber,
+              }}
+              handlePostDiscount={handlePostDiscount}
+            />
           </StepSlide>
         );
 
@@ -1586,7 +1613,10 @@ const DiscountForm = (props) => {
               </PrevButton>
             )}
 
-            {step < STEPS.length - 1 ? (
+            {step === STEPS.length - 1 ? (
+              // Final step (Payment) - let Payment component handle submission
+              null
+            ) : step < STEPS.length - 1 ? (
               <NextButton
                 type="button"
                 disabled={!canProceed[step]}

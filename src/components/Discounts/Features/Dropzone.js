@@ -5,6 +5,7 @@ import styled from "styled-components";
 
 const Dropzone = (props) => {
   const [bgImage, setBgImage] = useState("");
+  const fileInputRef = React.useRef(null);
 
   let onDrop = props.onDrop;
   let accept = props.accept;
@@ -12,7 +13,13 @@ const Dropzone = (props) => {
   let maxSize = props.maxSizeBytes;
   let maxFiles = props.maxFiles;
   const { getRootProps, getInputProps, isDragActive, acceptedFiles } =
-    useDropzone({ accept, minSize, maxSize, maxFiles, onDrop });
+    useDropzone({ 
+      accept, 
+      minSize, 
+      maxSize, 
+      maxFiles, 
+      onDrop
+    });
 
   const files = acceptedFiles.map((file) => (
     <li key={file.path}>
@@ -24,23 +31,43 @@ const Dropzone = (props) => {
     setBgImage(props.bgImage);
   }, [props.bgImage]);
 
+  // Handle click on the uploaded image to change it
+  const handleImageClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Trigger file selection
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handle click on the dropzone area when no image is uploaded
+  const handleDropzoneClick = (e) => {
+    // Only trigger file input when there's no image uploaded
+    if (!props.filename && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <Container
       className="container"
       isEmpty={props.isEmpty}
       isDragActive={isDragActive}
+      onClick={handleDropzoneClick}
     >
-      <div {...getRootProps({ className: "dropzone" })}>
+      <div {...getRootProps({ className: "dropzone", onClick: (e) => e.preventDefault() })}>
         {props.filename ? (
           <ImagePreview
             id="dropzone-image-preview"
             className="drop-zone__thumb"
-            data-label={props.filename}
+            data-label={`${props.filename} (Click to change)`}
             style={{ backgroundImage: `url('${bgImage}')` }}
+            onClick={handleImageClick}
+            title="Click to change image"
           />
         ) : (
           <div>
-            <input className="input-zone" {...getInputProps()} />
             <UploadIcon>↑</UploadIcon>
             <div className="text-center">
               {props.error ? (
@@ -64,6 +91,11 @@ const Dropzone = (props) => {
             </aside>
           </div>
         )}
+        <input 
+          className="input-zone" 
+          {...getInputProps()} 
+          ref={fileInputRef}
+        />
         <SelectButton type="button">Click to select files</SelectButton>
       </div>
     </Container>
@@ -139,6 +171,13 @@ const ImagePreview = styled.div`
   background-size: cover;
   background-position: center;
   position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(250, 129, 40, 0.25);
+  }
 
   &::after {
     content: attr(data-label);

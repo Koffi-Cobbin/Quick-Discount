@@ -7,7 +7,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import BackgroundSlider from "./BackgroundSlider";
 import CarouselFlex from "../Shared/CarouselFlex";
 import TopDiscounts from "../Discounts/TopDiscounts";
-import { LeftButton, RightButton } from "../Shared/CarouselControls";
 import DiscountCard from "../Discounts/DiscountCard";
 
 import { getDiscountsAPI } from "../../actions";
@@ -155,7 +154,15 @@ const Home = (props) => {
             <FilterEdgeFade side="left" visible={leftFade} />
             <FilterEdgeFade side="right" visible={rightFade} />
 
-            <LeftButton target="filter" pos="0" />
+            <FilterButton 
+              onClick={() => {
+                const el = document.getElementById("filter");
+                if (el) el.scrollBy({ left: -200, behavior: "smooth" });
+              }}
+              aria-label="Scroll categories left"
+            >
+              <img src="/images/icons/chevron-left-b-48.svg" alt="" />
+            </FilterButton>
 
             <CategoriesTrack
               id="filter"
@@ -177,7 +184,15 @@ const Home = (props) => {
               ))}
             </CategoriesTrack>
 
-            <RightButton target="filter" pos="0" />
+            <FilterButton 
+              onClick={() => {
+                const el = document.getElementById("filter");
+                if (el) el.scrollBy({ left: 200, behavior: "smooth" });
+              }}
+              aria-label="Scroll categories right"
+            >
+              <img src="/images/icons/chevron-right-b-48.svg" alt="" />
+            </FilterButton>
           </FilterBar>
         )}
 
@@ -316,16 +331,20 @@ const FilterBar = styled.div`
   position: sticky;
   top: 50px; /* mobile default — sits flush under the 52px mobile navbar */
   z-index: 100;
-  /* border-bottom: 1px solid rgba(0, 0, 0, 0.06); */
-  background: rgba(255, 255, 255, 0.55);
-  /* box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.22),
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 -1px 0 rgba(220, 103, 14, 0.2) inset; */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2px;
+  padding: 8px 0;
+  gap: 4px;
+
+  /* Frosted glass effect */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 2px 16px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04);
 
   /* Desktop: navbar is taller (64px logo + 12px padding = 76px) */
   @media (min-width: 600px) {
@@ -333,12 +352,48 @@ const FilterBar = styled.div`
   }
 `;
 
+const FilterButton = styled.button`
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+
+  img {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+  }
+
+  &:hover {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(103, 48, 155, 0.2);
+    transform: scale(1.05);
+    
+    img {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
 const FilterEdgeFade = styled.div`
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 48px;
-  z-index: 2;
+  width: 40px;
+  z-index: 5;
   pointer-events: none;
   transition: opacity 0.3s ease;
   opacity: ${({ visible }) => (visible ? 1 : 0)};
@@ -346,20 +401,34 @@ const FilterEdgeFade = styled.div`
   ${({ side }) =>
     side === "left"
       ? css`
-          left: 30px;
-          background: linear-gradient(to right, #f8f8f8 30%, transparent);
+          left: 36px;
+          background: linear-gradient(to right, rgba(248, 248, 248, 0.95) 20%, transparent);
         `
       : css`
-          right: 30px;
-          background: linear-gradient(to left, #f8f8f8 30%, transparent);
+          right: 36px;
+          background: linear-gradient(to left, rgba(248, 248, 248, 0.95) 20%, transparent);
         `}
+
+  @media (min-width: 768px) {
+    width: 48px;
+    ${({ side }) =>
+      side === "left"
+        ? css`
+            left: 40px;
+            background: linear-gradient(to right, rgba(248, 248, 248, 0.9) 30%, transparent);
+          `
+        : css`
+            right: 40px;
+            background: linear-gradient(to left, rgba(248, 248, 248, 0.9) 30%, transparent);
+          `}
+  }
 `;
 
 const CategoriesTrack = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 12px 8px;
+  padding: 4px 8px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scroll-behavior: smooth;
