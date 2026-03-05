@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import { 
-  getDiscountsAPI, 
   addToWishlistAPI, 
   removeFromWishlistAPI, 
   getWishlistAPI, 
@@ -23,27 +22,22 @@ function Empty({ icon, title, body }) {
 
 function UserDashboard({
   user,
-  discounts,
   wishlist,
   notifications,
   organizer,
   loading,
   token,
-  getDiscounts,
   addToWishlist,
   removeFromWishlist,
   getWishlist,
   getUserNotifications,
   updateUser
 }) {
-  const allDiscounts = discounts?.results || [];
   const isOrganizer = !!(user?.organizer_detail || organizer);
 
-  const [tab, setTab] = useState("discounts");
+  const [tab, setTab] = useState("saved");
   const [greeting, setGreeting] = useState("Welcome");
   const [savedIds, setSavedIds] = useState(new Set());
-  const [wishlistData, setWishlistData] = useState([]);
-  const [loadingDiscounts, setLoadingDiscounts] = useState(false);
   const [loadingWishlist, setLoadingWishlist] = useState(false);
 
   const [uName, setUName] = useState("");
@@ -75,16 +69,8 @@ function UserDashboard({
     );
   }, []);
 
-// Fetch discounts and wishlist on mount
+// Fetch wishlist and notifications on mount
   useEffect(() => {
-    setLoadingDiscounts(true);
-    const discountPromise = getDiscounts();
-    if (discountPromise && typeof discountPromise.finally === 'function') {
-      discountPromise.finally(() => setLoadingDiscounts(false));
-    } else {
-      setLoadingDiscounts(false);
-    }
-    
     if (!wishlist) {
       setLoadingWishlist(true);
       const wishlistPromise = getWishlist();
@@ -100,17 +86,12 @@ function UserDashboard({
     }
   }, []);
 
-  // Sync wishlist with discounts
+  // Sync saved IDs with wishlist
   useEffect(() => {
-    if (wishlist && allDiscounts.length > 0) {
-      const urls = wishlist.map((w) => w.discount);
-      const wl = allDiscounts.filter((d) => urls.includes(d.url));
-      setWishlistData(wl);
-      setSavedIds(new Set(wl.map((d) => d.id)));
-    } else if (wishlist) {
+    if (wishlist) {
       setSavedIds(new Set(wishlist.map((w) => w.id)));
     }
-  }, [wishlist, allDiscounts]);
+  }, [wishlist]);
 
   const toggleSave = (id) => {
     const isCurrentlySaved = savedIds.has(id);
@@ -131,7 +112,8 @@ function UserDashboard({
     });
   };
   
-  const savedItems = allDiscounts.filter((d) => savedIds.has(d.id));
+  // Get saved items from wishlist
+  const savedItems = wishlist || [];
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -160,7 +142,6 @@ function UserDashboard({
   };
 
   const tabs = [
-    { id: "discounts", label: "My Discounts" },
     { id: "saved", label: "Saved" },
     { id: "notifications", label: "Notifications", badge: unread || null },
     { id: "settings", label: "Settings" },
@@ -252,35 +233,6 @@ function UserDashboard({
       {/* CONTENT */}
       <div className="dashboard-inner">
         <div className="dashboard-content" key={tab}>
-          {tab === "discounts" &&
-            (loadingDiscounts ? (
-              <Empty
-                icon="⏳"
-                title="Loading discounts..."
-                body="Please wait while we fetch the latest deals."
-              />
-            ) : allDiscounts.length === 0 ? (
-              <Empty
-                icon="🎟"
-                title="No discounts yet"
-                body="Browse deals on the homepage."
-              />
-) : (
-              <div className="dashboard-grid">
-                {allDiscounts.map((d, i) => (
-                  <Card
-                    key={d.id}
-                    discount={d}
-                    index={i}
-                    onSave={toggleSave}
-                    isSaved={savedIds.has(d.id)}
-                    isEditMode={true}
-                    onEdit={(id) => window.location.href = `/discounts/${id}/edit`}
-                  />
-                ))}
-              </div>
-            ))}
-
           {tab === "saved" &&
             (savedItems.length === 0 ? (
               <Empty
@@ -457,7 +409,6 @@ function UserDashboard({
 
 const mapStateToProps = (state) => ({
   user: state.userState.user,
-  discounts: state.discountState.discounts,
   wishlist: state.discountState.wishlist,
   notifications: state.userState.notifications,
   organizer: state.organizerState.organizer,
@@ -466,7 +417,6 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  getDiscounts: () => dispatch(getDiscountsAPI()),
   addToWishlist: (data) => dispatch(addToWishlistAPI(data)),
   removeFromWishlist: (data) => dispatch(removeFromWishlistAPI(data)),
   getWishlist: () => dispatch(getWishlistAPI()),

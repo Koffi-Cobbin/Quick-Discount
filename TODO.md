@@ -1,25 +1,27 @@
-# Dashboard.js Optimization - COMPLETED
+# TODO - Fix Loading Message Glitch
 
-## 1. API Data Fetching Optimization
-- [x] Import Redux connect and necessary action creators
-- [x] Add useEffect to fetch user discounts on mount
-- [x] Update toggleSave to call addToWishlistAPI/removeFromWishlistAPI
-- [x] Add loading states for API calls
-- [x] Connect component to Redux store
-- [x] Export connected component
-- [x] Update Profile.js to remove redundant API calls
+## Task: Optimize the loading message functionality to ensure seamless and efficient performance
 
-## 2. CSS Optimization
-- [x] Extract inline CSS to separate Dashboard.css file
-- [x] Use BEM naming convention for class names
-- [x] Add proper CSS organization with comments
-- [x] Improve maintainability and readability
-- [x] Better performance - CSS is no longer re-parsed on every render
+### Steps:
+- [x] 1. Fix `src/actions/index.js` - Update createDiscountAPI to properly manage loading state
+- [x] 2. Fix `src/components/Payment/Paystack.js` - Consolidate useEffect hooks to eliminate race conditions
+- [x] 3. Fix `src/components/Shared/Loading.js` - Add auto-dismiss for success messages + fix image display
 
-## API Endpoints used:
-- GET `/discounts/` - Fetch all discounts via getDiscountsAPI
-- POST `/discounts/add-to-wishlist/` - Add to wishlist via addToWishlistAPI
-- POST `/discounts/remove-from-wishlist/` - Remove from wishlist via removeFromWishlistAPI
-- POST `/profile/update/` - Update user profile via userUpdateAPI
-- GET `/discounts/get-wishlist/` - Get wishlist via getWishlistAPI
-- GET `/messages/` - Get notifications via getUserNotificationsAPI
+### Progress:
+- [x] Step 1: Fix createDiscountAPI loading state
+- [x] Step 2: Fix Paystack useEffect race conditions
+- [x] Step 3: Add auto-dismiss to Loading component + fix stretched images
+
+### Summary of Changes:
+1. **actions/index.js**: Added `setLoading(false)` after successful discount creation, after failure, and in catch block. Also added error message dispatch in catch block.
+
+2. **Paystack.js**: Consolidated two separate useEffect hooks into one with a ref to prevent race conditions. Added auto-redirect after 2.5 seconds to ensure smooth transition.
+
+3. **Loading.js**: 
+   - Added auto-dismiss timer (3 seconds) for success messages to prevent flickering/glitching
+   - Fixed image display: Larger card (320px) when displaying messages
+   - Added proper SuccessIcon component with correct SVG image sizing (48x48px)
+   - Hides duplicate images from message JSX
+   - Shows appropriate icon (tick-circle.svg for success, error.svg for errors)
+   - Properly styles text based on message type (success/error)
+

@@ -237,6 +237,7 @@ const DividerText = styled.span`
 
 const Paystack = (props) => {
   const navigate = useNavigate();
+  const hasProcessedPayment = useRef(false);
 
   // Paystack configuration
   const publicKey = props.payment.public_key;
@@ -262,28 +263,35 @@ const Paystack = (props) => {
     console.error("Payment failed!", error);
   }, []);
 
-  // Handle redirect after user closes the loader
+  // Consolidated effect: Handle payment verification and redirect
   useEffect(() => {
+    // Prevent multiple processing
+    if (hasProcessedPayment.current) return;
+    
     // Only proceed if payment is verified
     if (!props.payment?.paid) return;
+    
+    // If still loading, wait for it to complete
+    if (props.loading) return;
 
-    // Show loader and success message when payment is verified
+    // Mark as processed to prevent re-running
+    hasProcessedPayment.current = true;
+
+    // Show loader with success message when payment is verified
     props.showLoader();
     props.showSuccessMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE);
     console.log("PAYMENT VERIFIED - Success message shown");
-  }, [props.payment?.paid]);
+    
+    // Auto-redirect after showing success message (gives time for user to see it)
+    const redirectTimer = setTimeout(() => {
+      console.log("Loader dismissed, redirecting to dashboard...");
+      props.clearPayment();
+      props.resetCreateDiscountStatus();
+      navigate('/dashboard');
+    }, 2500);
 
-  // Handle redirect after user closes the loader
-  useEffect(() => {
-    // Only proceed if payment is verified AND loading has been dismissed
-    if (!props.payment?.paid) return;
-    if (props.loading) return; // Wait for user to close loader
-
-    // User has closed the loader, redirect to dashboard
-    console.log("Loader dismissed, redirecting to dashboard...");
-    props.clearPayment();
-    navigate('/dashboard');
-  }, [props.payment?.paid, props.loading, navigate, props]);
+    return () => clearTimeout(redirectTimer);
+  }, [props.payment?.paid, props.loading, props, navigate]);
 
 
   return (

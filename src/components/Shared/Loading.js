@@ -1,16 +1,55 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { connect } from "react-redux";
 import { setLoading, setLoadingMessage } from "../../actions";
 
 const Loading = (props) => {
   const [visible, setVisible] = useState(false);
+  const autoDismissTimer = useRef(null);
 
   // Slight delay before showing — prevents flash on fast loads
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  // Auto-dismiss success messages after 3 seconds
+  useEffect(() => {
+    // Check if there's a loading message (success message present)
+    if (props.loading_message && props.loading) {
+      // Clear any existing timer
+      if (autoDismissTimer.current) {
+        clearTimeout(autoDismissTimer.current);
+      }
+      
+      // Set auto-dismiss timer for success messages (10 seconds)
+      autoDismissTimer.current = setTimeout(() => {
+        console.log("Auto-dismissing loading message after 3 seconds");
+        props.close(props.loading_message);
+      }, 3000);
+    }
+
+    // Cleanup timer on unmount
+    return () => {
+      if (autoDismissTimer.current) {
+        clearTimeout(autoDismissTimer.current);
+      }
+    };
+  }, [props.loading_message, props.loading]);
+
+  // Also clear timer if user manually closes the loader
+  const handleClose = () => {
+    if (autoDismissTimer.current) {
+      clearTimeout(autoDismissTimer.current);
+    }
+    props.close(props.loading_message);
+  };
+
+  // Determine if message is an error/success
+  const isError = props.loading_message && 
+    (props.loading_message.props?.children?.some?.(c => c?.props?.style?.color === 'red') || 
+     String(props.loading_message).includes('error') ||
+     String(props.loading_message).includes('Failed'));
 
   return (
     <Overlay visible={visible}>
@@ -37,10 +76,10 @@ const Loading = (props) => {
         delay="0.7s"
       />
 
-      <Card>
+      <Card hasMessage={!!props.loading_message}>
         {/* Close button */}
         <CloseBtn
-          onClick={() => props.close(props.loading_message)}
+          onClick={handleClose}
           aria-label="Dismiss"
         >
           &times;
@@ -48,8 +87,13 @@ const Loading = (props) => {
 
         {props.loading_message ? (
           <MessageContent>
-            <MessageIcon>ℹ️</MessageIcon>
-            <MessageText>{props.loading_message}</MessageText>
+            <MessageIcon>
+              <SuccessIcon 
+                src={isError ? "/images/icons/error.svg" : "/images/icons/tick-circle.svg"} 
+                alt={isError ? "Error" : "Success"} 
+              />
+            </MessageIcon>
+            <MessageText isError={isError}>{props.loading_message}</MessageText>
           </MessageContent>
         ) : (
           <SpinnerContent>
@@ -167,7 +211,7 @@ const Orb = styled.div`
 
 const Card = styled.div`
   position: relative;
-  width: 200px;
+  width: ${({ hasMessage }) => hasMessage ? '320px' : '200px'};
   background: rgba(20, 13, 6, 0.82);
   border: 1px solid rgba(220, 103, 14, 0.28);
   border-radius: 20px;
@@ -337,20 +381,44 @@ const MessageContent = styled.div`
   align-items: center;
   gap: 12px;
   padding: 8px 0 4px;
+  width: 100%;
 `;
 
 const MessageIcon = styled.div`
   font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const MessageText = styled.p`
+const SuccessIcon = styled.img`
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+`;
+
+const MessageText = styled.div`
   margin: 0;
   font-family: Inter, "Roboto", sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
+  color: ${({ isError }) => isError ? 'rgba(255, 107, 107, 0.9)' : 'rgba(255, 255, 255, 0.85)'};
   text-align: center;
   line-height: 1.5;
+  max-width: 260px;
+  
+  /* Style images within the message - hide them, we display our own icon */
+  img {
+    display: none;
+  }
+  
+  /* Style paragraphs within the message */
+  p {
+    margin: 0;
+    color: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+  }
 `;
 
 /* ─── Redux ──────────────────────────────────────────────────────────────── */

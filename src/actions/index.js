@@ -442,6 +442,7 @@ export function createDiscountAPI(formData) {
       .then((data) => {
         if (data.success) {
           dispatch(setCreateDiscountStatus(true));
+          dispatch(setLoading(false));
           // dispatch(setLoadingMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE));
           console.log("DISCOUNT Success mail message ", data.message);
           console.log("FormData ", formData);
@@ -460,6 +461,7 @@ export function createDiscountAPI(formData) {
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setCreateDiscountStatus(false));
+          dispatch(setLoading(false));
           let msg = (
             <>
               <img src="/images/icons/error.svg" />
@@ -473,6 +475,8 @@ export function createDiscountAPI(formData) {
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
+        dispatch(setLoading(false));
+        dispatch(setLoadingMessage(messages.CREATE_DISCOUNT_FAILED_MESSAGE));
       });
   };
 };
