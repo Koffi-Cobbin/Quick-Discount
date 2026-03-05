@@ -31,6 +31,7 @@ const Home = (props) => {
   const [leftFade, setLeftFade] = useState(false);
   const [rightFade, setRightFade] = useState(true);
   const filterRef = useRef(null);
+  const isInitialMount = useRef(true);
 
   const { getDiscounts } = props;
   useEffect(() => {
@@ -108,6 +109,10 @@ const Home = (props) => {
 
   // Scroll the active chip into view inside the filter bar
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (!activeCategory || !filterRef.current) return;
     const activeChip = filterRef.current.querySelector(
       `[data-cat="${activeCategory}"]`,

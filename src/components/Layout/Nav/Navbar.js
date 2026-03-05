@@ -150,6 +150,7 @@ const Navbar = (props) => {
                             <NavItem>
                                 <NavLink
                                     to="/"
+                                    end
                                     className={({ isActive }) =>
                                         isActive ? "active current" : ""
                                     }
@@ -162,6 +163,7 @@ const Navbar = (props) => {
                             <NavItem>
                                 <NavLink
                                     to="/discounts"
+                                    end
                                     className={({ isActive }) =>
                                         isActive ? "active current" : ""
                                     }
@@ -594,8 +596,9 @@ const SearchPanelPip = styled.div`
 
 const SearchShell = styled.div`
     border-radius: 12px;
-    overflow: hidden;
-
+    overflow: visible;
+    z-index: 1000;
+    position: relative;
 `;
 
 const SearchHints = styled.div`

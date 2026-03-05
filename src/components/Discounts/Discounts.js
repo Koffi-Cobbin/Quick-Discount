@@ -130,7 +130,7 @@ const Rule = styled.div`
 // ─── Controls row ────────────────────────────────────────────────────────────
 const Controls = styled.div`
   display: flex;
-  align-items: left;
+  align-items: flex-start;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -140,6 +140,7 @@ const Controls = styled.div`
   @media (max-width: 480px) {
     flex-direction: column;
     align-items: stretch;
+    gap: 16px;
   }
 `;
 
@@ -147,9 +148,24 @@ const CatRail = styled.div`
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  flex-shrink: 1;
-  min-width: 0;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  width: 100%;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding: 4px 0;
+  margin: -4px 0;
+
+  /* Ensure horizontal scroll on mobile */
+  @media (max-width: 480px) {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -165,6 +181,7 @@ const Chip = styled.button`
   cursor: pointer;
   transition: all 0.18s;
   flex-shrink: 0;
+  scroll-snap-align: start;
   border: 1px solid ${({ $active }) => ($active ? T.orange : T.border)};
   background: ${({ $active }) => ($active ? T.orangeDim : "transparent")};
   color: ${({ $active }) => ($active ? T.orange : T.textSub)};

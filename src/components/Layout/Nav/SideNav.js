@@ -350,7 +350,8 @@ const SearchShell = styled.div`
         focused ? "rgba(250,129,40,0.5)" : "rgba(255,255,255,0.09)"};
     background: ${({ focused }) =>
         focused ? "rgba(250,129,40,0.03)" : "rgba(255,255,255,0.025)"};
-    overflow: hidden;
+    overflow: visible;
+    z-index: 10000;
     transition: border-color 0.3s ease, background 0.3s ease;
 
     ${({ focused }) => focused && css`

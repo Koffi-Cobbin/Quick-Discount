@@ -70,7 +70,7 @@ export const Badge = styled.div`
   left: 12px;
   background: ${T.orange};
   color: #fff;
-  font-family: "Playfair Display", serif;
+  font-family: serif;
   font-style: italic;
   font-size: 1.05rem;
   font-weight: 700;
@@ -143,6 +143,7 @@ export const CardLoc = styled.p`
   font-size: 0.78rem;
   color: ${T.textSub};
   margin-bottom: auto;
+  text-align: left;
 
   svg {
     color: ${T.orange};

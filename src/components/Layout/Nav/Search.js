@@ -98,7 +98,7 @@ const Search = (props) => {
 
     const styling = {
         border: "1.5px solid rgba(250, 129, 40, 0.6)",
-        backgroundColor: "transparent",
+        backgroundColor: "rgba(0,0,0,0.9)",
         color: "#fff",
         outline: "none",
         placeholderColor: "#FFF",
