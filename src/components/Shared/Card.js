@@ -179,9 +179,9 @@ export const SaveBtn = styled.button`
   gap: 5px;
   padding: 5px 12px;
   border-radius: 20px;
-  border: 1px solid ${T.border};
-  background: transparent;
-  color: ${T.textSub};
+  border: 1px solid ${({ $isSaved }) => ($isSaved ? T.orange : T.border)};
+  background: ${({ $isSaved }) => ($isSaved ? T.orangeDim : "transparent")};
+  color: ${({ $isSaved }) => ($isSaved ? T.orange : T.textSub)};
   font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.18s;
@@ -190,6 +190,11 @@ export const SaveBtn = styled.button`
     border-color: ${T.orange};
     color: ${T.orange};
     background: ${T.orangeDim};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
@@ -215,7 +220,7 @@ export const EditBtn = styled.button`
 
 // ─── Card React Component ─────────────────────────────────────────────────
 
-function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit }) {
+function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, isLoading }) {
   // Format end_date for display
   const formatExpiry = (dateStr) => {
     if (!dateStr) return null;
@@ -224,14 +229,18 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit }) {
   };
 
   const handleSaveClick = (e) => {
-    if (onSave) {
-      onSave(discount.id, e);
+    e.preventDefault();
+    e.stopPropagation();
+    if (onSave && !isLoading) {
+      onSave(discount.id);
     }
   };
 
   const handleEditClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onEdit) {
-      onEdit(discount.id, e);
+      onEdit(discount.id);
     }
   };
 
@@ -242,7 +251,7 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit }) {
       <CardImg>
         <img src={discount.flyer} alt={discount.title} />
         {discount.percentage_discount && (
-          <Badge>-{discount.percentage_discount}%</Badge>
+          <Badge>{discount.percentage_discount}</Badge>
         )}
         {discount.end_date && (
           <ExpiryTag>Ends {formatExpiry(discount.end_date)}</ExpiryTag>
@@ -285,8 +294,12 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit }) {
               ✎ Edit
             </EditBtn>
           ) : (
-            <SaveBtn onClick={handleSaveClick}>
-              {isSaved ? "✦ Saved" : "♡ Save"}
+            <SaveBtn 
+              onClick={handleSaveClick} 
+              $isSaved={isSaved}
+              disabled={isLoading}
+            >
+              {isLoading ? "..." : isSaved ? "✦ Saved" : "♡ Save"}
             </SaveBtn>
           )}
         </CardFooter>

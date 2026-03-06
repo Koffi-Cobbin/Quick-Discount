@@ -5,7 +5,8 @@ import {
   removeFromWishlistAPI, 
   getWishlistAPI, 
   getUserNotificationsAPI,
-  userUpdateAPI 
+  userUpdateAPI,
+  getDiscountsAPI 
 } from "../../actions";
 import Card from "../Shared/Card";
 import "./Dashboard.css";
@@ -27,10 +28,12 @@ function UserDashboard({
   organizer,
   loading,
   token,
+  discounts,
   addToWishlist,
   removeFromWishlist,
   getWishlist,
   getUserNotifications,
+  getDiscounts,
   updateUser
 }) {
   const isOrganizer = !!(user?.organizer_detail || organizer);
@@ -39,6 +42,11 @@ function UserDashboard({
   const [greeting, setGreeting] = useState("Welcome");
   const [savedIds, setSavedIds] = useState(new Set());
   const [loadingWishlist, setLoadingWishlist] = useState(false);
+  const [wishlistError, setWishlistError] = useState(null);
+  
+  // Use refs to track if we've already fetched to avoid infinite loops
+  const hasFetchedWishlist = useRef(false);
+  const hasFetchedDiscounts = useRef(false);
 
   const [uName, setUName] = useState("");
   const [uEmail, setUEmail] = useState("");
@@ -71,27 +79,130 @@ function UserDashboard({
 
 // Fetch wishlist and notifications on mount
   useEffect(() => {
-    if (!wishlist) {
-      setLoadingWishlist(true);
-      const wishlistPromise = getWishlist();
-      if (wishlistPromise && typeof wishlistPromise.finally === 'function') {
-        wishlistPromise.finally(() => setLoadingWishlist(false));
-      } else {
-        setLoadingWishlist(false);
+    // Fetch wishlist from API to get fresh data (only once)
+    if (!hasFetchedWishlist.current) {
+      hasFetchedWishlist.current = true;
+      
+      const shouldFetchWishlist = !wishlist || 
+        (Array.isArray(wishlist) && wishlist.length === 0) || 
+        (wishlist && !wishlist.results);
+      
+      if (shouldFetchWishlist) {
+        setLoadingWishlist(true);
+        setWishlistError(null);
+        
+        const result = getWishlist();
+        // Handle case where action might not return a promise
+        if (result && typeof result.then === 'function') {
+          result
+            .then(() => setLoadingWishlist(false))
+            .catch((err) => {
+              console.error("Error fetching wishlist:", err);
+              setWishlistError("Failed to load saved discounts");
+              setLoadingWishlist(false);
+            });
+        } else {
+          // If action doesn't return promise, assume it handled the dispatch internally
+          setLoadingWishlist(false);
+        }
       }
     }
     
+    // Fetch all discounts if not already loaded (only once)
+    if (!hasFetchedDiscounts.current) {
+      hasFetchedDiscounts.current = true;
+      if (!discounts || (discounts.results && discounts.results.length === 0)) {
+        getDiscounts();
+      }
+    }
+    
+    // Fetch notifications only once
     if (!notifications) {
       getUserNotifications();
     }
-  }, []);
+  }, []); // Empty deps - only run on mount
 
-  // Sync saved IDs with wishlist
-  useEffect(() => {
-    if (wishlist) {
-      setSavedIds(new Set(wishlist.map((w) => w.id)));
+  // Transform wishlist API response to extract discount data
+  // The API returns an array like: [{ id: 1, discount: "https://.../discounts/53/" }, ...]
+  // We need to extract the discount ID from the URL and match with full discount data from store
+  const transformWishlist = (wishlistData, allDiscounts) => {
+    if (!wishlistData) return [];
+    
+    // Helper to get discount ID from URL
+    const getDiscountIdFromUrl = (url) => {
+      if (!url) return null;
+      const match = url.match(/\/discounts\/(\d+)\/?$/);
+      return match ? parseInt(match[1]) : null;
+    };
+    
+    // Get all discount IDs from store
+    let discountIdMap = {};
+    if (allDiscounts && allDiscounts.results && Array.isArray(allDiscounts.results)) {
+      allDiscounts.results.forEach(d => {
+        discountIdMap[d.id] = d;
+      });
+    } else if (Array.isArray(allDiscounts)) {
+      allDiscounts.forEach(d => {
+        discountIdMap[d.id] = d;
+      });
     }
-  }, [wishlist]);
+    
+    // Check if it's in paginated format (count/results) - older format
+    if (wishlistData.results && Array.isArray(wishlistData.results)) {
+      return wishlistData.results
+        .filter(item => item.discount) // Filter out any items without discount data
+        .map(item => ({
+          ...item.discount, // Spread the discount properties to top level
+          _wishlistId: item.id, // Keep track of original wishlist item id
+          _savedAt: item.created_at
+        }));
+    }
+    
+    // If it's an array (newer format from API), extract discount IDs from URLs and match with full data
+    if (Array.isArray(wishlistData)) {
+      // First, filter out duplicates by using a Set to track seen discount IDs
+      const seenIds = new Set();
+      const uniqueItems = wishlistData.filter(item => {
+        if (!item.discount) return false;
+        const discountId = getDiscountIdFromUrl(item.discount);
+        if (seenIds.has(discountId)) return false;
+        seenIds.add(discountId);
+        return true;
+      });
+      
+      return uniqueItems
+        .map(item => {
+          // Extract discount ID from URL like "https://.../discounts/53/"
+          const discountId = getDiscountIdFromUrl(item.discount);
+          
+          // Get full discount data from store if available
+          const fullDiscount = discountId ? discountIdMap[discountId] : null;
+          
+          return {
+            ...fullDiscount, // Spread full discount properties (id, title, flyer, etc.)
+            id: discountId, // Ensure ID is set
+            _wishlistId: item.id, // Keep track of original wishlist item id
+            _savedAt: item.created_at
+          };
+        });
+    }
+    
+    return [];
+  };
+
+  // Get transformed saved items (pass discounts to match with wishlist)
+  const savedItems = transformWishlist(wishlist, discounts);
+
+  // Sync saved IDs with wishlist - only update when savedItems actually changes
+  useEffect(() => {
+    if (savedItems.length > 0) {
+      const newIds = new Set(savedItems.map((w) => w.id));
+      // Only update if the sets are different
+      if (newIds.size !== savedIds.size || [...newIds].some(id => !savedIds.has(id))) {
+        setSavedIds(newIds);
+      }
+    }
+  }, [savedItems]);
 
   const toggleSave = (id) => {
     const isCurrentlySaved = savedIds.has(id);
@@ -102,18 +213,15 @@ function UserDashboard({
       if (isCurrentlySaved) {
         n.delete(id);
         // Call API to remove from wishlist
-        removeFromWishlist({ discount_ids: [id] });
+        removeFromWishlist({ discount_id: id });
       } else {
         n.add(id);
         // Call API to add to wishlist
-        addToWishlist({ discount_ids: [id] });
+        addToWishlist({ discount_id: id });
       }
       return n;
     });
   };
-  
-  // Get saved items from wishlist
-  const savedItems = wishlist || [];
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -234,7 +342,19 @@ function UserDashboard({
       <div className="dashboard-inner">
         <div className="dashboard-content" key={tab}>
           {tab === "saved" &&
-            (savedItems.length === 0 ? (
+            (loadingWishlist ? (
+              <Empty
+                icon="⟳"
+                title="Loading saved discounts"
+                body="Please wait while we fetch your saved items."
+              />
+            ) : wishlistError ? (
+              <Empty
+                icon="⚠"
+                title="Unable to load saved discounts"
+                body={wishlistError}
+              />
+            ) : savedItems.length === 0 ? (
               <Empty
                 icon="♥"
                 title="Nothing saved yet"
@@ -257,7 +377,6 @@ function UserDashboard({
           {tab === "notifications" &&
             <>
               <div className="dashboard-notif-header">
-                <div className="dashboard-notif-title">Notifications</div>
                 {unread > 0 && <span className="dashboard-notif-pill">{unread} unread</span>}
               </div>
               {(!notifications || notifications.length === 0) ? (
@@ -410,6 +529,7 @@ function UserDashboard({
 const mapStateToProps = (state) => ({
   user: state.userState.user,
   wishlist: state.discountState.wishlist,
+  discounts: state.discountState.discounts,
   notifications: state.userState.notifications,
   organizer: state.organizerState.organizer,
   loading: state.appState.loading,
@@ -420,6 +540,7 @@ const mapDispatchToProps = (dispatch) => ({
   addToWishlist: (data) => dispatch(addToWishlistAPI(data)),
   removeFromWishlist: (data) => dispatch(removeFromWishlistAPI(data)),
   getWishlist: () => dispatch(getWishlistAPI()),
+  getDiscounts: () => dispatch(getDiscountsAPI()),
   getUserNotifications: () => dispatch(getUserNotificationsAPI()),
   updateUser: (data) => dispatch(userUpdateAPI(data)),
 });

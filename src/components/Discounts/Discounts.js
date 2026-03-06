@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styled, { keyframes, css, createGlobalStyle } from "styled-components";
 import { connect } from "react-redux";
-import { getDiscountsAPI } from "../../actions";
+import { getDiscountsAPI, addToWishlistAPI, removeFromWishlistAPI } from "../../actions";
 import Card from "../Shared/Card";
 
 // ─── Theme tokens (matches QuickDiscount app) ─────────────────────────────────
@@ -398,8 +398,9 @@ function DiscountsPage(props) {
   const [sort, setSort] = useState("Popular");
   const [query, setQuery] = useState("");
   const [saved, setSaved] = useState(new Set());
+  const [savingId, setSavingId] = useState(null);
 
-  const { getDiscounts, discounts, loading: propsLoading } = props;
+  const { getDiscounts, discounts, loading: propsLoading, user, token, addToWishlist, removeFromWishlist, wishlist } = props;
 
   // Fetch discounts on mount if not already loaded
   useEffect(() => {
@@ -407,6 +408,14 @@ function DiscountsPage(props) {
       getDiscounts();
     }
   }, [discounts, getDiscounts]);
+
+  // Initialize saved state from wishlist
+  useEffect(() => {
+    if (wishlist?.results) {
+      const savedIds = new Set(wishlist.results.map(item => item.discount?.id || item.discount));
+      setSaved(savedIds);
+    }
+  }, [wishlist]);
 
   // Derive unique category list from live data
   const allDiscounts = discounts?.results || [];
@@ -438,12 +447,63 @@ function DiscountsPage(props) {
       return 0;
     });
 
-  const toggleSave = (id, e) => {
-    e.stopPropagation();
+  const toggleSave = (id) => {
+    // Prevent multiple clicks while processing
+    if (savingId) return;
+
+    const isCurrentlySaved = saved.has(id);
+    
+    // Optimistically update UI
     setSaved((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (isCurrentlySaved) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
+    });
+
+    // If user is not logged in, show alert
+    if (!token || !token.access) {
+      alert("Please login to save discounts to your wishlist");
+      // Revert optimistic update
+      setSaved((prev) => {
+        const next = new Set(prev);
+        if (isCurrentlySaved) {
+          next.add(id);
+        } else {
+          next.delete(id);
+        }
+        return next;
+      });
+      return;
+    }
+
+    // Set loading state for this specific card
+    setSavingId(id);
+
+    // Call appropriate API
+    const action = isCurrentlySaved 
+      ? removeFromWishlist({ discount_id: id })
+      : addToWishlist({ discount_id: id });
+
+    action.then(() => {
+      setSavingId(null);
+    }).catch((error) => {
+      console.error("Wishlist operation failed:", error);
+      setSavingId(null);
+      // Revert optimistic update on error
+      setSaved((prev) => {
+        const next = new Set(prev);
+        if (isCurrentlySaved) {
+          next.add(id);
+        } else {
+          next.delete(id);
+        }
+        return next;
+      });
+      alert("Failed to update wishlist. Please try again.");
     });
   };
 
@@ -547,7 +607,13 @@ function DiscountsPage(props) {
               </Empty>
             ) : (
               filtered.map((d) => (
-                <Card key={d.id} discount={d} onSave={toggleSave} isSaved={saved.has(d.id)} />
+                <Card 
+                  key={d.id} 
+                  discount={d} 
+                  onSave={toggleSave} 
+                  isSaved={saved.has(d.id)}
+                  isLoading={savingId === d.id}
+                />
               ))
             )}
           </Grid>
@@ -560,10 +626,15 @@ function DiscountsPage(props) {
 const mapStateToProps = (state) => ({
   discounts: state.discountState.discounts,
   loading: state.discountState.loading,
+  user: state.userState.user,
+  token: state.userState.token,
+  wishlist: state.discountState.wishlist,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   getDiscounts: () => dispatch(getDiscountsAPI()),
+  addToWishlist: (data) => dispatch(addToWishlistAPI(data)),
+  removeFromWishlist: (data) => dispatch(removeFromWishlistAPI(data)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DiscountsPage);

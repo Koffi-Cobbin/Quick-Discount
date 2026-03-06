@@ -957,7 +957,8 @@ export function getWishlistAPI() {
     const state = getState();
     const authToken = state.userState.token.access;
 
-    fetch(url, {
+    // Return the fetch promise so Dashboard can handle loading state
+    return fetch(url, {
       method: "GET",
       headers: {
         Accept: "application/json", 
@@ -998,7 +999,7 @@ export function addToWishlistAPI(payload) {
     const state = getState();
     const authToken = state.userState.token.access;
 
-    fetch(url, {
+    return fetch(url, {
       method: "POST",
       headers: {
         Accept: "application/json", 
@@ -1022,9 +1023,11 @@ export function addToWishlistAPI(payload) {
   .then((data) => {
     console.log(data);
     dispatch(setWishlist(data));
+    return data;
   })
   .catch((error) => {
     console.log(error.message);
+    throw error;
   });
 };
 }
@@ -1040,7 +1043,7 @@ export function removeFromWishlistAPI(payload) {
     const state = getState();
     const authToken = state.userState.token.access;
 
-    fetch(url, {
+    return fetch(url, {
       method: "POST",
       headers: {
         Accept: "application/json", 
@@ -1064,9 +1067,11 @@ export function removeFromWishlistAPI(payload) {
   .then((data) => {
     console.log(data);
     dispatch(setWishlist(data));
+    return data;
   })
   .catch((error) => {
     console.log(error.message);
+    throw error;
   });
 };
 }

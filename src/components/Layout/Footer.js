@@ -158,7 +158,7 @@ const Footer = (props) => {
             </Layout>
             <Copyright>
                 <p className="text-center">
-                    Copyright © 2024{" "}
+                    Copyright © 2026{" "}
                     <a href="/" className="text-center">
                         QuickDiscountGhLtd
                     </a>

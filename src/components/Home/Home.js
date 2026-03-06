@@ -329,7 +329,7 @@ const FadeInSection = styled.div`
  */
 const FilterBar = styled.div`
   position: sticky;
-  top: 50px; /* mobile default — sits flush under the 52px mobile navbar */
+  top: 48px; /* mobile default — sits flush under the 52px mobile navbar */
   z-index: 100;
   display: flex;
   align-items: center;
@@ -345,10 +345,15 @@ const FilterBar = styled.div`
   box-shadow: 
     0 2px 16px rgba(0, 0, 0, 0.06),
     0 1px 4px rgba(0, 0, 0, 0.04);
+  border-radius: 14px;
 
   /* Desktop: navbar is taller (64px logo + 12px padding = 76px) */
-  @media (min-width: 600px) {
-    top: 76px;
+  @media (min-width: 700px) {
+    top: 60px;
+  }
+    /* Desktop: navbar is taller (64px logo + 12px padding = 76px) */
+  @media (min-width: 1024px) {
+    top: 70px;
   }
 `;
 
@@ -356,10 +361,7 @@ const FilterButton = styled.button`
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -402,11 +404,9 @@ const FilterEdgeFade = styled.div`
     side === "left"
       ? css`
           left: 36px;
-          background: linear-gradient(to right, rgba(248, 248, 248, 0.95) 20%, transparent);
         `
       : css`
           right: 36px;
-          background: linear-gradient(to left, rgba(248, 248, 248, 0.95) 20%, transparent);
         `}
 
   @media (min-width: 768px) {
@@ -415,11 +415,9 @@ const FilterEdgeFade = styled.div`
       side === "left"
         ? css`
             left: 40px;
-            background: linear-gradient(to right, rgba(248, 248, 248, 0.9) 30%, transparent);
           `
         : css`
             right: 40px;
-            background: linear-gradient(to left, rgba(248, 248, 248, 0.9) 30%, transparent);
           `}
   }
 `;

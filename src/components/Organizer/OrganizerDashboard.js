@@ -325,6 +325,7 @@ const OrganizerDashboard = (props) => {
     { id: "all", label: "My Discounts" },
     { id: "active", label: "Active", badge: stats.activeDiscounts },
     { id: "pending", label: "Pending", badge: stats.pendingDiscounts },
+    { id: "rejected", label: "Rejected", badge: stats.rejectedDiscounts },
     { id: "notifications", label: "Notifications", badge: unreadCount > 0 ? unreadCount : null },
     { id: "settings", label: "Settings" },
   ];

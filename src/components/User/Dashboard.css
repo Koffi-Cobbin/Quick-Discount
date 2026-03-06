@@ -481,13 +481,6 @@
   margin-bottom: 20px;
 }
 
-.dashboard-notif-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #f2ede8;
-}
-
 .dashboard-notif-pill {
   padding: 2px 9px;
   border-radius: 10px;
