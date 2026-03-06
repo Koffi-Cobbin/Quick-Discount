@@ -48,7 +48,10 @@ Authorization: Bearer <your_token_here>
 | `/users/delete/<int:pk>/` | DELETE | Delete user | No |
 | `/profile/` | GET | Get current user profile | Yes |
 | `/profile/` | POST | Create user profile | Yes |
-| `/profile/update/` | POST | Update user profile | Yes |
+| `/profile/update/` | GET | Get current user profile | Yes |
+| `/profile/update/` | PUT | Full update user profile | Yes |
+| `/profile/update/` | PATCH | Partial update user profile | Yes |
+| `/profile/update/` | POST | Update user profile (partial) | Yes |
 | `/users/logout/` | GET | User logout | No |
 | `/users/activate/<uuidb64>/<token>/` | GET | Activate user account | No |
 
@@ -429,6 +432,68 @@ Content-Type: application/json
     "bio": "Updated bio text",
     "phone": "+9876543210",
     "date_of_birth": "1990-05-15"
+}
+```
+
+### Get User Profile (GET)
+```http
+GET /profile/update/
+Authorization: Bearer <token>
+```
+
+### Get User Profile Response
+```json
+{
+    "success": true,
+    "user_data": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "user@example.com",
+        "contact": "+1234567890",
+        "profile_pic": "https://res.cloudinary.com/.../image.jpg",
+        "is_organizer": false
+    }
+}
+```
+
+### Update User Profile (PUT) Request
+```http
+PUT /profile/update/
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "user@example.com",
+    "contact": "+9876543210",
+    "profile_pic": <file>
+}
+```
+
+### Update User Profile (PATCH) Request
+```http
+PATCH /profile/update/
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+    "name": "John Updated",
+    "contact": "+1111111111"
+}
+```
+
+### Update User Profile Response
+```json
+{
+    "success": true,
+    "user_data": {
+        "id": 1,
+        "name": "John Updated",
+        "email": "user@example.com",
+        "contact": "+1111111111",
+        "profile_pic": "https://res.cloudinary.com/.../image.jpg",
+        "is_organizer": false
+    }
 }
 ```
 

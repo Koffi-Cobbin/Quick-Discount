@@ -358,7 +358,7 @@ export function userUpdateAPI(payload) {
     const url = `${BASE_URL}/profile/update/`;
 
     fetch(url, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${authToken}`,
@@ -1249,34 +1249,33 @@ export function updateOrganizerAPI(payload) {
 
     const state = getState();
     const authToken = state.userState.token.access;
+    const organizerId = state.organizerState.organizer?.id;
 
-    const url = `${BASE_URL}/profile/update/`;
+    const url = `${BASE_URL}/discounts/organizers/${organizerId}/`;
 
     fetch(url, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${authToken}`,
       },
       body: payload,
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          let user = state.userState.user;
-          let organizer_detail = user['organizer_detail'];
-          let user_data = data.user_data;
-          user_data['organizer_detail'] = organizer_detail;
-          dispatch(setUser(user_data));
-          dispatch(setLoading(false));
-        } else if (data.failed) {
-          console.log(data.errors);
-          dispatch(setErrors({ login: data.errors }));
-          dispatch(setLoading(false));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
         }
+        return response.json();
+      })
+      .then((data) => {
+        // Handle both success response and direct data response
+        const organizerData = data.success ? data : data;
+        dispatch(setOrganizer(organizerData));
+        dispatch(setLoading(false));
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
+        dispatch(setLoading(false));
       });
   };
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { getOrganizerAPI, getOrganizerDiscountsAPI, getAnalyticsAPI, getUserNotificationsAPI } from "../../actions";
+import { getOrganizerAPI, getOrganizerDiscountsAPI, getAnalyticsAPI, getUserNotificationsAPI, updateOrganizerAPI } from "../../actions";
 import Card from "../Shared/Card";
 
 // Theme
@@ -278,6 +278,38 @@ const CardGrid = styled.div`
 // Main Component
 const OrganizerDashboard = (props) => {
   const [tab, setTab] = useState("all");
+  
+  // Form state for settings
+  const [orgName, setOrgName] = useState("");
+  const [orgEmail, setOrgEmail] = useState("");
+  const [orgPhone, setOrgPhone] = useState("");
+  const [saveState, setSaveState] = useState(null);
+
+  // Sync state with organizer prop
+  useEffect(() => {
+    if (props.organizer) {
+      setOrgName(props.organizer.name || "");
+      setOrgEmail(props.organizer.email || "");
+      setOrgPhone(props.organizer.phone_number || "");
+    }
+  }, [props.organizer]);
+
+  const handleSaveOrganizer = (e) => {
+    e.preventDefault();
+    setSaveState("saving");
+    
+    const fd = new FormData();
+    fd.append("name", orgName);
+    fd.append("email", orgEmail);
+    fd.append("phone_number", orgPhone);
+    
+    props.updateOrganizer(fd);
+    
+    setTimeout(() => {
+      setSaveState("saved");
+      setTimeout(() => setSaveState(null), 3000);
+    }, 900);
+  };
 
   // Fetch data on mount
   useEffect(() => {
@@ -409,21 +441,39 @@ const OrganizerDashboard = (props) => {
             <SectionHeader>
               <SectionTitle>Settings</SectionTitle>
             </SectionHeader>
-            <div style={{ padding: '20px' }}>
+            <form style={{ padding: '20px' }} onSubmit={handleSaveOrganizer}>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '11px', color: T.textMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Organizer Name</label>
-                <input defaultValue={props.organizer?.name || ""} style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} />
+                <input 
+                  value={orgName} 
+                  onChange={(e) => setOrgName(e.target.value)}
+                  style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} 
+                />
               </div>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '11px', color: T.textMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contact Email</label>
-                <input defaultValue={props.organizer?.email || ""} style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} />
+                <input 
+                  value={orgEmail} 
+                  onChange={(e) => setOrgEmail(e.target.value)}
+                  style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} 
+                />
               </div>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '11px', color: T.textMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Phone Number</label>
-                <input defaultValue={props.organizer?.phone_number || ""} style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} />
+                <input 
+                  value={orgPhone} 
+                  onChange={(e) => setOrgPhone(e.target.value)}
+                  style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} 
+                />
               </div>
-              <button style={{ padding: '12px 24px', background: T.orange, border: 'none', borderRadius: '8px', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Save Changes</button>
-            </div>
+              <button 
+                type="submit" 
+                disabled={saveState === "saving"}
+                style={{ padding: '12px 24px', background: T.orange, border: 'none', borderRadius: '8px', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+              >
+                {saveState === "saving" ? "Saving..." : saveState === "saved" ? "✓ Saved!" : "Save Changes"}
+              </button>
+            </form>
           </Section>
         ) : (
           <Section>
@@ -467,6 +517,7 @@ const mapDispatchToProps = (dispatch) => ({
   getOrganizerDiscounts: (organizer_id) => dispatch(getOrganizerDiscountsAPI(organizer_id)),
   getAnalytics: (organizer_id) => dispatch(getAnalyticsAPI(organizer_id)),
   getUserNotifications: () => dispatch(getUserNotificationsAPI()),
+  updateOrganizer: (data) => dispatch(updateOrganizerAPI(data)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrganizerDashboard);
