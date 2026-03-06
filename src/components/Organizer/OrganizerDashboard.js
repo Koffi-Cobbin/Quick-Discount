@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { getOrganizerAPI, getOrganizerDiscountsAPI, getAnalyticsAPI, getUserNotificationsAPI, updateOrganizerAPI } from "../../actions";
+import { getOrganizerAPI, getOrganizerDiscountsAPI, getAnalyticsAPI, getUserNotificationsAPI, updateOrganizerAPI, deleteDiscountAPI } from "../../actions";
 import Card from "../Shared/Card";
 
 // Theme
@@ -47,12 +47,18 @@ const Container = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 24px;
 
-  @media (min-width: 400px) {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 `;
 
@@ -335,18 +341,59 @@ const OrganizerDashboard = (props) => {
   // Get discounts from props (from Redux store)
   const discountsData = props.discounts?.results || props.discounts || [];
   
-  // Calculate stats from actual data
-  const activeDiscounts = discountsData.filter(d => d.status === 'active').length;
-  const pendingDiscounts = discountsData.filter(d => d.status === 'pending').length;
-  const rejectedDiscounts = discountsData.filter(d => d.status === 'rejected').length;
-  const totalViews = props.analytics?.total_views || props.analytics?.views || 0;
+  // Get analytics data
+  const analytics = props.analytics || {};
+  const discountSummary = analytics.discount_summary || {};
+  const engagement = analytics.engagement || {};
+  const organizerInfo = analytics.organizer || {};
+
+  // Use analytics data for stats (with fallback to manual calculation)
+  const activeDiscounts = discountSummary.active_discounts !== undefined 
+    ? discountSummary.active_discounts 
+    : discountsData.filter(d => d.status === 'active').length;
+  const pendingDiscounts = discountSummary.pending_discounts !== undefined 
+    ? discountSummary.pending_discounts 
+    : discountsData.filter(d => d.status === 'pending').length;
+  const rejectedDiscounts = discountSummary.rejected_discounts !== undefined 
+    ? discountSummary.rejected_discounts 
+    : discountsData.filter(d => d.status === 'rejected').length;
+  const expiredDiscounts = discountSummary.expired_discounts || 0;
+  
+  // Engagement metrics from analytics API
+  const totalLikes = engagement.total_likes || 0;
+  const totalReviews = engagement.total_reviews || 0;
+  const averageRating = engagement.average_rating || 0;
+  const totalWishlists = engagement.total_wishlists || 0;
+  const followersCount = organizerInfo.followers_count || 0;
+
+  // Helper function to check if a discount is expired based on end_date
+  const isExpiredDiscount = (discount) => {
+    if (discount.status === 'expired') return true;
+    if (discount.end_date) {
+      const endDate = new Date(discount.end_date);
+      return endDate < new Date();
+    }
+    return false;
+  };
+
+  // Calculate expired discounts count based on actual data
+  const expiredDiscountsCount = discountSummary.expired_discounts !== undefined 
+    ? discountSummary.expired_discounts 
+    : discountsData.filter(d => isExpiredDiscount(d)).length;
 
   const stats = {
-    totalDiscounts: discountsData.length,
+    totalDiscounts: discountSummary.total_discounts !== undefined 
+      ? discountSummary.total_discounts 
+      : discountsData.length,
     activeDiscounts,
     pendingDiscounts,
     rejectedDiscounts,
-    totalViews,
+    expiredDiscounts: expiredDiscountsCount,
+    totalLikes,
+    totalReviews,
+    averageRating,
+    totalWishlists,
+    followersCount,
   };
 
   // Use actual notifications or empty array
@@ -354,15 +401,20 @@ const OrganizerDashboard = (props) => {
   const unreadCount = notificationsData.filter(n => !n.read).length;
 
   const tabs = [
-    { id: "all", label: "My Discounts" },
+    { id: "all", label: "My Discounts", badge: stats.totalDiscounts },
     { id: "active", label: "Active", badge: stats.activeDiscounts },
     { id: "pending", label: "Pending", badge: stats.pendingDiscounts },
     { id: "rejected", label: "Rejected", badge: stats.rejectedDiscounts },
+    { id: "expired", label: "Expired", badge: stats.expiredDiscounts },
     { id: "notifications", label: "Notifications", badge: unreadCount > 0 ? unreadCount : null },
     { id: "settings", label: "Settings" },
   ];
 
-  const filteredDiscounts = tab === "all" ? discountsData : discountsData.filter(d => d.status === tab);
+  const filteredDiscounts = tab === "all" 
+    ? discountsData 
+    : tab === "expired" 
+      ? discountsData.filter(d => isExpiredDiscount(d)) 
+      : discountsData.filter(d => d.status === tab);
 
   return (
     <PageWrap>
@@ -389,14 +441,34 @@ const OrganizerDashboard = (props) => {
             <StatLabel>Rejected</StatLabel>
           </StatCard>
           <StatCard>
-            <StatIcon>👁</StatIcon>
-            <StatValue>{stats.totalViews.toLocaleString()}</StatValue>
-            <StatLabel>Views</StatLabel>
+            <StatIcon>📅</StatIcon>
+            <StatValue>{stats.expiredDiscounts}</StatValue>
+            <StatLabel>Expired</StatLabel>
           </StatCard>
           <StatCard>
-            <StatIcon>🔔</StatIcon>
-            <StatValue>{unreadCount}</StatValue>
-            <StatLabel>Notifications</StatLabel>
+            <StatIcon>👥</StatIcon>
+            <StatValue>{stats.followersCount}</StatValue>
+            <StatLabel>Followers</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatIcon>❤️</StatIcon>
+            <StatValue>{stats.totalLikes}</StatValue>
+            <StatLabel>Likes</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatIcon>⭐</StatIcon>
+            <StatValue>{stats.averageRating > 0 ? stats.averageRating.toFixed(1) : 'N/A'}</StatValue>
+            <StatLabel>Avg Rating</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatIcon>📝</StatIcon>
+            <StatValue>{stats.totalReviews}</StatValue>
+            <StatLabel>Reviews</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatIcon>💝</StatIcon>
+            <StatValue>{stats.totalWishlists}</StatValue>
+            <StatLabel>Wishlists</StatLabel>
           </StatCard>
         </StatsGrid>
 
@@ -478,8 +550,8 @@ const OrganizerDashboard = (props) => {
         ) : (
           <Section>
             <SectionHeader>
-              <SectionTitle>
-                {tab === "all" ? "All Discounts" : tab.charAt(0).toUpperCase() + tab.slice(1) + " Discounts"}
+            <SectionTitle>
+                {tab === "all" ? "All Discounts" : tab === "expired" ? "Expired Discounts" : tab.charAt(0).toUpperCase() + tab.slice(1) + " Discounts"}
               </SectionTitle>
             </SectionHeader>
             {filteredDiscounts.length > 0 ? (
@@ -489,6 +561,11 @@ const OrganizerDashboard = (props) => {
                     key={discount.id} 
                     discount={discount} 
                     isEditMode={true}
+                    onDelete={(id) => {
+                      if (window.confirm("Are you sure you want to delete this discount?")) {
+                        props.deleteDiscount(id);
+                      }
+                    }}
                   />
                 ))}
               </CardGrid>
@@ -518,6 +595,7 @@ const mapDispatchToProps = (dispatch) => ({
   getAnalytics: (organizer_id) => dispatch(getAnalyticsAPI(organizer_id)),
   getUserNotifications: () => dispatch(getUserNotificationsAPI()),
   updateOrganizer: (data) => dispatch(updateOrganizerAPI(data)),
+  deleteDiscount: (discount_id) => dispatch(deleteDiscountAPI(discount_id)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrganizerDashboard);

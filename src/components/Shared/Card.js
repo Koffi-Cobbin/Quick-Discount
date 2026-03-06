@@ -16,6 +16,8 @@ const T = {
   textSub: "rgba(240,236,230,0.62)",
   radius: "14px",
   radiusSm: "8px",
+  error: "#ef4444",
+  errorBg: "rgba(239,68,68,0.12)",
 };
 
 // ─── Card Styled Components ─────────────────────────────────────────────────
@@ -29,7 +31,9 @@ export const CardWrapper = styled.a`
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   transition:
     border-color 0.25s,
     transform 0.25s,
@@ -68,16 +72,25 @@ export const Badge = styled.div`
   position: absolute;
   top: 12px;
   left: 12px;
-  background: ${T.orange};
+  background: linear-gradient(135deg, #fa8128, #e05a00);
   color: #fff;
-  font-family: serif;
-  font-style: italic;
-  font-size: 1.05rem;
+  font-size: 11px;
   font-weight: 700;
   padding: 4px 10px;
-  border-radius: 6px;
-  letter-spacing: -0.01em;
-  line-height: 1;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(250, 129, 40, 0.45);
+  pointer-events: none;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  ${CardWrapper}:hover & {
+    transform: scale(1.05);
+  }
 `;
 
 export const ExpiryTag = styled.div`
@@ -96,10 +109,11 @@ export const ExpiryTag = styled.div`
 `;
 
 export const CardBody = styled.div`
-  padding: 18px 18px 16px;
+  padding: 18px 18px 0;
   display: flex;
   flex-direction: column;
   flex: 1;
+  background: ${({ $bgColor }) => $bgColor || 'transparent'};
 `;
 
 export const CardMeta = styled.div`
@@ -107,6 +121,7 @@ export const CardMeta = styled.div`
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+  flex-shrink: 0;
 `;
 
 export const CatLabel = styled.span`
@@ -130,6 +145,7 @@ export const CardTitle = styled.h3`
   margin-bottom: 8px;
   transition: color 0.2s;
   text-align: left;
+  flex-shrink: 0;
 
   ${CardWrapper}:hover & {
     color: ${T.orange};
@@ -142,8 +158,9 @@ export const CardLoc = styled.p`
   gap: 5px;
   font-size: 0.78rem;
   color: ${T.textSub};
-  margin-bottom: auto;
+  margin-bottom: 14px;
   text-align: left;
+  flex-shrink: 0;
 
   svg {
     color: ${T.orange};
@@ -155,8 +172,8 @@ export const CardFooter = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: auto;
+  padding: 14px 18px;
   border-top: 1px solid ${T.border};
 `;
 
@@ -218,9 +235,52 @@ export const EditBtn = styled.button`
   }
 `;
 
+export const DeleteBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid ${T.border};
+  background: transparent;
+  color: ${T.textSub};
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.18s;
+
+  &:hover {
+    border-color: ${T.error};
+    color: ${T.error};
+    background: ${T.errorBg};
+  }
+`;
+
 // ─── Card React Component ─────────────────────────────────────────────────
 
-function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, isLoading }) {
+// Styled component for action buttons container
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor }) {
+  // Helper function to truncate text to a specified size
+  const handleSlice = (data, size) => {
+    if (!data || data.length <= size) {
+      return data;
+    }
+    const words = data.split(" ");
+    let truncatedString = "";
+    for (let i = 0; i < words.length; i++) {
+      if (truncatedString.length + words[i].length <= size) {
+        truncatedString += words[i] + " ";
+      } else {
+        break;
+      }
+    }
+    return `${truncatedString.trim()} ...`;
+  };
+
   // Format end_date for display
   const formatExpiry = (dateStr) => {
     if (!dateStr) return null;
@@ -244,20 +304,30 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, isLoad
     }
   };
 
+  const handleDeleteClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(discount.id);
+    }
+  };
+
   if (!discount) return null;
 
   return (
     <CardWrapper href={`/discounts/${discount.id}`}>
       <CardImg>
         <img src={discount.flyer} alt={discount.title} />
-        {discount.percentage_discount && (
-          <Badge>{discount.percentage_discount}</Badge>
+        {discount.percentage_discount ? (
+          <Badge>{handleSlice(discount.percentage_discount, 20)}</Badge>
+        ) : (
+          <Badge>Deal</Badge>
         )}
         {discount.end_date && (
           <ExpiryTag>Ends {formatExpiry(discount.end_date)}</ExpiryTag>
         )}
       </CardImg>
-      <CardBody>
+      <CardBody $bgColor={bgColor}>
         {discount.categories && discount.categories.length > 0 && (
           <CardMeta>
             {discount.categories.map((c) => (
@@ -290,9 +360,14 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, isLoad
             <b>{discount.likes}</b> likes
           </Likes>
           {isEditMode ? (
-            <EditBtn onClick={handleEditClick}>
-              ✎ Edit
-            </EditBtn>
+            <ActionButtons>
+              <EditBtn onClick={handleEditClick}>
+                ✎ Edit
+              </EditBtn>
+              <DeleteBtn onClick={handleDeleteClick}>
+                ✕ Delete
+              </DeleteBtn>
+            </ActionButtons>
           ) : (
             <SaveBtn 
               onClick={handleSaveClick} 

@@ -606,13 +606,14 @@ function DiscountsPage(props) {
                 <EmptySub>Try a different category or search term.</EmptySub>
               </Empty>
             ) : (
-              filtered.map((d) => (
+            filtered.map((d) => (
                 <Card 
                   key={d.id} 
                   discount={d} 
                   onSave={toggleSave} 
                   isSaved={saved.has(d.id)}
                   isLoading={savingId === d.id}
+                  bgColor="rgba(14, 13, 11, 0.85)"
                 />
               ))
             )}

@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
-import DiscountCard from "../Discounts/DiscountCard";
+import Card from "../Shared/Card";
 
 
 const UserDiscounts = (props) => {
@@ -14,7 +14,7 @@ const UserDiscounts = (props) => {
                 <DiscountGrid>
                   {props.discounts.results.map((discount) => (
                     <GridItem>
-                        <DiscountCard
+                        <Card
                             key={discount.id}
                             discount={discount}
                         />

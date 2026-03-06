@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
-import EventCard from "./DiscountCard";
+import Card from "../Shared/Card";
 
 
 const Discounts = (props) => {
@@ -46,7 +46,7 @@ const Discounts = (props) => {
                  <Grid>
                         {activeEvents.map((event, key) => (
                         <GridItem>
-                            <EventCard key={key} event={event} showActions={true} />
+                            <Card key={key} discount={event} />
                         </GridItem>
                         ))}
                  </Grid>
@@ -59,7 +59,7 @@ const Discounts = (props) => {
                  <Grid>
                         {pendingEvents.map((event, key) => (
                         <GridItem>
-                            <EventCard key={key} event={event} showActions={true} />
+                            <Card key={key} discount={event} />
                         </GridItem>
                         ))}
                  </Grid>
@@ -72,7 +72,7 @@ const Discounts = (props) => {
                  <Grid>
                         {rejectedEvents.map((event, key) => (
                         <GridItem>
-                            <EventCard key={key} event={event} showActions={true} />
+                            <Card key={key} discount={event} />
                         </GridItem>
                         ))}
                  </Grid>

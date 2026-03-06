@@ -2,11 +2,11 @@ import React from "react";
 import styled from "styled-components";
 import Row from "../UI/Row";
 import Column from "../UI/Column";
-import DiscountCard from "./DiscountCard";
+import Card from "../Shared/Card";
 import BarChart from "../UI/Chart";
 import { connect } from "react-redux";
 import { useState, useEffect } from "react";
-import { getOrganizerDiscountsAPI } from "../../actions";
+import { getOrganizerDiscountsAPI, getAnalyticsAPI } from "../../actions";
 import { eventsData } from "../Assets/data";
 
 const Dashboard = (props) => {
@@ -14,13 +14,34 @@ const Dashboard = (props) => {
   const [pendingDiscounts, setPendingDiscounts] = useState();
   const [rejectedDiscounts, setRejectedDiscounts] = useState();
   const [upcomingDiscounts, setUpcomingDiscounts] = useState([]);
-  const [totalPackagesSold, setTotalPackagesSold] = useState(0);
   const [filterType, setFilterType] = useState("tickets");
   const [filterOption, setFilterOption] = useState("months");
 
-  let activeDiscountsCount = activeDiscounts ? activeDiscounts.length : 0;
-  let pendingDiscountsCount = pendingDiscounts ? pendingDiscounts.length : 0;
-  let rejectedDiscountsCount = rejectedDiscounts ? rejectedDiscounts.length : 0;
+  // Get analytics data from props
+  const analytics = props.analytics || {};
+  const discountSummary = analytics.discount_summary || {};
+  const engagement = analytics.engagement || {};
+  const organizerInfo = analytics.organizer || {};
+
+  // Use analytics data for counts (fallback to manual calculation if analytics not available)
+  let activeDiscountsCount = discountSummary.active_discounts !== undefined 
+    ? discountSummary.active_discounts 
+    : (activeDiscounts ? activeDiscounts.length : 0);
+  let pendingDiscountsCount = discountSummary.pending_discounts !== undefined 
+    ? discountSummary.pending_discounts 
+    : (pendingDiscounts ? pendingDiscounts.length : 0);
+  let rejectedDiscountsCount = discountSummary.rejected_discounts !== undefined 
+    ? discountSummary.rejected_discounts 
+    : (rejectedDiscounts ? rejectedDiscounts.length : 0);
+  let totalDiscountsCount = discountSummary.total_discounts || 0;
+
+  // Use engagement data for insights
+  const totalPackagesSold = engagement.total_attendees || 0;
+  const totalLikes = engagement.total_likes || 0;
+  const totalReviews = engagement.total_reviews || 0;
+  const averageRating = engagement.average_rating || 0;
+  const totalWishlists = engagement.total_wishlists || 0;
+  const followersCount = organizerInfo.followers_count || 0;
 
   // function to filter a list of discount objects based on a given discount status
   function filterByStatus(eventsList, status) {
@@ -114,6 +135,11 @@ const Dashboard = (props) => {
       props.getOrganizerDiscounts(props.organizer.id);
       console.log("In organizer dashboard!");
     }
+    // Fetch analytics when organizer is available
+    if (props.organizer && !props.analytics) {
+      props.getAnalytics(props.organizer.id);
+      console.log("Fetching analytics!");
+    }
     if (props.events) {
       // Set active events
       setActiveDiscounts(filterByStatus(props.events, "active"));
@@ -133,7 +159,7 @@ const Dashboard = (props) => {
           <Column className="col-25 bg-50">
             <Card className="stats">
               <Number>{totalPackagesSold}</Number>
-              <span>Packages sold</span>
+              <span>Packages Sold</span>
             </Card>
           </Column>
 
@@ -155,6 +181,54 @@ const Dashboard = (props) => {
             <Card className="stats">
               <Number>{rejectedDiscountsCount}</Number>
               <span>Rejected Discounts</span>
+            </Card>
+          </Column>
+        </Row>
+      </Section>
+
+      <Section>
+        <Title>Engagement Insights</Title>
+        <Row style={{ justifyContent: "space-around" }}>
+          <Column className="col-25 bg-50">
+            <Card className="stats">
+              <Number>{followersCount}</Number>
+              <span>Followers</span>
+            </Card>
+          </Column>
+
+          <Column className="col-25 bg-50">
+            <Card className="stats">
+              <Number>{totalLikes}</Number>
+              <span>Total Likes</span>
+            </Card>
+          </Column>
+
+          <Column className="col-25 bg-50">
+            <Card className="stats">
+              <Number>{totalReviews}</Number>
+              <span>Reviews</span>
+            </Card>
+          </Column>
+
+          <Column className="col-25 bg-50">
+            <Card className="stats">
+              <Number>{averageRating.toFixed(1)}</Number>
+              <span>Avg Rating</span>
+            </Card>
+          </Column>
+        </Row>
+        <Row style={{ justifyContent: "space-around", marginTop: "10px" }}>
+          <Column className="col-25 bg-50">
+            <Card className="stats">
+              <Number>{totalWishlists}</Number>
+              <span>Wishlists</span>
+            </Card>
+          </Column>
+
+          <Column className="col-25 bg-50">
+            <Card className="stats">
+              <Number>{totalDiscountsCount}</Number>
+              <span>Total Discounts</span>
             </Card>
           </Column>
         </Row>
@@ -209,33 +283,27 @@ const Dashboard = (props) => {
       </Section>
 
       <Section>
-        <Title>Active Discounts</Title>
-        {activeDiscountsCount > 0 ?
+        <Title>Recent Discounts</Title>
+        {analytics.recent_discounts && analytics.recent_discounts.length > 0 ?
+        <Grid>
+          {analytics.recent_discounts.slice(0, 4).map((discount, key) => (
+              <GridItem>
+                <Card key={key} discount={discount} />
+              </GridItem>
+            ))}
+        </Grid>
+        :
+        (activeDiscountsCount > 0 ?
         <Grid>
           {activeDiscounts && activeDiscounts.slice(0, 4).map((discount, key) => (
               <GridItem>
-                <DiscountCard key={key} discount={discount} />
+                <Card key={key} discount={discount} />
               </GridItem>
             ))}
         </Grid>
         :
-        (<p>You have no active events</p>)
-        }
-      </Section>
-
-      <Section>
-        <Title>Upcoming Discounts</Title>
-        {upcomingDiscounts && upcomingDiscounts.length > 0 ?
-        <Grid>
-          {upcomingDiscounts.slice(0, 4).map((discount, key) => (
-              <GridItem>
-                <DiscountCard key={key} discount={discount} showActions={true}/>
-              </GridItem>
-            ))}
-        </Grid>
-        :
-        (<p>You have no upcoming events</p>)
-        }
+        (<p>You have no recent discounts</p>)
+        )}
       </Section>
 
       <Section>
@@ -366,12 +434,16 @@ const mapStateToProps = (state) => {
     organizer: state.organizerState.organizer,
     events: state.organizerState.events,
     notifications: state.organizerState.notifications,
+    analytics: state.organizerState.analytics,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
   getOrganizerDiscounts: (organizer_id) => {
     dispatch(getOrganizerDiscountsAPI(organizer_id));
+  },
+  getAnalytics: (organizer_id) => {
+    dispatch(getAnalyticsAPI(organizer_id));
   },
 });
 

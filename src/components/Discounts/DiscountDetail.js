@@ -14,7 +14,7 @@ import ReactPlayer from "react-player";
 import CustomerReview from "./CustomerReview";
 import StarRating from "./StarRating";
 import CarouselFlex from "../Shared/CarouselFlex";
-import DiscountCard from "./DiscountCard";
+import Card from "../Shared/Card";
 import { formatDate } from "../../utils/middleware";
 import { 
     getDiscountsAPI,
@@ -598,9 +598,10 @@ const DiscountDetail = (props) => {
                         classId="recomendations"                  
                     >
                         {recomendedDiscounts.slice(0, 4).map((recomendedDiscount, key) => (
-                        <DiscountCard
+                        <Card
                             key={key}
                             discount={recomendedDiscount}
+                            bgColor="rgba(14, 13, 11, 0.85)"
                         />
                         ))}
                     </CarouselFlex>

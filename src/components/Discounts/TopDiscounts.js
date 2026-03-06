@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import DiscountCard from "./DiscountCard"; 
+import Card from "../Shared/Card"; 
 import CarouselFlex from "../Shared/CarouselFlex";
 
 
@@ -16,10 +16,11 @@ const TopDiscounts = (props) => {
         {props.discounts
           .sort((a, b) => b.likes - a.likes)
           .map((discount, key) => (
-            <DiscountCard
+            <Card
               key={key}
               index={key}
               discount={discount}
+              bgColor="rgba(14, 13, 11, 0.85)"
             />
           ))}
       </CarouselFlex>

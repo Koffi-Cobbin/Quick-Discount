@@ -939,18 +939,35 @@ GET /search/?keywords=summer+sale
 ### Get Organizer Analytics Response
 ```json
 {
-    "total_discounts": 10,
-    "total_likes": 150,
-    "total_followers": 50,
-    "total_tickets_sold": 100,
-    "total_revenue": "5000.00",
-    "views": 1000,
-    "top_discounts": [
+    "organizer": {
+        "id": 1,
+        "name": "Tech Deals Inc.",
+        "followers_count": 200
+    },
+    "discount_summary": {
+        "total_discounts": 25,
+        "active_discounts": 10,
+        "pending_discounts": 5,
+        "rejected_discounts": 3,
+        "expired_discounts": 7
+    },
+    "engagement": {
+        "total_likes": 500,
+        "total_reviews": 75,
+        "average_rating": 4.2,
+        "total_attendees": 150,
+        "total_wishlists": 85
+    },
+    "recent_discounts": [
         {
             "id": 1,
             "title": "Summer Sale",
-            "likes": 50,
-            "tickets_sold": 25
+            "status": "active",
+            "is_active": true,
+            "start_date": "2024-01-01",
+            "end_date": "2024-01-31",
+            "likes_count": 50,
+            "reviews_count": 10
         }
     ]
 }

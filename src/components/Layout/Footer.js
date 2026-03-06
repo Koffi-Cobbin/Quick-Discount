@@ -176,15 +176,11 @@ const Footer = (props) => {
 };
 
 const FooterSection = styled.div`
-    margin-top: 10px;
-    background-color: rgba(220, 103, 14, 0.78); /* #67309b; */
+    background-color: rgba(220, 103, 14, 0.78); 
     color: white;
     padding: 10px;
     margin-bottom: 0;
-    /* font-family: Inter, "Roboto", sans-serif; */
     font-size: 14px;
-    @media (max-width: 768px) {
-    }
 `;
 
 const Layout = styled.div`
@@ -331,7 +327,6 @@ const Form = styled.div`
         .textinput {
             border-radius: 10px;
             background-color: #fff;
-            /* border: 2px solid #000; */
             display: block;
             padding: 5px;
             color: #4a4a4a;
@@ -339,10 +334,8 @@ const Form = styled.div`
     }
 
     @media (max-width: 768px) {
-        /* padding: 20px; */
         & span {
             top: 16px;
-            /* font-size: 13px; */
         }
     }
 `;

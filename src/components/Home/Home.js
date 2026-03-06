@@ -7,7 +7,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import BackgroundSlider from "./BackgroundSlider";
 import CarouselFlex from "../Shared/CarouselFlex";
 import TopDiscounts from "../Discounts/TopDiscounts";
-import DiscountCard from "../Discounts/DiscountCard";
+import Card from "../Shared/Card";
 
 import { getDiscountsAPI } from "../../actions";
 
@@ -251,10 +251,11 @@ const Home = (props) => {
                         )
                         .slice(0, 4)
                         .map((discount, key) => (
-                          <DiscountCard
+                          <Card
                             key={key}
                             index={key}
                             discount={discount}
+                            bgColor="rgba(14, 13, 11, 0.85)"
                           />
                         ))}
                     </CarouselFlex>
@@ -319,14 +320,6 @@ const FadeInSection = styled.div`
 `;
 
 // ─── Category Filter Bar ──────────────────────────────────────────────────────
-/*
- * Navbar heights (scrolled state, padding: 6px 0):
- *   Mobile  < 600px : logo 40px + 12px padding = 52px
- *   Desktop ≥ 600px : logo 64px + 12px padding = 76px
- *
- * `top` must equal the navbar height so the filter bar sticks
- * flush underneath it when the page is scrolled.
- */
 const FilterBar = styled.div`
   position: sticky;
   top: 48px; /* mobile default — sits flush under the 52px mobile navbar */
@@ -376,8 +369,6 @@ const FilterButton = styled.button`
   }
 
   &:hover {
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(103, 48, 155, 0.2);
     transform: scale(1.05);
     
     img {

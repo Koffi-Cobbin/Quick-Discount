@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { discountsData } from "../Assets/data";
 import { connect } from "react-redux";
-import DiscountCard from "../Discounts/DiscountCard";
+import Card from "../Shared/Card";
 import { getWishlistAPI } from "../../actions";
 
 
@@ -41,23 +41,6 @@ const SavedDiscounts = (props) => {
         }
     }, [props.wishlist]);
 
-    const discountCardStyles = {
-        card: {margin: "0 auto", width: '80%'},
-        bgImage: {height: "110px"},
-        discountInfo: {paddingMd: "20px", height: "115px"},
-        title: {fontSizeSm: "13px", fontSizeMd: "15px", fontSizeL: "18px"},
-        fontSizes: {fontSizeSm: "12px", fontSizeMd: "12px", fontSizeL: "15.5px"},
-        dateTime: {
-          md: {display: "flex", alignItems: "center", justifyContent: "space-between"}, 
-          xsm: {}
-        },
-        time: {},
-        discountStatus: {},
-        locationStyle: {},
-        attendeesSlots: {display: "flex", alignItems: "center", justifyContent: "space-between"},
-        slots: {}
-      };
-
     return (
         <Container>
             <Section>
@@ -67,7 +50,7 @@ const SavedDiscounts = (props) => {
                     {
                         wishlistDiscounts.map((discount, key) => (
                         <GridItem>
-                            <DiscountCard key={key} discount={discount} discountCardStyles={discountCardStyles} />
+                            <Card key={key} discount={discount} />
                         </GridItem>
                         ))
                     }
