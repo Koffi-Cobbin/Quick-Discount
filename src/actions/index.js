@@ -255,6 +255,9 @@ export const getUserTokenAPI = (payload) => (dispatch) => {
       }      
       console.log("Fetching organizer data...");
       dispatch(getOrganizerAPI());
+      // Fetch wishlist after token is obtained
+      console.log("Fetching wishlist...");
+      dispatch(getWishlistAPI());
     })
     .catch((error) => {
       alert(error.message);
@@ -955,7 +958,15 @@ export function getWishlistAPI() {
     const url = `${BASE_URL}/discounts/get-wishlist/`;
 
     const state = getState();
-    const authToken = state.userState.token.access;
+    const token = state.userState.token;
+    
+    // Check if token exists and has access property
+    if (!token || !token.access) {
+      console.log("Wishlist API: Token not available yet, skipping wishlist fetch");
+      return Promise.resolve();
+    }
+    
+    const authToken = token.access;
 
     // Return the fetch promise so Dashboard can handle loading state
     return fetch(url, {

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import styled, { keyframes, css, createGlobalStyle } from "styled-components";
 import { connect } from "react-redux";
 import { getDiscountsAPI, addToWishlistAPI, removeFromWishlistAPI } from "../../actions";
@@ -394,6 +395,7 @@ const SearchIcon = styled.span`
 
 // ─── Main component ───────────────────────────────────────────────────────────
 function DiscountsPage(props) {
+  const { catId } = useParams();
   const [activeCat, setActiveCat] = useState("All");
   const [sort, setSort] = useState("Popular");
   const [query, setQuery] = useState("");
@@ -409,15 +411,7 @@ function DiscountsPage(props) {
     }
   }, [discounts, getDiscounts]);
 
-  // Initialize saved state from wishlist
-  useEffect(() => {
-    if (wishlist?.results) {
-      const savedIds = new Set(wishlist.results.map(item => item.discount?.id || item.discount));
-      setSaved(savedIds);
-    }
-  }, [wishlist]);
-
-  // Derive unique category list from live data
+  // Derive unique category list from live data (needed for URL parameter handling)
   const allDiscounts = discounts?.results || [];
   const cats = [
     "All",
@@ -425,6 +419,27 @@ function DiscountsPage(props) {
       ...new Set(allDiscounts.flatMap((d) => d.categories.map((c) => c.name))),
     ],
   ];
+
+  // Set active category from URL parameter when categories are loaded
+  useEffect(() => {
+    if (catId && discounts?.results) {
+      // Find matching category (case-insensitive)
+      const matchingCat = cats.find(
+        (cat) => cat.toLowerCase() === catId.toLowerCase()
+      );
+      if (matchingCat) {
+        setActiveCat(matchingCat);
+      }
+    }
+  }, [catId, discounts?.results, cats]);
+
+  // Initialize saved state from wishlist
+  useEffect(() => {
+    if (wishlist?.results) {
+      const savedIds = new Set(wishlist.results.map(item => item.discount?.id || item.discount));
+      setSaved(savedIds);
+    }
+  }, [wishlist]);
 
   const loading = propsLoading || !discounts?.results;
 
@@ -463,22 +478,6 @@ function DiscountsPage(props) {
       }
       return next;
     });
-
-    // If user is not logged in, show alert
-    if (!token || !token.access) {
-      alert("Please login to save discounts to your wishlist");
-      // Revert optimistic update
-      setSaved((prev) => {
-        const next = new Set(prev);
-        if (isCurrentlySaved) {
-          next.add(id);
-        } else {
-          next.delete(id);
-        }
-        return next;
-      });
-      return;
-    }
 
     // Set loading state for this specific card
     setSavingId(id);
@@ -614,6 +613,7 @@ function DiscountsPage(props) {
                   isSaved={saved.has(d.id)}
                   isLoading={savingId === d.id}
                   bgColor="rgba(14, 13, 11, 0.85)"
+                  isLoggedIn={!!token?.access}
                 />
               ))
             )}

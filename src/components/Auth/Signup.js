@@ -100,9 +100,6 @@ const Signup = (props) => {
         <PanelGlow />
 
         <PanelContent>
-          <PanelLogo>
-            <img src="/images/logo.png" alt="QuickDiscount" />
-          </PanelLogo>
           <PanelTagline>
             Join thousands of<br />
             <PanelAccent>savvy shoppers & sellers.</PanelAccent>
@@ -422,15 +419,6 @@ const PanelContent = styled.div`
   z-index: 1;
   padding: 48px;
   animation: ${fadeUp} 0.7s ease both;
-`;
-
-const PanelLogo = styled.div`
-  margin-bottom: 32px;
-  img {
-    height: 52px;
-    object-fit: contain;
-    filter: brightness(1.1);
-  }
 `;
 
 const PanelTagline = styled.h2`

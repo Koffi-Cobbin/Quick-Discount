@@ -66,9 +66,6 @@ const Login = (props) => {
         ))}
 
         <PanelContent>
-          <PanelLogo>
-            <img src="/images/logo.png" alt="QuickDiscount" />
-          </PanelLogo>
           <PanelTagline>
             Ghana's fastest way to<br />
             <PanelAccent>find & run discounts.</PanelAccent>
@@ -309,15 +306,6 @@ const PanelContent = styled.div`
   padding: 48px;
   text-align: left;
   animation: ${fadeUp} 0.7s ease both;
-`;
-
-const PanelLogo = styled.div`
-  margin-bottom: 36px;
-  img {
-    height: 56px;
-    object-fit: contain;
-    filter: brightness(1.1);
-  }
 `;
 
 const PanelTagline = styled.h2`

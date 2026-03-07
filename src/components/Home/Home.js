@@ -452,17 +452,14 @@ const CategoryChip = styled.span`
     transform 0.15s ease,
     box-shadow 0.22s ease;
 
-  background-color: ${({ active }) => (active ? "#67309b" : "#fff")};
-  color: ${({ active }) => (active ? "#fff" : "#444")};
-  box-shadow: ${({ active }) =>
-    active
-      ? "0 2px 12px rgba(103, 48, 155, 0.28)"
-      : "0 1px 3px rgba(0,0,0,0.08)"};
+  background-color: ${({ active }) => (active ? "rgba(14, 13, 11, 0.85)" : "#fff")};
+  color: ${({ active }) => (active ? "#fa8128" : "#444")};
 
   &:hover {
-    background-color: ${({ active }) => (active ? "#5a2888" : "#f0eaf8")};
-    color: ${({ active }) => (active ? "#fff" : "#67309b")};
+    background-color: ${({ active }) => (active ? "#fa8128" : "rgba(250,129,40,0.15)")};
+    color: ${({ active }) => (active ? "rgba(14, 13, 11, 0.85)" : "#fa8128")};
     transform: translateY(-1px);
+    & span {background-color: rgba(14, 13, 11, 0.85) !important;}
   }
 
   &:active {
@@ -481,7 +478,7 @@ const ChipActiveDot = styled.span`
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.75);
+  background: #fa8128;
   animation: ${pipScale} 0.2s ease;
 `;
 

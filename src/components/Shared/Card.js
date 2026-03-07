@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 // ─── Theme tokens (matches QuickDiscount app) ─────────────────────────────────
 const T = {
@@ -42,9 +43,6 @@ export const CardWrapper = styled.a`
   &:hover {
     border-color: rgba(250, 129, 40, 0.35);
     transform: translateY(-3px);
-    box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(250, 129, 40, 0.1);
     text-decoration: none;
     color: inherit;
   }
@@ -263,7 +261,9 @@ const ActionButtons = styled.div`
   gap: 8px;
 `;
 
-function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor }) {
+function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, isLoggedIn }) {
+  const navigate = useNavigate();
+  
   // Helper function to truncate text to a specified size
   const handleSlice = (data, size) => {
     if (!data || data.length <= size) {
@@ -291,6 +291,13 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
   const handleSaveClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Redirect to login if user is not logged in
+    if (!isLoggedIn) {
+      navigate("/login", { state: { from: window.location.pathname } });
+      return;
+    }
+    
     if (onSave && !isLoading) {
       onSave(discount.id);
     }
