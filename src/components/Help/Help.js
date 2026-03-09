@@ -164,11 +164,7 @@ function Help() {
             </Lead>
             <FeatureList>
               {[
-                { icon: "✏️", text: "Create, edit, and delete discount ads." },
-                {
-                  icon: "💰",
-                  text: "Set up payment preferences and receive payments directly.",
-                },
+                { icon: "✏️", text: "Create, edit, and delete discount ads." },                
                 {
                   icon: "📊",
                   text: "View discount statistics and engagement details.",
@@ -198,8 +194,7 @@ function Help() {
             <SectionHeading>Payment</SectionHeading>
             <Lead>
               QuickDiscount provides secure payment processing for your discount
-              sales, supporting multiple payment methods for shops and
-              customers.
+              ad package, supporting multiple payment methods.
             </Lead>
             <PaymentGrid>
               {[
@@ -214,14 +209,14 @@ function Help() {
                     "Input your payment details to receive discount sales revenue securely.",
                 },
                 {
-                  label: "Customer Checkout",
+                  label: "Checkout",
                   detail:
-                    "Customers pay via their preferred method through our encrypted checkout.",
+                    "Pay via your preferred method through our encrypted checkout.",
                 },
                 {
-                  label: "Track Earnings",
+                  label: "Track Engagements",
                   detail:
-                    "Monitor payouts and earnings in real time from your account dashboard.",
+                    "Monitor user engagements in real time from your account dashboard.",
                 },
               ].map(({ label, detail }) => (
                 <PaymentCard key={label}>
@@ -262,9 +257,9 @@ function Help() {
                 <PackageFeaturedBadge>Most Popular</PackageFeaturedBadge>
                 <PackageName>Weekly</PackageName>
                 <PackagePrice>
-                  GHS 75 <PackagePriceSub>up to 10 clicks</PackagePriceSub>
+                  GHS 100 <PackagePriceSub>up to 10 clicks</PackagePriceSub>
                 </PackagePrice>
-                <PackagePriceAlt>GHS 100 for 10+ clicks</PackagePriceAlt>
+                <PackagePriceAlt>GHS 140 for 10+ clicks</PackagePriceAlt>
                 <PackageDesc>
                   Homepage visibility for a full week with multiple clicks
                   allowed. Great for ongoing promotions and sale periods.

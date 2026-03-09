@@ -6,14 +6,14 @@ import { connect } from "react-redux";
 import { setPreviousUrl } from '../src/actions';
 
 
-const Protected = (props) => {
+const Protected = ({ user, children, setUrl }) => {
   const location = useLocation();
 
   useEffect(() => {
-    props.setUrl(location.pathname);
-  }, []);
+    setUrl(location.pathname);
+  }, [location.pathname, setUrl]);
 
-  return props.user ? props.children : <Navigate to="/login" />; 
+  return user ? children : <Navigate to="/login" />;
 };
 
 

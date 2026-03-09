@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import WishlistContext from "../../store/wishlist-context";
 
 // ─── Theme tokens (matches QuickDiscount app) ─────────────────────────────────
 const T = {
@@ -264,6 +266,9 @@ const ActionButtons = styled.div`
 function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, isLoggedIn }) {
   const navigate = useNavigate();
   
+  // Access WishlistContext for local wishlist storage (when not logged in)
+  const wishlistCtx = useContext(WishlistContext);
+  
   // Helper function to truncate text to a specified size
   const handleSlice = (data, size) => {
     if (!data || data.length <= size) {
@@ -288,16 +293,29 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   };
 
+  // Check if item is saved locally (for non-logged in users)
+  const isLocallySaved = wishlistCtx.wishlist?.some(item => item.id === discount.id) || false;
+  
+  // Determine if item is saved (either via API or locally)
+  const isItemSaved = isSaved || isLocallySaved;
+
   const handleSaveClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Redirect to login if user is not logged in
     if (!isLoggedIn) {
-      navigate("/login", { state: { from: window.location.pathname } });
+      // User is not logged in - save to local wishlist (sessionStorage)
+      if (isLocallySaved) {
+        // Remove from local wishlist
+        wishlistCtx.removeWishItem(discount.id);
+      } else {
+        // Add to local wishlist
+        wishlistCtx.addWishItem({ id: discount.id });
+      }
       return;
     }
     
+    // User is logged in - use API
     if (onSave && !isLoading) {
       onSave(discount.id);
     }
@@ -378,10 +396,10 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
           ) : (
             <SaveBtn 
               onClick={handleSaveClick} 
-              $isSaved={isSaved}
+              $isSaved={isItemSaved}
               disabled={isLoading}
             >
-              {isLoading ? "..." : isSaved ? "✦ Saved" : "♡ Save"}
+              {isLoading ? "..." : isItemSaved ? "✦ Saved" : "♡ Save"}
             </SaveBtn>
           )}
         </CardFooter>

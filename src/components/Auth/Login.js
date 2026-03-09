@@ -47,8 +47,8 @@ const Login = (props) => {
 
   useEffect(() => {
     if (props.errors?.login) setLoginError(props.errors.login);
-    if (props.user) handleRedirect(props.previous_url);
-  }, [props.errors, props.user, props.previous_url]);
+    if (props.user) navigate(props.previous_url || "/");
+  }, [props.errors, props.user, props.previous_url, navigate]);
 
   const canSubmit = password && (loginChoice === "email" ? email : contact);
 

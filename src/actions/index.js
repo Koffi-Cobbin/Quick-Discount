@@ -1,4 +1,4 @@
-import { auth, provider, storage } from "../firebase";
+import { auth, provider } from "../firebase";
 import {
   ACTIVATE_USER,
   SET_USER,
@@ -27,10 +27,8 @@ import {
   SET_SEARCH_RESULT,
   USER_DISCOUNT_LIKE
 } from "./actionType";
-import db from "../firebase";
 import { BASE_URL, STAFF_EMAIL } from "../utils/constants";
 import * as messages from "../utils/messages";
-import { userData, discountsData, discountReviewsData, categoriesData, discountMediaData } from "../components/Assets/data";
 
 
 export const setUserActivationStatus = (payload) => ({
@@ -465,9 +463,9 @@ export function createDiscountAPI(formData) {
           console.log(data.errors);
           dispatch(setCreateDiscountStatus(false));
           dispatch(setLoading(false));
-          let msg = (
+let msg = (
             <>
-              <img src="/images/icons/error.svg" />
+              <img src="/images/icons/error.svg" alt="error" />
               <p style={{ color: "red" }}>
                 Failed to create discount. {data.errors.name ? data.errors.name : data.errors}{" "}
               </p>
@@ -514,9 +512,9 @@ export function updateDiscountAPI({formData, discount_id}) {
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setUpdateDiscountStatus(false));
-          let msg = (
+let msg = (
             <>
-              <img src="/images/icons/error.svg" />
+              <img src="/images/icons/error.svg" alt="error" />
               <p style={{ color: "red" }}>
                 Failed to update discount. {data.errors.name}{" "}
               </p>

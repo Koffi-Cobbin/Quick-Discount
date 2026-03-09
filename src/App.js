@@ -37,6 +37,7 @@ import Test from "./components/Tests/Test";
 
 
 function App(props) {
+  const { getUserAuth } = props;
   const [scrollTop, setScrollTop] = useState(0);
   const [openNav, setOpenNav] = useState(false);
   const [cartIsShown, setCartIsShown] = useState(false);
@@ -54,8 +55,8 @@ function App(props) {
   }, []);
 
   useEffect(() => {
-    props.getUserAuth();
-  }, []);
+    getUserAuth();
+  }, [getUserAuth]);
 
   const openSideNav = () => {
     setOpenNav(true);
