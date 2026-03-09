@@ -87,8 +87,8 @@ function App(props) {
       <div className="App" id="app">
         <Router>
           {cartIsShown && <Cart onClose={hideCartHandler} />}
-          <ScrollToTop />
-          <Routes>
+          <ScrollToTop>
+            <Routes>
             <Route
               exact
               path="/"
@@ -264,6 +264,7 @@ function App(props) {
               ]}
               />
           </Routes>
+          </ScrollToTop>
           {
             openNav && (
               <SideNav isOpen={openNav} close={closeSideNav} onShowCart={showCartHandler}/>
@@ -299,7 +300,7 @@ const ScrollToTopButton = styled.button`
   border: none;
   border-radius: 50%;
   background-color: #fa8128;
-  z-index: 50;
+  z-index: 101;
   display: flex;
   align-items: center;
   justify-content: center;
