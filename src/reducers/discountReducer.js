@@ -24,6 +24,8 @@ export const initState = {
     JSON.parse(sessionStorage.getItem('wishlist')) : [],    
     discount_packages: sessionStorage.getItem('discount_packages') ?
     JSON.parse(sessionStorage.getItem('discount_packages')) : null,
+    discount_media: sessionStorage.getItem('discount_media') ?
+    JSON.parse(sessionStorage.getItem('discount_media')) : [],
     reviews: sessionStorage.getItem('reviews') ?
     JSON.parse(sessionStorage.getItem('reviews')) : null, 
     search_result: sessionStorage.getItem('search_result') ?

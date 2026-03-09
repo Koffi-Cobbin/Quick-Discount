@@ -15,27 +15,26 @@ import {
   getCategoriesAPI,
   createDiscountAPI,
   updateDiscountAPI,
-  getDiscountMediaAPI,
   getDiscountPackagesAPI,
   setPreviousUrl,
 } from "../../actions";
 import Payment from "../Payment/Payment";
 
-// ─── Theme tokens ────────────────────────────────────────────────────────────
+// ─── Theme tokens (light / white background) ──────────────────────────────────
 const T = {
-  bg: "#0e0d0b",
-  surface: "rgba(255,255,255,0.035)",
-  surfaceHover: "rgba(255,255,255,0.06)",
-  border: "rgba(240,236,230,0.08)",
+  bg: "#f5f4f2",
+  surface: "#ffffff",
+  surfaceHover: "rgba(0,0,0,0.025)",
+  border: "rgba(0,0,0,0.1)",
   borderFocus: "rgba(250,129,40,0.55)",
   orange: "#fa8128",
-  orangeDim: "rgba(250,129,40,0.18)",
-  orangeGlow: "rgba(250,129,40,0.08)",
-  text: "#f0ece6",
-  textMuted: "rgba(240,236,230,0.45)",
-  textSub: "rgba(240,236,230,0.65)",
-  error: "#ff6b6b",
-  errorBg: "rgba(255,107,107,0.07)",
+  orangeDim: "rgba(250,129,40,0.1)",
+  orangeGlow: "rgba(250,129,40,0.06)",
+  text: "#1a1a16",
+  textMuted: "rgba(20,20,15,0.45)",
+  textSub: "rgba(20,20,15,0.6)",
+  error: "#d93025",
+  errorBg: "rgba(217,48,37,0.06)",
   radius: "12px",
   radiusSm: "8px",
 };
@@ -63,12 +62,12 @@ const PageWrap = styled.div`
   background-image:
     radial-gradient(
       ellipse 70% 45% at 50% 0%,
-      rgba(250, 129, 40, 0.13) 0%,
+      rgba(250, 129, 40, 0.07) 0%,
       transparent 68%
     ),
     radial-gradient(
       ellipse 40% 30% at 80% 80%,
-      rgba(250, 129, 40, 0.05) 0%,
+      rgba(250, 129, 40, 0.04) 0%,
       transparent 60%
     );
   position: relative;
@@ -81,17 +80,19 @@ const PageWrap = styled.div`
     padding: 72px 12px 140px;
   }
 
+  /* Subtle grain texture */
   &::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.028;
+    opacity: 0.018;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 256px 256px;
   }
 
+  /* Left edge accent line */
   &::after {
     content: "";
     position: fixed;
@@ -102,8 +103,8 @@ const PageWrap = styled.div`
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      rgba(250, 129, 40, 0.5) 25%,
-      rgba(250, 129, 40, 0.25) 65%,
+      rgba(250, 129, 40, 0.4) 25%,
+      rgba(250, 129, 40, 0.2) 65%,
       transparent 100%
     );
     pointer-events: none;
@@ -130,7 +131,7 @@ const CardTag = styled.div`
 const CardTagLine = styled.div`
   flex: 1;
   height: 1px;
-  background: linear-gradient(to right, rgba(250, 129, 40, 0.4), transparent);
+  background: linear-gradient(to right, rgba(250, 129, 40, 0.35), transparent);
 `;
 
 const CardTagText = styled.span`
@@ -138,20 +139,21 @@ const CardTagText = styled.span`
   font-size: 9px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(250, 129, 40, 0.55);
+  color: rgba(250, 129, 40, 0.6);
   white-space: nowrap;
 `;
 
+// ─── Card shell ───────────────────────────────────────────────────────────────
 const Card = styled.div`
   width: 100%;
-  background: rgba(255, 255, 255, 0.032);
-  border: 1px solid rgba(240, 236, 230, 0.07);
-  border-top: 1px solid rgba(250, 129, 40, 0.2);
+  background: ${T.surface};
+  border: 1px solid ${T.border};
+  border-top: 1px solid rgba(250, 129, 40, 0.25);
   border-radius: 16px;
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 32px 80px rgba(0, 0, 0, 0.45),
-    0 0 120px rgba(250, 129, 40, 0.04);
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
 `;
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -159,6 +161,7 @@ const CardHeader = styled.div`
   padding: 24px 16px 20px;
   border-bottom: 1px solid ${T.border};
   border-radius: 16px 16px 0 0;
+  background: #faf9f7;
 
   @media (min-width: 400px) {
     padding: 28px 24px 22px;
@@ -175,7 +178,7 @@ const Eyebrow = styled.span`
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: ${T.orange};
-  opacity: 0.7;
+  opacity: 0.8;
   display: block;
   margin-bottom: 8px;
 `;
@@ -212,7 +215,7 @@ const StepItem = styled.button`
   padding: 0;
   flex: 1;
   min-width: 0;
-  opacity: ${({ active, done }) => (active || done ? 1 : 0.35)};
+  opacity: ${({ active, done }) => (active || done ? 1 : 0.3)};
   transition: opacity 0.3s;
 `;
 
@@ -229,10 +232,10 @@ const StepDot = styled.div`
   flex-shrink: 0;
   transition: all 0.3s;
   background: ${({ active, done }) =>
-    done ? T.orange : active ? "transparent" : "rgba(255,255,255,0.04)"};
+    done ? T.orange : active ? "transparent" : "rgba(0,0,0,0.04)"};
   border: 1.5px solid
     ${({ active, done }) =>
-      active || done ? T.orange : "rgba(240,236,230,0.12)"};
+      active || done ? T.orange : "rgba(0,0,0,0.15)"};
   color: ${({ active, done }) =>
     done ? "#fff" : active ? T.orange : T.textMuted};
 
@@ -254,7 +257,6 @@ const StepLabel = styled.span`
   text-overflow: ellipsis;
   max-width: 100%;
 
-  /* Hide labels on very small screens — dots + connector are enough */
   @media (max-width: 360px) {
     display: none;
   }
@@ -270,7 +272,7 @@ const StepConnector = styled.div`
   min-width: 6px;
   max-width: 28px;
   height: 1px;
-  background: ${({ done }) => (done ? T.orange : "rgba(240,236,230,0.08)")};
+  background: ${({ done }) => (done ? T.orange : "rgba(0,0,0,0.1)")};
   transition: background 0.4s;
   margin-bottom: 13px;
 
@@ -281,7 +283,7 @@ const StepConnector = styled.div`
 
 const ProgressBar = styled.div`
   height: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.06);
   margin-top: 18px;
   border-radius: 2px;
   overflow: hidden;
@@ -309,12 +311,8 @@ const CardBody = styled.div`
 const StepSlide = styled.div`
   animation: ${({ direction }) =>
     direction === "forward"
-      ? css`
-          ${slideIn} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both
-        `
-      : css`
-          ${slideInLeft} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both
-        `};
+      ? css`${slideIn} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both`
+      : css`${slideInLeft} 0.38s cubic-bezier(0.4, 0, 0.2, 1) both`};
 `;
 
 // ─── Section heading inside a step ────────────────────────────────────────────
@@ -327,7 +325,8 @@ const SectionHeading = styled.div`
 
 const SectionIcon = styled.span`
   font-size: 15px;
-  opacity: 0.8;
+  opacity: 0.6;
+  color: ${T.orange};
 `;
 
 const SectionTitle = styled.h3`
@@ -356,7 +355,7 @@ const FieldLabel = styled.label`
 
 const baseInput = css`
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: #faf9f7;
   border: 1px solid ${T.border};
   border-radius: ${T.radiusSm};
   color: ${T.text};
@@ -374,8 +373,8 @@ const baseInput = css`
 
   &:focus {
     border-color: ${T.borderFocus};
-    background: ${T.orangeGlow};
-    box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.06);
+    background: ${T.surface};
+    box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.08);
   }
 
   ${({ hasError }) =>
@@ -436,22 +435,15 @@ const CategoryWrap = styled.div`
   position: relative;
 `;
 
-/* Fade-out edges hint that the rail is scrollable */
-const CategoryRail = styled.div`
+const ChipGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   max-height: 132px;
   overflow-y: auto;
   padding: 2px 2px 8px;
-
-  /* hide scrollbar visually but keep it functional */
   scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* When many categories exist, fade the bottom edge */
+  &::-webkit-scrollbar { display: none; }
   mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 `;
@@ -464,9 +456,6 @@ const CategoryCount = styled.span`
   color: ${T.textMuted};
   margin-top: 10px;
 `;
-
-/* Keep old name as alias so JSX doesn't need to change */
-const ChipGrid = CategoryRail;
 
 const Chip = styled.button`
   padding: 6px 14px;
@@ -485,14 +474,10 @@ const Chip = styled.button`
   &:hover {
     border-color: ${T.orange};
     color: ${T.orange};
+    background: ${T.orangeDim};
   }
 
-  /* Pulse the active state so selections are unmissable */
-  ${({ active }) =>
-    active &&
-    `
-    box-shadow: 0 0 0 3px rgba(250,129,40,0.12);
-  `}
+  ${({ active }) => active && "box-shadow: 0 0 0 3px rgba(250,129,40,0.1);"}
 `;
 
 // ─── Social media row ─────────────────────────────────────────────────────────
@@ -507,7 +492,7 @@ const SocialHandle = styled.span`
   font-family: "Courier New", monospace;
   font-size: 11px;
   color: ${T.orange};
-  opacity: 0.7;
+  opacity: 0.75;
   width: 80px;
   flex-shrink: 0;
   letter-spacing: 0.05em;
@@ -536,15 +521,15 @@ const PackageCard = styled.button`
   border: 1.5px solid ${({ active }) => (active ? T.orange : T.border)};
   background: ${({ active }) =>
     active
-      ? "linear-gradient(135deg, rgba(250,129,40,0.14) 0%, rgba(180,70,0,0.08) 100%)"
-      : T.surface};
+      ? "linear-gradient(135deg, rgba(250,129,40,0.1) 0%, rgba(180,70,0,0.05) 100%)"
+      : "#faf9f7"};
   position: relative;
   overflow: hidden;
 
   &:hover {
-    border-color: ${({ active }) =>
-      active ? T.orange : "rgba(250,129,40,0.35)"};
-    background: ${({ active }) => (active ? undefined : T.surfaceHover)};
+    border-color: ${({ active }) => (active ? T.orange : "rgba(250,129,40,0.4)")};
+    background: ${({ active }) => (active ? undefined : "rgba(250,129,40,0.04)")};
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   }
 `;
 
@@ -597,7 +582,7 @@ const AgreementBox = styled.label`
   padding: 16px;
   border-radius: ${T.radiusSm};
   border: 1px solid ${({ checked }) => (checked ? T.borderFocus : T.border)};
-  background: ${({ checked }) => (checked ? T.orangeGlow : "transparent")};
+  background: ${({ checked }) => (checked ? T.orangeGlow : "#faf9f7")};
   transition: all 0.2s;
   margin-bottom: 24px;
 
@@ -623,9 +608,7 @@ const AgreementText = styled.span`
   a {
     color: ${T.orange};
     text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
+    &:hover { text-decoration: underline; }
   }
 `;
 
@@ -660,6 +643,7 @@ const CardFooter = styled.div`
   align-items: center;
   border-top: 1px solid ${T.border};
   border-radius: 0 0 16px 16px;
+  background: #faf9f7;
   padding: 14px 16px 24px;
   gap: 10px;
   flex-wrap: nowrap;
@@ -699,6 +683,7 @@ const PrevButton = styled(NavButton)`
   &:hover {
     border-color: ${T.orange};
     color: ${T.orange};
+    background: ${T.orangeDim};
   }
 `;
 
@@ -709,7 +694,6 @@ const NextButton = styled(NavButton)`
   margin-left: auto;
   flex-shrink: 0;
 
-  /* On mobile, grow to fill available space for easy tapping */
   @media (max-width: 479px) {
     flex: 1;
   }
@@ -718,10 +702,10 @@ const NextButton = styled(NavButton)`
     background: #e67020;
   }
   &:disabled {
-    background: rgba(250, 129, 40, 0.25);
+    background: rgba(250, 129, 40, 0.2);
     border-color: transparent;
     cursor: not-allowed;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.25);
   }
 `;
 
@@ -737,7 +721,7 @@ const StepCounter = styled.span`
 // ─── InfoNote ─────────────────────────────────────────────────────────────────
 const InfoNote = styled.div`
   padding: 12px 16px;
-  border-left: 3px solid rgba(250, 129, 40, 0.4);
+  border-left: 3px solid rgba(250, 129, 40, 0.45);
   background: ${T.orangeGlow};
   border-radius: 0 8px 8px 0;
   font-size: 0.83rem;
@@ -771,6 +755,7 @@ const QtyButton = styled.button`
   &:hover {
     border-color: ${T.orange};
     color: ${T.orange};
+    background: ${T.orangeDim};
   }
 `;
 
@@ -795,199 +780,153 @@ const STEPS = [
 // COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 const DiscountForm = (props) => {
-  // ── State (same as original) ──────────────────────────────────────────────
+  // ── Text / form state ─────────────────────────────────────────────────────
   const [discountTitle, setDiscountName] = useState("");
   const [discountDescription, setDiscountDescription] = useState("");
-  const [organizerName, setOrganizerName] = useState(
-    props.organizer?.name ?? "",
-  );
-  const [organizerDescription, setOrganizerDescription] = useState(
-    props.organizer?.description ?? "",
-  );
+  const [organizerName, setOrganizerName] = useState(props.organizer?.name ?? "");
   const [email, setEmail] = useState(props.organizer?.email ?? "");
-  const [phoneNumber, setPhoneNumber] = useState(
-    props.organizer?.phone_number ?? "",
-  );
-  const [discountCategories, setDiscountCategories] = useState([]);
-  const [percentageDiscount, setPercentageDiscount] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(props.organizer?.contact ?? "");
+  const [websiteURL, setWebsiteUrl] = useState("");
+  const [facebookURL, setFacebookURL] = useState("");
+  const [instagramURL, setInstagramURL] = useState("");
+  const [twitterURL, setTwitterURL] = useState("");
+  const [videoURL, setVideoURL] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [location, setLocation] = useState("");
-  const [address, setAddress] = useState("");
-  const [startDate, setStartDate] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
-  const [endDate, setEndDate] = useState(
-    new Date(Date.now() + 86400000).toISOString().slice(0, 10),
-  );
-  const [discountFlyer, setDiscountFlyer] = useState();
+  const [percentageDiscount, setPercentageDiscount] = useState("");
+  const [discountCategories, setDiscountCategories] = useState([]);
+  const [packageOption, setPackageOption] = useState(null);
+  const [agreement, setAgreement] = useState("");
+  const [mapEmbed, setMapEmbed] = useState("");
+
+  // ── Media state ───────────────────────────────────────────────────────────
+  const [discountFlyer, setDiscountFlyer] = useState(null);
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
+  const [filename, setFilename] = useState("");
+  const [isFlyerEmpty, setIsFlyerEmpty] = useState(false);
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
-  const [socialMediaHandles, setSocialMediaHandles] = useState(
-    props.organizer?.social_media_handles ?? {
-      whatsapp: "",
-      facebook: "",
-      instagram: "",
-      twitter: "",
-    },
-  );
-  const [videoURL, setVideoURL] = useState("");
-  const [websiteURL, setWebsiteUrl] = useState("");
-  const [agreement, setAgreement] = useState("");
-  const [allCategories, setAllCategories] = useState();
-  const [discountPackages, setDiscountPackages] = useState();
-  const [packageOption, setPackageOption] = useState();
 
-  // UI state
-  const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState("forward");
-  
-  // Scroll to top on step change
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [step]);
-
-  // Errors
+  // ── Error state ───────────────────────────────────────────────────────────
   const [emailError, setEmailError] = useState("");
   const [contactError, setContactError] = useState("");
-  const [imageError, setImageError] = useState({ flyer: "", images: "" });
-  const [videoURLError, setVideoURLError] = useState("");
   const [websiteURLError, setWebsiteURLError] = useState("");
-  const [socialMediaHandlesURLError, setSocialMediaHandlesURLError] = useState({
-    whatsappError: "",
-    facebookError: "",
-    instagramError: "",
-    twitterError: "",
-  });
-  const [isFlyerEmpty, setIsFlyerEmpty] = useState(false);
-  const [filename, setFilename] = useState("");
+  const [videoURLError, setVideoURLError] = useState("");
+  const [imageError, setImageError] = useState({ flyer: "", images: "" });
 
-  const { pathname } = useLocation();
+  // ── UI state ──────────────────────────────────────────────────────────────
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState("forward");
+
   const {
-    setUrl,
-    categories,
     discount,
-    discount_media,
-    discount_packages,
+    allCategories,
+    discountPackages,
     getCategories,
     getDiscountPackages,
-    getDiscountMedia,
+    createDiscount,
+    updateDiscount,
   } = props;
 
-  // ── Effects ───────────────────────────────────────────────────────────────
-  // Mount-only: record URL for post-login redirect. Refs let us read
-  // the latest values without adding them as reactive dependencies.
-  const pathnameRef = React.useRef(pathname);
-  const setUrlRef = React.useRef(setUrl);
+  const { pathname } = useLocation();
+
+  // Record URL for post-login redirect
   useEffect(() => {
-    setUrlRef.current?.(pathnameRef.current);
-  }, []);
+    props.setUrl?.(pathname);
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (categories) setAllCategories(categories);
-    else getCategories?.();
+    if (!allCategories) getCategories();
+    if (!discountPackages) getDiscountPackages();
+  }, [allCategories, discountPackages, getCategories, getDiscountPackages]);
 
-    if (discount_packages) {
-      setDiscountPackages(discount_packages.results);
-      setPackageOption({ ...discount_packages.results[0], quantity: 1 });
-    } else {
-      getDiscountPackages?.();
+
+  // Auto-select the first package once packages are available
+  useEffect(() => {
+    if (discountPackages?.length && !packageOption) {
+      setPackageOption({ ...discountPackages[0], quantity: 1 });
     }
-
-    if (discount && !discountFlyer) {
-      setDiscountName(discount.name);
-      setDiscountDescription(discount.description);
-      setOrganizerName(discount.organizer.name);
-      setOrganizerDescription(discount.organizer.description);
-      setEmail(discount.organizer.email);
-      setPhoneNumber(discount.organizer.phone_number);
-      setDiscountCategories(discount.categories);
-      setPercentageDiscount(discount.percentage_discount);
-      setLocation(discount.location);
-      setAddress(discount.address);
-      setStartDate(discount.start_date);
-      setEndDate(discount.end_date);
-      setSocialMediaHandles(discount.organizer.social_media_handles);
-      setWebsiteUrl(discount.website_url);
-      setPackageOption(discount_packages.results[0]);
-      setDiscountFlyer(discount.flyer);
-      setAgreement(discount.agreement);
+  }, [discountPackages]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Pre-fill form when editing
+  useEffect(() => {
+    if (discount) {
+      setDiscountName(discount.title ?? "");
+      setDiscountDescription(discount.description ?? "");
+      setOrganizerName(discount.organizer_name ?? "");
+      setEmail(discount.organizer_email ?? "");
+      setPhoneNumber(discount.organizer_contact ?? "");
+      setWebsiteUrl(discount.website_url ?? "");
+      setFacebookURL(discount.facebook_url ?? "");
+      setInstagramURL(discount.instagram_url ?? "");
+      setTwitterURL(discount.twitter_url ?? "");
+      setVideoURL(discount.video_url ?? "");
+      setStartDate(discount.start_date ?? "");
+      setEndDate(discount.end_date ?? "");
+      setLocation(discount.location ?? "");
+      setPercentageDiscount(discount.percentage_discount ?? "");
+      setDiscountCategories(discount.categories ?? []);
+      setMapEmbed(discount.map_embed ?? "");
+      // Restore existing flyer preview when editing
+      if (discount.flyer) {
+        setReadDiscountFlyer(discount.flyer);
+        setFilename("Current flyer");
+      }
     }
+  }, [discount]);
 
-    if (
-      (!discount_media && discount) ||
-      (discount && discount_media?.[0]?.discount !== discount.url)
-    ) {
-      getDiscountMedia?.(discount.id);
-    }
+  const pct = ((step + 1) / STEPS.length) * 100;
 
-    if (discount_media && !discountImages.length) {
-      setDiscountImages(discount_media);
-      setReadDiscountImages(discount_media);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    categories,
-    discount,
-    discount_media,
-    discount_packages,
-    discountFlyer,
-    discountImages.length,
-    getCategories,
-    getDiscountMedia,
-    getDiscountPackages,
-  ]);
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
   const goTo = (next) => {
-    setDirection(next > step ? "forward" : "back");
+    setDirection(next > step ? "forward" : "backward");
     setStep(next);
+    document.getElementById("top")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleEmailChange = (value) => {
+    setEmail(value);
+    const res = isEmailValid(value);
+    setEmailError(res[1] ?? "");
+  };
+
+  const handleContactChange = (value) => {
+    setPhoneNumber(value);
+    const res = isContactValid(value);
+    setContactError(res[1] ?? "");
   };
 
   const toggleCategory = (cat) => {
-    const exists = discountCategories?.some((c) => c.name === cat.name);
-    setDiscountCategories(
-      exists
-        ? discountCategories.filter((c) => c.name !== cat.name)
-        : [...(discountCategories || []), cat],
+    setDiscountCategories((prev) =>
+      prev.some((c) => c.name === cat.name)
+        ? prev.filter((c) => c.name !== cat.name)
+        : [...prev, cat],
     );
   };
 
-  const handleEmailChange = (val) => {
-    setEmail(val);
-    const res = isEmailValid(val);
-    setEmailError(res[1] ? res[1] : "");
-  };
-
-  const handleContactChange = (val) => {
-    setPhoneNumber(val);
-    const res = isContactValid(val);
-    setContactError(res[1] ? res[1] : "");
-  };
-
-  const handleSocialChange = (platform, value) => {
-    setSocialMediaHandles((prev) => ({ ...prev, [platform]: value }));
-    if (value && !isValidURL(value)) {
-      setSocialMediaHandlesURLError((prev) => ({
-        ...prev,
-        [`${platform}Error`]: "Invalid URL",
-      }));
-    } else {
-      setSocialMediaHandlesURLError((prev) => ({
-        ...prev,
-        [`${platform}Error`]: "",
-      }));
-    }
+  // ── Media handlers ────────────────────────────────────────────────────────
+  const flyerImageHandler = (acceptedFiles) => {
+    if (!acceptedFiles.length) return;
+    const file = acceptedFiles[0];
+    setDiscountFlyer(file);
+    setIsFlyerEmpty(false);
+    setFilename(file.name);
+    setImageError((prev) => ({ ...prev, flyer: "" }));
+    const reader = new FileReader();
+    reader.onload = (e) => setReadDiscountFlyer(e.target.result);
+    reader.readAsDataURL(file);
   };
 
   const onDrop = (acceptedFiles) => {
     if (discountImages.length >= 3) {
-      setImageError((e) => ({ ...e, images: "Maximum 3 images" }));
+      setImageError((prev) => ({ ...prev, images: "Maximum 3 images allowed" }));
       return;
     }
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
+    const remaining = 3 - discountImages.length;
+    const toAdd = acceptedFiles.slice(0, remaining);
+    toAdd.forEach((file) => {
       const imgId = createId();
       setDiscountImages((prev) => [...prev, { id: `image-${imgId}`, file }]);
+      const reader = new FileReader();
       reader.onload = (e) =>
         setReadDiscountImages((prev) => [
           ...prev,
@@ -995,112 +934,63 @@ const DiscountForm = (props) => {
         ]);
       reader.readAsDataURL(file);
     });
-  };
-
-  const flyerImageHandler = (acceptedFiles) => {
-    if (!acceptedFiles.length) return;
-    const file = acceptedFiles[0];
-    setDiscountFlyer(file);
-    setIsFlyerEmpty(false);
-    setFilename(file.name);
-    const reader = new FileReader();
-    reader.onload = (e) => setReadDiscountFlyer(e.target.result);
-    reader.readAsDataURL(file);
+    if (acceptedFiles.length > remaining) {
+      setImageError((prev) => ({ ...prev, images: "Maximum 3 images allowed" }));
+    } else {
+      setImageError((prev) => ({ ...prev, images: "" }));
+    }
   };
 
   const popImage = (id) => {
     setDiscountImages((prev) => prev.filter((img) => img.id !== id));
     setReadDiscountImages((prev) => prev.filter((img) => img.id !== id));
+    setImageError((prev) => ({ ...prev, images: "" }));
   };
 
-  const generateEmbed = async () => {
-    try {
-      const embed = await generateEmbedFromName(location);
-      setAddress(embed);
-      return embed;
-    } catch (err) {
-      console.error("Could not generate embed:", err);
+  const handlePostDiscount = () => {
+    // Validate flyer is present for new discounts
+    if (!discount && !discountFlyer) {
+      setIsFlyerEmpty(true);
+      setImageError((prev) => ({ ...prev, flyer: "Flyer image is required" }));
+      goTo(2);
+      return;
     }
-  };
-
-  const handlePostDiscount = async () => {
-    let embed_location = address;
-    if (!address?.trim()) {
-      try {
-        embed_location = await generateEmbed();
-      } catch (_) {}
-    }
-
-    const filteredSocial = Object.fromEntries(
-      Object.entries(socialMediaHandles).filter(([, v]) => v?.trim()),
-    );
 
     const payload = {
-      discount_data: {
-        title: discountTitle,
-        description: discountDescription,
-        package_type: packageOption?.type,
-        percentage_discount: percentageDiscount,
-        start_date: startDate,
-        end_date: endDate,
-        categories: discountCategories,
-        video_url: videoURL,
-        website_url: websiteURL,
-        agreement,
-        location,
-        address: embed_location,
-      },
-      organizer_data: {
-        name: organizerName,
-        description: organizerDescription,
-        email,
-        phone_number: phoneNumber,
-        social_media_handles: filteredSocial,
-      },
-      package_data: {
-        type: packageOption?.type,
-        quantity: packageOption?.quantity,
-      },
+      id: discount?.id ?? createId(),
+      title: discountTitle,
+      description: discountDescription,
+      organizer_name: organizerName,
+      organizer_email: email,
+      organizer_contact: phoneNumber,
+      website_url: websiteURL,
+      facebook_url: facebookURL,
+      instagram_url: instagramURL,
+      twitter_url: twitterURL,
+      video_url: videoURL,
+      start_date: startDate,
+      end_date: endDate,
+      location,
+      percentage_discount: percentageDiscount,
+      categories: discountCategories,
+      map_embed: mapEmbed,
+      package_type: packageOption?.type,
     };
 
-    const files = { flyer: discountFlyer, images: discountImages };
     const formData = new FormData();
     formData.append("payload", JSON.stringify(payload));
-    formData.append("flyer", files.flyer);
-    formData.append("images_length", files.images.length);
+    if (discountFlyer) formData.append("flyer", discountFlyer);
+    formData.append("images_length", discountImages.length);
+    discountImages.forEach((img, i) => {
+      formData.append(`image-${i}`, img.file ? img.file : JSON.stringify(img));
+    });
 
-    if (discount) {
-      files.images.forEach((img, i) => {
-        formData.append(
-          `image-${i}`,
-          img.file ? img.file : JSON.stringify(img),
-        );
-      });
-      props.updateDiscount?.({ formData, discount_id: discount.id });
-    } else {
-      files.images.forEach((img, i) => formData.append(`image-${i}`, img.file));
-      props.postDiscount?.(formData);
-    }
+    discount ? updateDiscount(formData) : createDiscount(formData);
   };
 
-  // ── Step validation (simple) ───────────────────────────────────────────────
-  const canProceed = [
-    discountTitle && discountDescription && percentageDiscount,
-    organizerName && email && !emailError,
-    true, // media optional
-    agreement === "agreed" && packageOption,
-    packageOption, // payment step - just need a package selected
-  ];
-
-  // ── Render helpers ────────────────────────────────────────────────────────
-  const pct = ((step + 1) / STEPS.length) * 100;
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP CONTENT
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─── Step content renderer ────────────────────────────────────────────────
   // Called as renderStepContent(), NOT as <StepContent /> — avoids React
-  // treating it as a new component type each render (which would unmount/
-  // remount all inputs, losing focus and resetting scroll on every keystroke).
+  // treating it as a new component type each render which unmounts inputs.
   const renderStepContent = () => {
     switch (step) {
       // ── Step 0: Discount Details ────────────────────────────────────────
@@ -1187,13 +1077,11 @@ const DiscountForm = (props) => {
 
             {allCategories ? (
               <CategoryWrap>
-                <ChipGrid id="categories">
+                <ChipGrid>
                   {allCategories.map((cat) => (
                     <Chip
                       key={cat.id}
-                      active={discountCategories?.some(
-                        (c) => c.name === cat.name,
-                      )}
+                      active={discountCategories?.some((c) => c.name === cat.name)}
                       onClick={() => toggleCategory(cat)}
                       type="button"
                     >
@@ -1213,7 +1101,7 @@ const DiscountForm = (props) => {
           </StepSlide>
         );
 
-      // ── Step 1: Organizer Info ──────────────────────────────────────────
+      // ── Step 1: Organizer Info ────────────────────────────────────────────
       case 1:
         return (
           <StepSlide direction={direction}>
@@ -1270,9 +1158,7 @@ const DiscountForm = (props) => {
                   onChange={(e) => {
                     setWebsiteUrl(e.target.value);
                     setWebsiteURLError(
-                      isValidURL(e.target.value) || !e.target.value
-                        ? ""
-                        : "Invalid URL",
+                      isValidURL(e.target.value) || !e.target.value ? "" : "Invalid URL",
                     );
                   }}
                 />
@@ -1280,113 +1166,88 @@ const DiscountForm = (props) => {
               </FieldGroup>
             </TwoCol>
 
-            <FieldGroup>
-              <FieldLabel>About Your Business</FieldLabel>
-              <Textarea
-                id="organizerDescription"
-                rows={3}
-                value={organizerDescription}
-                placeholder="Briefly describe your business…"
-                onChange={(e) => setOrganizerDescription(e.target.value)}
-              />
-            </FieldGroup>
-
             <Divider />
 
             <SectionHeading>
               <SectionIcon>◉</SectionIcon>
-              <SectionTitle>
-                Social Handles{" "}
-                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
-                  (optional)
-                </span>
-              </SectionTitle>
+              <SectionTitle>Social Media</SectionTitle>
             </SectionHeading>
 
-            {["whatsapp", "facebook", "instagram", "twitter"].map(
-              (platform) => (
-                <SocialRow key={platform}>
-                  <SocialHandle>{platform}</SocialHandle>
-                  <SocialInput
-                    type="url"
-                    value={socialMediaHandles[platform] ?? ""}
-                    hasError={!!socialMediaHandlesURLError[`${platform}Error`]}
-                    placeholder={`https://${platform}.com/…`}
-                    onChange={(e) =>
-                      handleSocialChange(platform, e.target.value)
-                    }
-                  />
-                  {socialMediaHandlesURLError[`${platform}Error`] && (
-                    <FieldError
-                      style={{ fontSize: "0.72rem", whiteSpace: "nowrap" }}
-                    >
-                      {socialMediaHandlesURLError[`${platform}Error`]}
-                    </FieldError>
-                  )}
-                </SocialRow>
-              ),
-            )}
+            {[
+              { handle: "facebook.com/", value: facebookURL, setter: setFacebookURL },
+              { handle: "instagram.com/", value: instagramURL, setter: setInstagramURL },
+              { handle: "twitter.com/", value: twitterURL, setter: setTwitterURL },
+            ].map(({ handle, value, setter }) => (
+              <SocialRow key={handle}>
+                <SocialHandle>{handle}</SocialHandle>
+                <SocialInput
+                  type="text"
+                  value={value}
+                  placeholder="username"
+                  onChange={(e) => setter(e.target.value)}
+                />
+              </SocialRow>
+            ))}
           </StepSlide>
         );
 
-      // ── Step 2: Media ───────────────────────────────────────────────────
+      // ── Step 2: Media ─────────────────────────────────────────────────────
       case 2:
         return (
           <StepSlide direction={direction}>
             <SectionHeading>
               <SectionIcon>◉</SectionIcon>
-              <SectionTitle>Media Assets</SectionTitle>
+              <SectionTitle>Media</SectionTitle>
             </SectionHeading>
-
-            <InfoNote>
-              A high-quality flyer significantly improves click-through rate.
-              Use a 1:1 or 4:5 ratio image for best results.
-            </InfoNote>
 
             <AssetGrid>
               <AssetSlot>
                 <AssetLabel>Discount Flyer *</AssetLabel>
                 <Dropzone
                   onDrop={flyerImageHandler}
-                  accept={"image/*"}
+                  accept="image/*"
                   minSizeBytes={1}
                   maxSizeBytes={1000000}
                   maxFiles={1}
-                  preview={true}
                   filename={filename}
                   bgImage={readDiscountFlyer}
                   isEmpty={isFlyerEmpty}
                   error={imageError.flyer}
                 />
               </AssetSlot>
+
               <AssetSlot>
                 <AssetLabel>Gallery Images (up to 3)</AssetLabel>
                 <Dropzone
                   onDrop={onDrop}
-                  accept={"image/*"}
+                  accept="image/*"
                   minSizeBytes={1}
                   maxSizeBytes={1000000}
                   maxFiles={3}
+                  imageCount={readDiscountImages.length}
                   error={imageError.images}
                 />
+                {readDiscountImages.length > 0 && (
+                  <ImageGrid images={readDiscountImages} popImage={popImage} />
+                )}
               </AssetSlot>
             </AssetGrid>
 
-            {readDiscountImages?.length > 0 && (
-              <ImageGrid images={readDiscountImages} popImage={popImage} />
-            )}
-
             <Divider />
 
-            <SectionHeading>
-              <SectionIcon>▷</SectionIcon>
-              <SectionTitle>
-                Video{" "}
-                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
-                  (optional)
-                </span>
-              </SectionTitle>
-            </SectionHeading>
+            <FieldGroup>
+              <FieldLabel>Google Maps Embed Name</FieldLabel>
+              <Input
+                type="text"
+                value={mapEmbed}
+                placeholder="e.g. Accra Mall"
+                onChange={(e) => {
+                  setMapEmbed(e.target.value);
+                  generateEmbedFromName(e.target.value);
+                }}
+              />
+              <FieldHint>Enter the place name as it appears on Google Maps.</FieldHint>
+            </FieldGroup>
 
             <FieldGroup>
               <FieldLabel>Video URL</FieldLabel>
@@ -1398,9 +1259,7 @@ const DiscountForm = (props) => {
                 onChange={(e) => {
                   setVideoURL(e.target.value);
                   setVideoURLError(
-                    isValidURL(e.target.value) || !e.target.value
-                      ? ""
-                      : "Invalid URL",
+                    isValidURL(e.target.value) || !e.target.value ? "" : "Invalid URL",
                   );
                 }}
               />
@@ -1409,7 +1268,7 @@ const DiscountForm = (props) => {
           </StepSlide>
         );
 
-      // ── Step 3: Package + Submit ────────────────────────────────────────
+      // ── Step 3: Package + Agreement ───────────────────────────────────────
       case 3:
         return (
           <StepSlide direction={direction}>
@@ -1428,10 +1287,7 @@ const DiscountForm = (props) => {
                       active={active}
                       type="button"
                       onClick={() =>
-                        setPackageOption({
-                          ...pkg,
-                          quantity: packageOption?.quantity || 1,
-                        })
+                        setPackageOption({ ...pkg, quantity: packageOption?.quantity || 1 })
                       }
                     >
                       <PackageCheck active={active}>✓</PackageCheck>
@@ -1453,10 +1309,7 @@ const DiscountForm = (props) => {
                   <QtyButton
                     type="button"
                     onClick={() =>
-                      setPackageOption((p) => ({
-                        ...p,
-                        quantity: Math.max(1, p.quantity - 1),
-                      }))
+                      setPackageOption((p) => ({ ...p, quantity: Math.max(1, p.quantity - 1) }))
                     }
                   >
                     −
@@ -1465,25 +1318,13 @@ const DiscountForm = (props) => {
                   <QtyButton
                     type="button"
                     onClick={() =>
-                      setPackageOption((p) => ({
-                        ...p,
-                        quantity: p.quantity + 1,
-                      }))
+                      setPackageOption((p) => ({ ...p, quantity: p.quantity + 1 }))
                     }
                   >
                     +
                   </QtyButton>
-                  <span
-                    style={{
-                      color: T.textMuted,
-                      fontSize: "0.85rem",
-                      marginLeft: 8,
-                    }}
-                  >
-                    Total: GHS{" "}
-                    {(
-                      parseFloat(packageOption.price) * packageOption.quantity
-                    ).toFixed(2)}
+                  <span style={{ color: T.textMuted, fontSize: "0.85rem", marginLeft: 8 }}>
+                    Total: GHS {(parseFloat(packageOption.price) * packageOption.quantity).toFixed(2)}
                   </span>
                 </QuantityRow>
               </FieldGroup>
@@ -1498,9 +1339,7 @@ const DiscountForm = (props) => {
 
             <AgreementBox
               checked={agreement === "agreed"}
-              onClick={() =>
-                setAgreement(agreement === "agreed" ? "" : "agreed")
-              }
+              onClick={() => setAgreement(agreement === "agreed" ? "" : "agreed")}
             >
               <Checkbox
                 id="agreement"
@@ -1511,12 +1350,7 @@ const DiscountForm = (props) => {
               />
               <AgreementText>
                 I have read and agree to the{" "}
-                <a
-                  href="/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <a href="/terms" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                   Terms and Conditions
                 </a>{" "}
                 and confirm that all information provided is accurate.
@@ -1525,9 +1359,10 @@ const DiscountForm = (props) => {
           </StepSlide>
         );
 
-      // ── Step 4: Payment ─────────────────────────────────────────────────
-      case 4:
-        const totalAmount = parseFloat(packageOption?.price || 0) * (packageOption?.quantity || 1);
+      // ── Step 4: Payment ───────────────────────────────────────────────────
+      case 4: {
+        const totalAmount =
+          parseFloat(packageOption?.price || 0) * (packageOption?.quantity || 1);
         return (
           <StepSlide direction={direction}>
             <SectionHeading>
@@ -1535,31 +1370,24 @@ const DiscountForm = (props) => {
               <SectionTitle>Payment</SectionTitle>
             </SectionHeading>
 
-            <InfoNote>
-              Complete your purchase to publish your discount ad.
-            </InfoNote>
+            <InfoNote>Complete your purchase to publish your discount ad.</InfoNote>
 
             <Payment
               amount={totalAmount}
               package_type={packageOption?.type}
-              user={{
-                name: organizerName,
-                email: email,
-                contact: phoneNumber,
-              }}
+              user={{ name: organizerName, email, contact: phoneNumber }}
               handlePostDiscount={handlePostDiscount}
             />
           </StepSlide>
         );
+      }
 
       default:
         return null;
     }
   };
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // RENDER
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <PageWrap id="top">
       <CardOuter>
@@ -1571,11 +1399,8 @@ const DiscountForm = (props) => {
           {/* ── Header ── */}
           <CardHeader>
             <Eyebrow>Quick Discount</Eyebrow>
-            <FormTitle>
-              {discount ? "Update Discount Ad" : "Create Discount Ad"}
-            </FormTitle>
+            <FormTitle>{discount ? "Update Discount Ad" : "Create Discount Ad"}</FormTitle>
 
-            {/* Step indicators */}
             <StepRow>
               {STEPS.map((s, i) => (
                 <React.Fragment key={s.label}>
@@ -1603,9 +1428,7 @@ const DiscountForm = (props) => {
 
           {/* ── Footer ── */}
           <CardFooter>
-            <StepCounter>
-              {step + 1} / {STEPS.length}
-            </StepCounter>
+            <StepCounter>{step + 1} / {STEPS.length}</StepCounter>
 
             {step > 0 && (
               <PrevButton type="button" onClick={() => goTo(step - 1)}>
@@ -1613,24 +1436,13 @@ const DiscountForm = (props) => {
               </PrevButton>
             )}
 
-            {step === STEPS.length - 1 ? (
-              // Final step (Payment) - let Payment component handle submission
-              null
-            ) : step < STEPS.length - 1 ? (
+            {step === STEPS.length - 1 ? null : (
               <NextButton
                 type="button"
-                disabled={!canProceed[step]}
                 onClick={() => goTo(step + 1)}
+                disabled={step === STEPS.length - 2 && agreement !== "agreed"}
               >
-                Continue →
-              </NextButton>
-            ) : (
-              <NextButton
-                type="button"
-                disabled={!canProceed[step]}
-                onClick={handlePostDiscount}
-              >
-                {discount ? "Update Ad" : "Submit Ad"} →
+                Next →
               </NextButton>
             )}
           </CardFooter>
@@ -1640,22 +1452,18 @@ const DiscountForm = (props) => {
   );
 };
 
-// ─── Redux connections (unchanged from original) ──────────────────────────────
 const mapStateToProps = (state) => ({
-  categories: state.discountState.categories,
-  discount_packages: state.discountState.discount_packages,
-  discount_media: state.organizerState.discount_media,
-  payment: state.discountState.payment,
-  organizer: state.organizerState.organizer,
-  createDiscountStatus: state.organizerState.createDiscountStatus,
+  allCategories: state.discountState.categories,
+  // discount_packages is a paginated response { results: [...] }; unwrap here
+  discountPackages: state.discountState.discount_packages?.results ?? null,
+  organizer: state.userState.user,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   getCategories: () => dispatch(getCategoriesAPI()),
   getDiscountPackages: () => dispatch(getDiscountPackagesAPI()),
-  postDiscount: (payload) => dispatch(createDiscountAPI(payload)),
-  updateDiscount: (payload) => dispatch(updateDiscountAPI(payload)),
-  getDiscountMedia: (id) => dispatch(getDiscountMediaAPI(id)),
+  createDiscount: (data) => dispatch(createDiscountAPI(data)),
+  updateDiscount: (data) => dispatch(updateDiscountAPI(data)),
   setUrl: (url) => dispatch(setPreviousUrl(url)),
 });
 

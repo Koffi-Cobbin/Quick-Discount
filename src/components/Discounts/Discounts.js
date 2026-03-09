@@ -7,17 +7,17 @@ import Card from "../Shared/Card";
 
 // ─── Theme tokens (matches QuickDiscount app) ─────────────────────────────────
 const T = {
-  bg: "#0e0d0b",
-  surface: "rgba(255,255,255,0.034)",
-  surfaceHover: "rgba(255,255,255,0.06)",
-  border: "rgba(240,236,230,0.08)",
+  bg: "#ffffff",
+  surface: "rgba(0,0,0,0.03)",
+  surfaceHover: "rgba(0,0,0,0.06)",
+  border: "rgba(0,0,0,0.1)",
   borderHover: "rgba(250,129,40,0.3)",
   orange: "#fa8128",
-  orangeDim: "rgba(250,129,40,0.15)",
-  orangeGlow: "rgba(250,129,40,0.06)",
-  text: "#f0ece6",
-  textMuted: "rgba(240,236,230,0.4)",
-  textSub: "rgba(240,236,230,0.62)",
+  orangeDim: "rgba(250,129,40,0.12)",
+  orangeGlow: "rgba(250,129,40,0.05)",
+  text: "#1a1a16",
+  textMuted: "rgba(20,20,15,0.4)",
+  textSub: "rgba(20,20,15,0.6)",
   radius: "14px",
   radiusSm: "8px",
 };
@@ -40,10 +40,10 @@ const grain = keyframes`
 
 // ─── Global ───────────────────────────────────────────────────────────────────
 const Global = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+  @import url('...');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: ${T.bg}; color: ${T.text}; }
-  ::-webkit-scrollbar { width: 4px; } 
+  ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(250,129,40,0.3); border-radius: 4px; }
 `;
@@ -233,7 +233,7 @@ const SortSelect = styled.select`
   }
 
   option {
-    background: #1a1a16;
+    background: #ffffff;
   }
 `;
 
@@ -296,9 +296,9 @@ const SkeletonShimmer = keyframes`
 const SkeletonBase = css`
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 37%,
-    rgba(255, 255, 255, 0.04) 63%
+    rgba(0, 0, 0, 0.04) 25%,
+    rgba(0, 0, 0, 0.08) 37%,
+    rgba(0, 0, 0, 0.04) 63%
   );
   background-size: 600px 100%;
   animation: ${SkeletonShimmer} 1.4s infinite linear;
@@ -612,7 +612,7 @@ function DiscountsPage(props) {
                   onSave={toggleSave} 
                   isSaved={saved.has(d.id)}
                   isLoading={savingId === d.id}
-                  bgColor="rgba(14, 13, 11, 0.85)"
+                  bgColor="light"
                   isLoggedIn={!!token?.access}
                 />
               ))

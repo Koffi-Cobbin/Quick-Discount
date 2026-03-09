@@ -20,7 +20,7 @@ const TopDiscounts = (props) => {
               key={key}
               index={key}
               discount={discount}
-              bgColor="rgba(14, 13, 11, 0.85)"
+              bgColor="light"
             />
           ))}
       </CarouselFlex>

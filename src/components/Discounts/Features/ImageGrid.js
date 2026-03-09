@@ -1,52 +1,77 @@
 import React from "react";
 import styled from "styled-components";
 
-// Rendering individual images
-const Image = ({ image, popImage }) => {
-  return (
-    <div className="file-item" onClick={() => popImage(image.id)}>
-      <img
-        alt={`img - ${image.id}`}
-        src={image.media_url}
-        className="file-img"
-      />
-    </div>
-  );
-};
-
-// ImageList Component//
 const ImageGrid = ({ images, popImage }) => {
-  // render each image by calling Image component
-  const renderImage = (image, index) => {
-    return <Image 
-              image={image} 
-              key={`${image.id}-image`} 
-              popImage={popImage}/>;
-  };
-  // Return the list of files//
+  if (!images?.length) return null;
+
   return (
-    <ImagePreview className="file-list">{images.map(renderImage)}</ImagePreview>
+    <Grid>
+      {images.map((image) => (
+        <Thumb key={`${image.id}-image`}>
+          {/* Local previews store base64 in `image`; server images use `media_url` */}
+          <img
+            alt={`gallery-${image.id}`}
+            src={image.image || image.media_url}
+          />
+          <RemoveBtn
+            type="button"
+            onClick={() => popImage(image.id)}
+            title="Remove"
+            aria-label="Remove image"
+          >
+            ✕
+          </RemoveBtn>
+        </Thumb>
+      ))}
+    </Grid>
   );
 };
 
-const ImagePreview = styled.section `
-    display: flex !important;
-    /* flex-wrap: wrap; */
-    width: auto;
-    padding: 10px 20px;
-    margin: 20px 12px;
-    border: 2px dotted rgba(0, 0, 0, 0.15);
-  
-    &.file-list img {
-        height: 100%;
-        width: 100px;
-        padding-right: 10px;
-        object-fit: cover;
-    }
+const Grid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+`;
 
-    @media (max-width: 480px) {
-    padding: 10px 1px;
-    overflow-x: auto;
+const Thumb = styled.div`
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.04);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+`;
+
+const RemoveBtn = styled.button`
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  padding: 0;
+
+  &:hover {
+    background: rgba(217, 48, 37, 0.85);
   }
 `;
 

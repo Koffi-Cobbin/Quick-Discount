@@ -6,26 +6,26 @@ import Paystack from "./Paystack";
 import { checkoutAPI, setUserOrder } from "../../actions";
 import { isContactValid, isEmailValid } from "../../utils/middleware";
 
-// ─── Theme tokens (matching DiscountForm) ─────────────────────────────────────
+// ─── Theme tokens (light — matching DiscountForm) ─────────────────────────────
 const T = {
-  bg: "#0e0d0b",
-  surface: "rgba(255,255,255,0.035)",
-  surfaceHover: "rgba(255,255,255,0.06)",
-  border: "rgba(240,236,230,0.08)",
+  bg: "#f5f4f2",
+  surface: "#ffffff",
+  surfaceHover: "rgba(0,0,0,0.025)",
+  border: "rgba(0,0,0,0.1)",
   borderFocus: "rgba(250,129,40,0.55)",
   orange: "#fa8128",
-  orangeDim: "rgba(250,129,40,0.18)",
-  orangeGlow: "rgba(250,129,40,0.08)",
-  text: "#f0ece6",
-  textMuted: "rgba(240,236,230,0.45)",
-  textSub: "rgba(240,236,230,0.65)",
-  error: "#ff6b6b",
-  errorBg: "rgba(255,107,107,0.07)",
+  orangeDim: "rgba(250,129,40,0.1)",
+  orangeGlow: "rgba(250,129,40,0.06)",
+  text: "#1a1a16",
+  textMuted: "rgba(20,20,15,0.45)",
+  textSub: "rgba(20,20,15,0.6)",
+  error: "#d93025",
+  errorBg: "rgba(217,48,37,0.06)",
   radius: "12px",
   radiusSm: "8px",
 };
 
-// ─── Styled Components ───────────────────────────────────────────────────────
+// ─── Styled Components ────────────────────────────────────────────────────────
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -33,12 +33,12 @@ const Wrapper = styled.div`
   padding: 0;
 `;
 
-const PaymentSection = styled.div`
-  background: ${T.surface};
-  border: 1px solid ${T.border};
+const OrderSummary = styled.div`
+  background: linear-gradient(135deg, rgba(250,129,40,0.07) 0%, rgba(250,129,40,0.03) 100%);
+  border: 1px solid rgba(250,129,40,0.2);
   border-radius: ${T.radius};
   padding: 20px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 `;
 
 const SectionTitle = styled.h3`
@@ -53,6 +53,50 @@ const SectionTitle = styled.h3`
   gap: 8px;
 `;
 
+const SummaryRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid ${T.border};
+
+  &:last-child {
+    border-bottom: none;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid rgba(250, 129, 40, 0.2);
+  }
+`;
+
+const SummaryLabel = styled.span`
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  color: ${T.textSub};
+`;
+
+const SummaryValue = styled.span`
+  font-family: "Georgia", serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${T.text};
+`;
+
+const TotalValue = styled.span`
+  font-family: "Georgia", serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: ${T.orange};
+`;
+
+// ─── Payment method section ───────────────────────────────────────────────────
+const PaymentSection = styled.div`
+  background: ${T.surface};
+  border: 1px solid ${T.border};
+  border-radius: ${T.radius};
+  padding: 20px;
+  margin-bottom: 16px;
+`;
+
 const PaymentMethodTabs = styled.div`
   display: flex;
   gap: 8px;
@@ -61,10 +105,10 @@ const PaymentMethodTabs = styled.div`
 
 const PaymentTab = styled.button`
   flex: 1;
-  padding: 12px 16px;
+  padding: 11px 16px;
   border-radius: ${T.radiusSm};
   font-family: "Courier New", monospace;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: all 0.2s;
@@ -75,13 +119,14 @@ const PaymentTab = styled.button`
   &:hover {
     border-color: ${T.orange};
     color: ${T.orange};
+    background: ${T.orangeDim};
   }
 `;
 
-// ─── Input styles matching DiscountForm ─────────────────────────────────────
+// ─── Input styles matching DiscountForm ──────────────────────────────────────
 const baseInput = css`
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: #faf9f7;
   border: 1px solid ${T.border};
   border-radius: ${T.radiusSm};
   color: ${T.text};
@@ -99,8 +144,8 @@ const baseInput = css`
 
   &:focus {
     border-color: ${T.borderFocus};
-    background: ${T.orangeGlow};
-    box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.06);
+    background: ${T.surface};
+    box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.08);
   }
 
   ${({ hasError }) =>
@@ -138,7 +183,15 @@ const FieldError = styled.p`
   font-family: "Courier New", monospace;
 `;
 
-// ─── Two column layout ──────────────────────────────────────────────────────
+const FieldHint = styled.p`
+  font-size: 0.75rem;
+  color: ${T.textMuted};
+  margin: 5px 0 0;
+  line-height: 1.5;
+  font-family: "Courier New", monospace;
+`;
+
+// ─── Two-col row ──────────────────────────────────────────────────────────────
 const TwoCol = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -149,51 +202,7 @@ const TwoCol = styled.div`
   }
 `;
 
-// ─── Order Summary ───────────────────────────────────────────────────────────
-const OrderSummary = styled.div`
-  background: linear-gradient(135deg, rgba(250,129,40,0.1) 0%, rgba(250,129,40,0.05) 100%);
-  border: 1px solid rgba(250,129,40,0.2);
-  border-radius: ${T.radius};
-  padding: 20px;
-  margin-bottom: 20px;
-`;
-
-const SummaryRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid ${T.border};
-
-  &:last-child {
-    border-bottom: none;
-    padding-top: 12px;
-    margin-top: 8px;
-    border-top: 1px solid rgba(250,129,40,0.3);
-  }
-`;
-
-const SummaryLabel = styled.span`
-  font-family: "Courier New", monospace;
-  font-size: 0.85rem;
-  color: ${T.textSub};
-`;
-
-const SummaryValue = styled.span`
-  font-family: "Georgia", serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${T.text};
-`;
-
-const TotalValue = styled.span`
-  font-family: "Georgia", serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: ${T.orange};
-`;
-
-// ─── Submit Button ──────────────────────────────────────────────────────────
+// ─── Submit button ────────────────────────────────────────────────────────────
 const SubmitButton = styled.button`
   width: 100%;
   padding: 14px 24px;
@@ -212,14 +221,18 @@ const SubmitButton = styled.button`
   &:hover {
     background: #e67020;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(250, 129, 40, 0.3);
+    box-shadow: 0 4px 16px rgba(250, 129, 40, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   &:disabled {
-    background: rgba(250, 129, 40, 0.25);
+    background: rgba(250, 129, 40, 0.2);
     border-color: transparent;
     cursor: not-allowed;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.25);
     transform: none;
     box-shadow: none;
   }
@@ -236,14 +249,13 @@ const SecureNote = styled.p`
   gap: 6px;
 `;
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────────────
 const Payment = (props) => {
   const [email, setEmail] = useState(props.user?.email || "");
   const [contact, setContact] = useState(props.user?.contact || "");
   const [momoNumber, setMomoNumber] = useState(props.user?.contact || "");
   const [username, setUsername] = useState(props.user?.name || "");
-  
-  // ERRORS
+
   const [emailError, setEmailError] = useState("");
   const [contactError, setContactError] = useState("");
   const [momoContactError, setMomoContactError] = useState("");
@@ -255,75 +267,58 @@ const Payment = (props) => {
 
   const validateEmail = (value) => {
     setEmail(value);
-    let emailRes = isEmailValid(value);
-    setEmailError(emailRes[1] ? emailRes[1] : "");
+    const res = isEmailValid(value);
+    setEmailError(res[1] ? res[1] : "");
   };
 
-  const validateContact = (value, cntType) => {
-    let contactRes = isContactValid(value);
-    if (cntType === "cnt") {
-      setContact(value);
-      setContactError(contactRes[1] ? contactRes[1] : "");
-    } else {
+  const validateContact = (value, type) => {
+    const res = isContactValid(value);
+    if (type === "momo") {
       setMomoNumber(value);
-      setMomoContactError(contactRes[1] ? contactRes[1] : "");
+      setMomoContactError(res[1] ? res[1] : "");
+    } else {
+      setContact(value);
+      setContactError(res[1] ? res[1] : "");
     }
   };
 
+  // Enable submit only when required fields are valid
   useEffect(() => {
-    const isAllEntriesFilled = async () => {
-      if (username && email && contact) {
-        setEnableSubmit(true);
-      } else {
-        setEnableSubmit(false);
-      }
-    };
-
-    isAllEntriesFilled();
-  }, [username, email, contact]);
+    const baseValid = username && email && !emailError && contact && !contactError;
+    const momoValid = paymentMethod !== "momo" || (momoNumber && !momoContactError);
+    setEnableSubmit(!!(baseValid && momoValid));
+  }, [username, email, emailError, contact, contactError, momoNumber, momoContactError, paymentMethod]);
 
   const handleCheckout = (e) => {
     e.preventDefault();
-
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-
-    props.handlePostDiscount?.();
+    const payload = {
+      username,
+      email,
+      contact,
+      momoNumber,
+    };
+    props.checkout?.(payload);
   };
 
   useEffect(() => {
-    const checkout = () => {
-      const payload = {
-        username: username,
-        email: email,
-        contact: contact,
-        momoNumber: momoNumber,
-      };
-
-      props.checkout?.(payload);
-    };
-    
     if (props.createDiscountStatus) {
-      checkout();
+      const payload = { username, email, contact, momoNumber };
+      props.checkout?.(payload);
     }
-  }, [props.createDiscountStatus]);
+  }, [props.createDiscountStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Show Paystack if payment prop is provided
+  // Show Paystack widget once checkout API has returned payment details
   if (props.payment) {
     return (
       <Wrapper>
-        <Paystack
-          payment={props.payment}
-          package_type={props.package_type}
-        />
+        <Paystack payment={props.payment} package_type={props.package_type} />
       </Wrapper>
     );
   }
 
   return (
     <Wrapper>
-      {/* Order Summary */}
+      {/* ── Order Summary ── */}
       <OrderSummary>
         <SectionTitle>📋 Order Summary</SectionTitle>
         <SummaryRow>
@@ -340,9 +335,10 @@ const Payment = (props) => {
         </SummaryRow>
       </OrderSummary>
 
-      {/* Payment Method Selection */}
+      {/* ── Payment Method + Form ── */}
       <PaymentSection>
         <SectionTitle>💳 Payment Method</SectionTitle>
+
         <PaymentMethodTabs>
           <PaymentTab
             type="button"
@@ -361,33 +357,35 @@ const Payment = (props) => {
         </PaymentMethodTabs>
 
         <form onSubmit={handleCheckout}>
-          <FieldGroup>
-            <FieldLabel>Full Name</FieldLabel>
-            <Input
-              type="text"
-              id="username"
-              name="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your full name"
-              required
-            />
-          </FieldGroup>
+          <TwoCol>
+            <FieldGroup>
+              <FieldLabel>Full Name</FieldLabel>
+              <Input
+                type="text"
+                id="username"
+                name="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Your full name"
+                required
+              />
+            </FieldGroup>
 
-          <FieldGroup>
-            <FieldLabel>Email Address</FieldLabel>
-            <Input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => validateEmail(e.target.value)}
-              hasError={!!emailError}
-              required
-            />
-            {emailError && <FieldError>{emailError}</FieldError>}
-          </FieldGroup>
+            <FieldGroup>
+              <FieldLabel>Email Address</FieldLabel>
+              <Input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                value={email}
+                hasError={!!emailError}
+                onChange={(e) => validateEmail(e.target.value)}
+                required
+              />
+              {emailError && <FieldError>{emailError}</FieldError>}
+            </FieldGroup>
+          </TwoCol>
 
           <FieldGroup>
             <FieldLabel>Contact Number</FieldLabel>
@@ -418,35 +416,28 @@ const Payment = (props) => {
                 required
               />
               {momoContactError && <FieldError>{momoContactError}</FieldError>}
-              <FieldError style={{ marginTop: '8px', fontSize: '0.72rem', color: T.textMuted }}>
+              <FieldHint>
                 We'll send an OTP to this number for payment verification
-              </FieldError>
+              </FieldHint>
             </FieldGroup>
           )}
 
-          <SubmitButton
-            type="submit"
-            disabled={!enableSubmit}
-          >
+          <SubmitButton type="submit" disabled={!enableSubmit}>
             Pay GH&#8373; {totalAmount} &rarr;
           </SubmitButton>
 
-          <SecureNote>
-            🔒 Secure payment powered by Paystack
-          </SecureNote>
+          <SecureNote>🔒 Secure payment powered by Paystack</SecureNote>
         </form>
       </PaymentSection>
     </Wrapper>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.userState.user,
-    payment: state.userState.payment,
-    createDiscountStatus: state.discountState.createDiscountStatus,
-  };
-};
+const mapStateToProps = (state) => ({
+  user: state.userState.user,
+  payment: state.userState.payment,
+  createDiscountStatus: state.discountState.createDiscountStatus,
+});
 
 const mapDispatchToProps = (dispatch) => ({
   checkout: (payload) => dispatch(checkoutAPI(payload)),
@@ -454,4 +445,3 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Payment);
-

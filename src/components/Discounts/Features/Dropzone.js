@@ -1,140 +1,202 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 
+/**
+ * Dropzone — handles both single-image (flyer) and multi-image (gallery) modes.
+ *
+ * Single-image mode  → pass bgImage + filename props → shows full-bleed preview
+ * Gallery mode       → pass imageCount + maxFiles > 1 → shows count badge + upload prompt
+ */
 const Dropzone = (props) => {
-  const [bgImage, setBgImage] = useState("");
-  const fileInputRef = React.useRef(null);
+  const { bgImage, filename, maxFiles = 1, imageCount = 0 } = props;
+  const isGalleryMode = maxFiles > 1;
 
-  let onDrop = props.onDrop;
-  let accept = props.accept;
-  let minSize = props.minSizeBytes;
-  let maxSize = props.maxSizeBytes;
-  let maxFiles = props.maxFiles;
-  const { getRootProps, getInputProps, isDragActive, acceptedFiles } =
-    useDropzone({ 
-      accept, 
-      minSize, 
-      maxSize, 
-      maxFiles, 
-      onDrop
-    });
+  // Single-image preview state (flyer)
+  const [previewUrl, setPreviewUrl] = useState(bgImage || "");
+  const [displayName, setDisplayName] = useState(filename || "");
 
-  const files = acceptedFiles.map((file) => (
-    <li key={file.path}>
-      {file.path} - {file.size} bytes
-    </li>
-  ));
+  // Sync server-provided bgImage (edit mode / flyer)
+  useEffect(() => {
+    if (bgImage) setPreviewUrl(bgImage);
+  }, [bgImage]);
 
   useEffect(() => {
-    setBgImage(props.bgImage);
-  }, [props.bgImage]);
+    if (filename) setDisplayName(filename);
+  }, [filename]);
 
-  // Handle click on the uploaded image to change it
+  const handleDrop = useCallback(
+    (acceptedFiles) => {
+      if (!acceptedFiles.length) return;
+
+      if (!isGalleryMode) {
+        // Flyer mode — immediate preview via object URL
+        const objectUrl = URL.createObjectURL(acceptedFiles[0]);
+        setPreviewUrl(objectUrl);
+        setDisplayName(acceptedFiles[0].name);
+      }
+
+      // Always bubble up to parent handler
+      props.onDrop?.(acceptedFiles);
+    },
+    [isGalleryMode], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const isFull = isGalleryMode && imageCount >= maxFiles;
+
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+    accept: props.accept,
+    minSize: props.minSizeBytes,
+    maxSize: props.maxSizeBytes,
+    maxFiles: isGalleryMode ? Math.max(1, maxFiles - imageCount) : 1,
+    onDrop: handleDrop,
+    noClick: true,
+    noKeyboard: true,
+    disabled: isFull,
+  });
+
+  const handleZoneClick = () => {
+    if (!isFull && !previewUrl) open();
+  };
+
   const handleImageClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Trigger file selection
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  // Handle click on the dropzone area when no image is uploaded
-  const handleDropzoneClick = (e) => {
-    // Only trigger file input when there's no image uploaded
-    if (!props.filename && fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    open();
   };
 
   return (
     <Container
-      className="container"
       isEmpty={props.isEmpty}
       isDragActive={isDragActive}
-      onClick={handleDropzoneClick}
+      isFull={isFull}
+      onClick={handleZoneClick}
     >
-      <div {...getRootProps({ className: "dropzone", onClick: (e) => e.preventDefault() })}>
-        {props.filename ? (
+      <div {...getRootProps({ className: "dropzone" })}>
+        <input {...getInputProps()} />
+
+        {/* ── Flyer / single-image preview ── */}
+        {!isGalleryMode && previewUrl ? (
           <ImagePreview
             id="dropzone-image-preview"
             className="drop-zone__thumb"
-            data-label={`${props.filename} (Click to change)`}
-            style={{ backgroundImage: `url('${bgImage}')` }}
+            data-label={`${displayName} (Click to change)`}
+            style={{ backgroundImage: `url('${previewUrl}')` }}
             onClick={handleImageClick}
             title="Click to change image"
           />
         ) : (
-          <div>
-            <UploadIcon>↑</UploadIcon>
-            <div className="text-center">
-              {props.error ? (
-                <ErrorText>{props.error}</ErrorText>
-              ) : (
-                <>
-                  {isDragActive ? (
+          /* ── Empty / gallery upload prompt ── */
+          <EmptyState>
+            {isGalleryMode && imageCount > 0 && (
+              <CountBadge isFull={isFull}>
+                {imageCount} / {maxFiles} added
+              </CountBadge>
+            )}
+
+            {isFull ? (
+              <>
+                <UploadIcon style={{ opacity: 0.3 }}>✓</UploadIcon>
+                <HintText>Maximum reached</HintText>
+              </>
+            ) : (
+              <>
+                <UploadIcon>↑</UploadIcon>
+                <div>
+                  {props.error ? (
+                    <ErrorText>{props.error}</ErrorText>
+                  ) : isDragActive ? (
                     <HintText>Release to drop files here</HintText>
                   ) : (
                     <HintText>
-                      Drag & drop or
+                      Drag &amp; drop or
                       <br />
-                      <ClickText>click to select</ClickText>
+                      <ClickText
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          open();
+                        }}
+                      >
+                        click to select
+                      </ClickText>
                     </HintText>
                   )}
-                </>
-              )}
-            </div>
-            <aside>
-              <ul>{files}</ul>
-            </aside>
-          </div>
+                </div>
+              </>
+            )}
+          </EmptyState>
         )}
-        <input 
-          className="input-zone" 
-          {...getInputProps()} 
-          ref={fileInputRef}
-        />
-        <SelectButton type="button">Click to select files</SelectButton>
       </div>
     </Container>
   );
 };
+
+// ─── Styled Components ────────────────────────────────────────────────────────
 
 const Container = styled.div`
   width: 100%;
   text-align: center;
   padding: 20px 16px;
   border-radius: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   transition:
     border-color 0.2s,
     background 0.2s;
-  cursor: pointer;
+  cursor: ${({ isFull }) => (isFull ? "default" : "pointer")};
 
-  /* Visible dashed border using the app's orange accent */
   border: 2px dashed
-    ${({ isEmpty, isDragActive }) =>
-      isEmpty
-        ? "rgba(255, 107, 107, 0.7)"
-        : isDragActive
-          ? "rgba(250, 129, 40, 0.8)"
-          : "rgba(250, 129, 40, 0.35)"};
+    ${({ isEmpty, isDragActive, isFull }) =>
+      isFull
+        ? "rgba(0,0,0,0.1)"
+        : isEmpty
+          ? "rgba(217, 48, 37, 0.6)"
+          : isDragActive
+            ? "rgba(250, 129, 40, 0.8)"
+            : "rgba(250, 129, 40, 0.35)"};
 
-  background: ${({ isDragActive }) =>
-    isDragActive ? "rgba(250, 129, 40, 0.07)" : "rgba(255, 255, 255, 0.02)"};
+  background: ${({ isDragActive, isFull }) =>
+    isFull
+      ? "rgba(0,0,0,0.02)"
+      : isDragActive
+        ? "rgba(250, 129, 40, 0.07)"
+        : "rgba(0, 0, 0, 0.015)"};
 
   &:hover {
-    border-color: rgba(250, 129, 40, 0.6);
-    background: rgba(250, 129, 40, 0.04);
+    border-color: ${({ isFull }) =>
+      isFull ? "rgba(0,0,0,0.1)" : "rgba(250, 129, 40, 0.6)"};
+    background: ${({ isFull }) =>
+      isFull ? "rgba(0,0,0,0.02)" : "rgba(250, 129, 40, 0.04)"};
   }
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  gap: 6px;
+`;
+
+const CountBadge = styled.div`
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 4px;
+  background: ${({ isFull }) =>
+    isFull ? "rgba(0,0,0,0.06)" : "rgba(250, 129, 40, 0.1)"};
+  color: ${({ isFull }) =>
+    isFull ? "rgba(20,20,15,0.45)" : "rgba(250, 129, 40, 0.9)"};
+  border: 1px solid
+    ${({ isFull }) =>
+      isFull ? "rgba(0,0,0,0.08)" : "rgba(250, 129, 40, 0.25)"};
 `;
 
 const UploadIcon = styled.div`
   font-size: 22px;
-  color: rgba(250, 129, 40, 0.5);
-  margin-bottom: 8px;
+  color: rgba(250, 129, 40, 0.55);
   line-height: 1;
 `;
 
@@ -142,24 +204,23 @@ const HintText = styled.p`
   font-family: "Courier New", monospace;
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: rgba(240, 236, 230, 0.35);
+  color: rgba(20, 20, 15, 0.45);
   line-height: 1.6;
   margin: 0;
 `;
 
 const ClickText = styled.span`
-  color: rgba(250, 129, 40, 0.7);
+  color: rgba(250, 129, 40, 0.85);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 `;
 
 const ErrorText = styled.p`
   font-family: "Courier New", monospace;
   font-size: 11px;
-  color: rgba(255, 107, 107, 0.85);
+  color: rgba(217, 48, 37, 0.9);
   margin: 0;
-`;
-
-const SelectButton = styled.button`
-  display: none;
 `;
 
 const ImagePreview = styled.div`
@@ -167,16 +228,18 @@ const ImagePreview = styled.div`
   height: 200px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.04);
   background-size: cover;
   background-position: center;
   position: relative;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(250, 129, 40, 0.25);
+    box-shadow: 0 4px 16px rgba(250, 129, 40, 0.25);
   }
 
   &::after {
@@ -185,13 +248,16 @@ const ImagePreview = styled.div`
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 6px 0;
-    color: rgba(240, 236, 230, 0.85);
-    background: rgba(0, 0, 0, 0.65);
+    padding: 6px 8px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.6);
     font-family: "Courier New", monospace;
     font-size: 11px;
     letter-spacing: 0.04em;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
