@@ -49,6 +49,12 @@ const DiscountDetail = (props) => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const formatExpiry = (dateStr) => {
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    };
+
     const getOrganizerDiscounts = () => {
         const newOrganizerDiscounts= props.discounts.results.filter((discount_item) => {
           return ((discount_item.id !== discount.id) && (discount_item.organizer.id === discount.organizer.id))
@@ -366,9 +372,14 @@ const DiscountDetail = (props) => {
         <Container>
             <DiscountImageWrapper>
                 <DiscountImage imgUrl={discount.flyer}/>
-                <ShareDiscount onClick={getDiscountURL}>
-                    <img src="/images/icons/share-w.svg" alt=""/> 
-                </ShareDiscount>
+                <ButtonsContainer>
+                    {discount.end_date && (
+                        <ExpiryTag>Ends {formatExpiry(discount.end_date)}</ExpiryTag>
+                    )}
+                    <ShareDiscount onClick={getDiscountURL}>
+                        <img src="/images/icons/share-w.svg" alt=""/> 
+                    </ShareDiscount>
+                </ButtonsContainer>
             </DiscountImageWrapper>
 
             <AboutDiscountWrapper>
@@ -395,11 +406,11 @@ const DiscountDetail = (props) => {
                             <b>Discount: </b> 
                             <Colored> {discount.percentage_discount} </Colored>            
                         </p>
-                        <p>
+                        {/* <p>
                             <b>Duration: </b> 
                             <Colored> {formatDate(discount.start_date)} </Colored> to        
                             <Colored> {formatDate(discount.start_date)} </Colored>                 
-                        </p>
+                        </p> */}
                         <p>
                             <b>Location: </b> 
                             <Colored> { discount.location } </Colored>                           
@@ -601,7 +612,7 @@ const DiscountDetail = (props) => {
                         <Card
                             key={key}
                             discount={recomendedDiscount}
-                            bgColor="rgba(14, 13, 11, 0.85)"
+                            bgColor="light"
                         />
                         ))}
                     </CarouselFlex>
@@ -679,12 +690,17 @@ const DiscountImage = styled.div`
   border-radius: 0 0 30px 30px;
 `;
 
-const ShareDiscount = styled.button`
+const ButtonsContainer = styled.div`
     position: absolute;
-    z-index: 1;
-    background-color: rgba(0, 0, 0, 0.7);
-    top: 84%;
-    right: 2%;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+`;
+
+const ShareDiscount = styled.button`
+    background-color: rgba(0, 0, 0, 0.9);
     border: none;
     outline: none;
     padding: 10px;
@@ -697,6 +713,19 @@ const ShareDiscount = styled.button`
     &:hover {
     cursor: pointer;
   }
+`;
+
+const ExpiryTag = styled.div`
+    background-color: rgba(0, 0, 0, 0.9);
+    border: none;
+    outline: none;
+    padding: 10px;
+    border-radius: 20px;
+    color: white;
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.06em;
 `;
 
 const SectionWrapper = styled.div``;

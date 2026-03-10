@@ -5,22 +5,25 @@ import { connect } from "react-redux";
 import { getOrganizerAPI, getOrganizerDiscountsAPI, getAnalyticsAPI, getUserNotificationsAPI, updateOrganizerAPI, deleteDiscountAPI } from "../../actions";
 import Card from "../Shared/Card";
 
-// Theme
+// ─── Theme tokens (light) ─────────────────────────────────────────────────────
 const T = {
-  bg: "#0e0d0b",
-  surface: "rgba(255,255,255,0.035)",
-  surfaceHover: "rgba(255,255,255,0.06)",
-  border: "rgba(240,236,230,0.08)",
-  orange: "#fa8128",
-  orangeDim: "rgba(250,129,40,0.18)",
-  orangeGlow: "rgba(250,129,40,0.08)",
-  text: "#f0ece6",
-  textMuted: "rgba(240,236,230,0.45)",
-  success: "#22c55e",
-  successBg: "rgba(34,197,94,0.12)",
-  error: "#ef4444",
-  errorBg: "rgba(239,68,68,0.12)",
-  radius: "12px",
+  bg:          "#faf8f5",
+  surface:     "#ffffff",
+  surfaceWarm: "#f5f2ed",
+  surfaceHover:"rgba(0,0,0,0.025)",
+  border:      "rgba(0,0,0,0.08)",
+  borderMed:   "rgba(0,0,0,0.12)",
+  orange:      "#fa8128",
+  orangeDim:   "rgba(250,129,40,0.1)",
+  orangeGlow:  "rgba(250,129,40,0.06)",
+  text:        "#1a1710",
+  textMuted:   "rgba(26,23,16,0.42)",
+  textSub:     "rgba(26,23,16,0.6)",
+  success:     "#16a34a",
+  successBg:   "rgba(22,163,74,0.08)",
+  error:       "#dc2626",
+  errorBg:     "rgba(220,38,38,0.08)",
+  radius:      "12px",
 };
 
 const fadeUp = keyframes`
@@ -28,12 +31,13 @@ const fadeUp = keyframes`
   to   { opacity: 1; transform: translateY(0); }
 `;
 
+// ─── Page Shell ───────────────────────────────────────────────────────────────
 const PageWrap = styled.div`
   min-height: 100vh;
   background-color: ${T.bg};
   background-image:
-    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(250,129,40,0.13) 0%, transparent 68%),
-    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(250,129,40,0.05) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(250,129,40,0.07) 0%, transparent 68%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(250,129,40,0.03) 0%, transparent 60%);
   padding: 80px 16px 120px;
   @media (max-width: 480px) { padding: 72px 12px 100px; }
 `;
@@ -45,21 +49,16 @@ const Container = styled.div`
   @media (max-width: 480px) { max-width: 100%; }
 `;
 
+// ─── Stats ────────────────────────────────────────────────────────────────────
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 24px;
 
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  @media (max-width: 480px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  @media (max-width: 1200px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 768px)  { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px)  { grid-template-columns: repeat(2, 1fr); }
 `;
 
 const StatCard = styled.div`
@@ -69,13 +68,12 @@ const StatCard = styled.div`
   padding: 20px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   &::before {
     content: "";
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 60px;
-    height: 60px;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
     background: radial-gradient(circle, ${T.orangeGlow} 0%, transparent 70%);
   }
 `;
@@ -106,10 +104,11 @@ const StatLabel = styled.div`
   font-family: "Courier New", monospace;
   font-size: 9px;
   letter-spacing: 0.1em;
-  color: ${T.textMuted};
+  color: ${T.text};
   text-transform: uppercase;
 `;
 
+// ─── Tab Bar ──────────────────────────────────────────────────────────────────
 const TabBar = styled.div`
   display: flex;
   gap: 4px;
@@ -121,9 +120,8 @@ const TabBar = styled.div`
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  &::-webkit-scrollbar { display: none; }
 `;
 
 const TabBtn = styled.button`
@@ -146,7 +144,7 @@ const TabBtn = styled.button`
   justify-content: center;
   gap: 6px;
   &:hover {
-    background: ${({ active }) => active ? T.orange : T.surfaceHover};
+    background: ${({ active }) => active ? T.orange : T.surfaceWarm};
     color: ${({ active }) => active ? '#fff' : T.text};
   }
 `;
@@ -160,12 +158,14 @@ const TabBadge = styled.span`
   font-weight: 700;
 `;
 
+// ─── Section Card ─────────────────────────────────────────────────────────────
 const Section = styled.div`
   background: ${T.surface};
   border: 1px solid ${T.border};
   border-radius: ${T.radius};
   margin-bottom: 24px;
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 `;
 
 const SectionHeader = styled.div`
@@ -184,6 +184,7 @@ const SectionTitle = styled.h2`
   margin: 0;
 `;
 
+// ─── Discount List ────────────────────────────────────────────────────────────
 const DiscountList = styled.div`padding: 8px;`;
 
 const DiscountItem = styled.div`
@@ -194,7 +195,7 @@ const DiscountItem = styled.div`
   border-radius: 8px;
   transition: background 0.2s;
   cursor: pointer;
-  &:hover { background: ${T.surfaceHover}; }
+  &:hover { background: ${T.surfaceWarm}; }
 `;
 
 const DiscountIcon = styled.div`
@@ -232,7 +233,7 @@ const DiscountMeta = styled.div`
 const ProgressBar = styled.div`
   width: 60px;
   height: 4px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.08);
   border-radius: 2px;
   overflow: hidden;
 `;
@@ -256,6 +257,7 @@ const StatusBadge = styled.span`
   color: ${({ status }) => status === 'active' ? T.success : status === 'pending' ? T.orange : T.error};
 `;
 
+// ─── Empty State ──────────────────────────────────────────────────────────────
 const EmptyState = styled.div`
   padding: 40px 20px;
   text-align: center;
@@ -273,7 +275,7 @@ const EmptyText = styled.p`
   margin: 0;
 `;
 
-// Grid for discount cards
+// ─── Card Grid ────────────────────────────────────────────────────────────────
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -281,49 +283,45 @@ const CardGrid = styled.div`
   padding: 8px;
 `;
 
-// Main Component
+// ─── Main Component ───────────────────────────────────────────────────────────
 const OrganizerDashboard = (props) => {
   const [tab, setTab] = useState("all");
   
-  // Form state for settings
   const [orgName, setOrgName] = useState("");
   const [orgEmail, setOrgEmail] = useState("");
   const [orgPhone, setOrgPhone] = useState("");
+  const [orgDescription, setOrgDescription] = useState("");
+  const [orgLocation, setOrgLocation] = useState("");
   const [saveState, setSaveState] = useState(null);
 
-  // Sync state with organizer prop
   useEffect(() => {
     if (props.organizer) {
       setOrgName(props.organizer.name || "");
       setOrgEmail(props.organizer.email || "");
       setOrgPhone(props.organizer.phone_number || "");
+      setOrgDescription(props.organizer.description || "");
+      setOrgLocation(props.organizer.location || "");
     }
   }, [props.organizer]);
 
   const handleSaveOrganizer = (e) => {
     e.preventDefault();
     setSaveState("saving");
-    
     const fd = new FormData();
     fd.append("name", orgName);
     fd.append("email", orgEmail);
     fd.append("phone_number", orgPhone);
-    
+    fd.append("description", orgDescription);
+    fd.append("location", orgLocation);
     props.updateOrganizer(fd);
-    
     setTimeout(() => {
       setSaveState("saved");
       setTimeout(() => setSaveState(null), 3000);
     }, 900);
   };
 
-  // Fetch data on mount
-  useEffect(() => {
-    // Fetch organizer data
-    props.getOrganizer();
-  }, []);
+  useEffect(() => { props.getOrganizer(); }, []);
 
-  // Fetch discounts and analytics when organizer is available
   useEffect(() => {
     if (props.organizer && props.organizer.id) {
       props.getOrganizerDiscounts(props.organizer.id);
@@ -331,59 +329,45 @@ const OrganizerDashboard = (props) => {
     }
   }, [props.organizer]);
 
-  // Fetch notifications if not available
   useEffect(() => {
-    if (!props.notifications) {
-      props.getUserNotifications();
-    }
+    if (!props.notifications) props.getUserNotifications();
   }, []);
 
-  // Get discounts from props (from Redux store)
   const discountsData = props.discounts?.results || props.discounts || [];
-  
-  // Get analytics data
   const analytics = props.analytics || {};
   const discountSummary = analytics.discount_summary || {};
   const engagement = analytics.engagement || {};
   const organizerInfo = analytics.organizer || {};
 
-  // Use analytics data for stats (with fallback to manual calculation)
-  const activeDiscounts = discountSummary.active_discounts !== undefined 
-    ? discountSummary.active_discounts 
+  const activeDiscounts = discountSummary.active_discounts !== undefined
+    ? discountSummary.active_discounts
     : discountsData.filter(d => d.status === 'active').length;
-  const pendingDiscounts = discountSummary.pending_discounts !== undefined 
-    ? discountSummary.pending_discounts 
+  const pendingDiscounts = discountSummary.pending_discounts !== undefined
+    ? discountSummary.pending_discounts
     : discountsData.filter(d => d.status === 'pending').length;
-  const rejectedDiscounts = discountSummary.rejected_discounts !== undefined 
-    ? discountSummary.rejected_discounts 
+  const rejectedDiscounts = discountSummary.rejected_discounts !== undefined
+    ? discountSummary.rejected_discounts
     : discountsData.filter(d => d.status === 'rejected').length;
-  const expiredDiscounts = discountSummary.expired_discounts || 0;
-  
-  // Engagement metrics from analytics API
-  const totalLikes = engagement.total_likes || 0;
-  const totalReviews = engagement.total_reviews || 0;
-  const averageRating = engagement.average_rating || 0;
-  const totalWishlists = engagement.total_wishlists || 0;
-  const followersCount = organizerInfo.followers_count || 0;
 
-  // Helper function to check if a discount is expired based on end_date
+  const totalLikes      = engagement.total_likes     || 0;
+  const totalReviews    = engagement.total_reviews   || 0;
+  const averageRating   = engagement.average_rating  || 0;
+  const totalWishlists  = engagement.total_wishlists || 0;
+  const followersCount  = organizerInfo.followers_count || 0;
+
   const isExpiredDiscount = (discount) => {
     if (discount.status === 'expired') return true;
-    if (discount.end_date) {
-      const endDate = new Date(discount.end_date);
-      return endDate < new Date();
-    }
+    if (discount.end_date) return new Date(discount.end_date) < new Date();
     return false;
   };
 
-  // Calculate expired discounts count based on actual data
-  const expiredDiscountsCount = discountSummary.expired_discounts !== undefined 
-    ? discountSummary.expired_discounts 
+  const expiredDiscountsCount = discountSummary.expired_discounts !== undefined
+    ? discountSummary.expired_discounts
     : discountsData.filter(d => isExpiredDiscount(d)).length;
 
   const stats = {
-    totalDiscounts: discountSummary.total_discounts !== undefined 
-      ? discountSummary.total_discounts 
+    totalDiscounts: discountSummary.total_discounts !== undefined
+      ? discountSummary.total_discounts
       : discountsData.length,
     activeDiscounts,
     pendingDiscounts,
@@ -396,80 +380,62 @@ const OrganizerDashboard = (props) => {
     followersCount,
   };
 
-  // Use actual notifications or empty array
   const notificationsData = props.notifications || [];
   const unreadCount = notificationsData.filter(n => !n.read).length;
 
   const tabs = [
-    { id: "all", label: "My Discounts", badge: stats.totalDiscounts },
-    { id: "active", label: "Active", badge: stats.activeDiscounts },
-    { id: "pending", label: "Pending", badge: stats.pendingDiscounts },
-    { id: "rejected", label: "Rejected", badge: stats.rejectedDiscounts },
-    { id: "expired", label: "Expired", badge: stats.expiredDiscounts },
-    { id: "notifications", label: "Notifications", badge: unreadCount > 0 ? unreadCount : null },
-    { id: "settings", label: "Settings" },
+    { id: "all",           label: "My Discounts",   badge: stats.totalDiscounts },
+    { id: "active",        label: "Active",          badge: stats.activeDiscounts },
+    { id: "pending",       label: "Pending",         badge: stats.pendingDiscounts },
+    { id: "rejected",      label: "Rejected",        badge: stats.rejectedDiscounts },
+    { id: "expired",       label: "Expired",         badge: stats.expiredDiscounts },
+    { id: "notifications", label: "Notifications",   badge: unreadCount > 0 ? unreadCount : null },
+    { id: "settings",      label: "Settings" },
   ];
 
-  const filteredDiscounts = tab === "all" 
-    ? discountsData 
-    : tab === "expired" 
-      ? discountsData.filter(d => isExpiredDiscount(d)) 
+  const filteredDiscounts = tab === "all"
+    ? discountsData
+    : tab === "expired"
+      ? discountsData.filter(d => isExpiredDiscount(d))
       : discountsData.filter(d => d.status === tab);
+
+  // Settings form input style (inline — matches existing code pattern)
+  const inputStyle = {
+    width: '100%',
+    padding: '12px',
+    background: T.surface,
+    border: `1px solid ${T.borderMed}`,
+    borderRadius: '8px',
+    color: T.text,
+    fontSize: '14px',
+    outline: 'none',
+    fontFamily: 'inherit',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '11px',
+    color: T.text,
+    marginBottom: '8px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  };
 
   return (
     <PageWrap>
       <Container>
+        {/* Stats */}
         <StatsGrid>
-          <StatCard>
-            <StatIcon>🏷️</StatIcon>
-            <StatValue>{stats.totalDiscounts}</StatValue>
-            <StatLabel>Total</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>✓</StatIcon>
-            <StatValue color={T.success}>{stats.activeDiscounts}</StatValue>
-            <StatLabel>Active</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>⏳</StatIcon>
-            <StatValue color={T.orange}>{stats.pendingDiscounts}</StatValue>
-            <StatLabel>Pending</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>✕</StatIcon>
-            <StatValue color={T.error}>{stats.rejectedDiscounts}</StatValue>
-            <StatLabel>Rejected</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>📅</StatIcon>
-            <StatValue>{stats.expiredDiscounts}</StatValue>
-            <StatLabel>Expired</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>👥</StatIcon>
-            <StatValue>{stats.followersCount}</StatValue>
-            <StatLabel>Followers</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>❤️</StatIcon>
-            <StatValue>{stats.totalLikes}</StatValue>
-            <StatLabel>Likes</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>⭐</StatIcon>
-            <StatValue>{stats.averageRating > 0 ? stats.averageRating.toFixed(1) : 'N/A'}</StatValue>
-            <StatLabel>Avg Rating</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>📝</StatIcon>
-            <StatValue>{stats.totalReviews}</StatValue>
-            <StatLabel>Reviews</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon>💝</StatIcon>
-            <StatValue>{stats.totalWishlists}</StatValue>
-            <StatLabel>Wishlists</StatLabel>
-          </StatCard>
+          <StatCard><StatIcon>🏷️</StatIcon><StatValue>{stats.totalDiscounts}</StatValue><StatLabel>Total</StatLabel></StatCard>
+          <StatCard><StatIcon>✓</StatIcon><StatValue color={T.success}>{stats.activeDiscounts}</StatValue><StatLabel>Active</StatLabel></StatCard>
+          <StatCard><StatIcon>⏳</StatIcon><StatValue color={T.orange}>{stats.pendingDiscounts}</StatValue><StatLabel>Pending</StatLabel></StatCard>
+          <StatCard><StatIcon>✕</StatIcon><StatValue color={T.error}>{stats.rejectedDiscounts}</StatValue><StatLabel>Rejected</StatLabel></StatCard>
+          <StatCard><StatIcon>📅</StatIcon><StatValue>{stats.expiredDiscounts}</StatValue><StatLabel>Expired</StatLabel></StatCard>
+          <StatCard><StatIcon>👥</StatIcon><StatValue>{stats.followersCount}</StatValue><StatLabel>Followers</StatLabel></StatCard>
+          <StatCard><StatIcon>❤️</StatIcon><StatValue>{stats.totalLikes}</StatValue><StatLabel>Likes</StatLabel></StatCard>
+          <StatCard><StatIcon>⭐</StatIcon><StatValue>{stats.averageRating > 0 ? stats.averageRating.toFixed(1) : 'N/A'}</StatValue><StatLabel>Avg Rating</StatLabel></StatCard>
+          <StatCard><StatIcon>📝</StatIcon><StatValue>{stats.totalReviews}</StatValue><StatLabel>Reviews</StatLabel></StatCard>
+          <StatCard><StatIcon>💝</StatIcon><StatValue>{stats.totalWishlists}</StatValue><StatLabel>Wishlists</StatLabel></StatCard>
         </StatsGrid>
 
         {/* Tabs */}
@@ -515,33 +481,67 @@ const OrganizerDashboard = (props) => {
             </SectionHeader>
             <form style={{ padding: '20px' }} onSubmit={handleSaveOrganizer}>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: T.textMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Organizer Name</label>
-                <input 
-                  value={orgName} 
+                <label style={labelStyle}>Organizer Name</label>
+                <input
+                  value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} 
+                  style={inputStyle}
                 />
               </div>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: T.textMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contact Email</label>
-                <input 
-                  value={orgEmail} 
+                <label style={labelStyle}>Contact Email</label>
+                <input
+                  value={orgEmail}
                   onChange={(e) => setOrgEmail(e.target.value)}
-                  style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} 
+                  style={inputStyle}
                 />
               </div>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: T.textMuted, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Phone Number</label>
-                <input 
-                  value={orgPhone} 
+                <label style={labelStyle}>Phone Number</label>
+                <input
+                  value={orgPhone}
                   onChange={(e) => setOrgPhone(e.target.value)}
-                  style={{ width: '100%', padding: '12px', background: T.surface, border: `1px solid ${T.border}`, borderRadius: '8px', color: T.text, fontSize: '14px' }} 
+                  style={inputStyle}
                 />
               </div>
-              <button 
-                type="submit" 
+              <div style={{ marginBottom: '20px' }}>
+                <label style={labelStyle}>Location</label>
+                <input
+                  value={orgLocation}
+                  onChange={(e) => setOrgLocation(e.target.value)}
+                  placeholder="e.g. Accra, Ghana"
+                  style={inputStyle}
+                />
+              </div>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={labelStyle}>Bio / Description</label>
+                <textarea
+                  value={orgDescription}
+                  onChange={(e) => setOrgDescription(e.target.value)}
+                  placeholder="Tell customers about your business…"
+                  rows={4}
+                  style={{
+                    ...inputStyle,
+                    resize: 'vertical',
+                    lineHeight: '1.6',
+                    minHeight: '96px',
+                  }}
+                />
+              </div>
+              <button
+                type="submit"
                 disabled={saveState === "saving"}
-                style={{ padding: '12px 24px', background: T.orange, border: 'none', borderRadius: '8px', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+                style={{
+                  padding: '12px 24px',
+                  background: T.orange,
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: saveState === "saving" ? 'not-allowed' : 'pointer',
+                  opacity: saveState === "saving" ? 0.7 : 1,
+                }}
               >
                 {saveState === "saving" ? "Saving..." : saveState === "saved" ? "✓ Saved!" : "Save Changes"}
               </button>
@@ -550,16 +550,17 @@ const OrganizerDashboard = (props) => {
         ) : (
           <Section>
             <SectionHeader>
-            <SectionTitle>
+              <SectionTitle>
                 {tab === "all" ? "All Discounts" : tab === "expired" ? "Expired Discounts" : tab.charAt(0).toUpperCase() + tab.slice(1) + " Discounts"}
               </SectionTitle>
             </SectionHeader>
             {filteredDiscounts.length > 0 ? (
               <CardGrid>
                 {filteredDiscounts.map((discount) => (
-                  <Card 
-                    key={discount.id} 
-                    discount={discount} 
+                  <Card
+                    key={discount.id}
+                    discount={discount}
+                    bgColor="light"
                     isEditMode={true}
                     onDelete={(id) => {
                       if (window.confirm("Are you sure you want to delete this discount?")) {
@@ -582,21 +583,21 @@ const OrganizerDashboard = (props) => {
   );
 };
 
+// ─── Redux ────────────────────────────────────────────────────────────────────
 const mapStateToProps = (state) => ({
-  organizer: state.organizerState.organizer,
-  discounts: state.organizerState.discounts,
-  analytics: state.organizerState.analytics,
+  organizer:     state.organizerState.organizer,
+  discounts:     state.organizerState.discounts,
+  analytics:     state.organizerState.analytics,
   notifications: state.userState.notifications,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  getOrganizer: () => dispatch(getOrganizerAPI()),
-  getOrganizerDiscounts: (organizer_id) => dispatch(getOrganizerDiscountsAPI(organizer_id)),
-  getAnalytics: (organizer_id) => dispatch(getAnalyticsAPI(organizer_id)),
-  getUserNotifications: () => dispatch(getUserNotificationsAPI()),
-  updateOrganizer: (data) => dispatch(updateOrganizerAPI(data)),
-  deleteDiscount: (discount_id) => dispatch(deleteDiscountAPI(discount_id)),
+  getOrganizer:           ()              => dispatch(getOrganizerAPI()),
+  getOrganizerDiscounts:  (organizer_id)  => dispatch(getOrganizerDiscountsAPI(organizer_id)),
+  getAnalytics:           (organizer_id)  => dispatch(getAnalyticsAPI(organizer_id)),
+  getUserNotifications:   ()              => dispatch(getUserNotificationsAPI()),
+  updateOrganizer:        (data)          => dispatch(updateOrganizerAPI(data)),
+  deleteDiscount:         (discount_id)   => dispatch(deleteDiscountAPI(discount_id)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrganizerDashboard);
-

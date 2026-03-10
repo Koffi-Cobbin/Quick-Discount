@@ -13,100 +13,65 @@ const Loading = (props) => {
     return () => clearTimeout(t);
   }, []);
 
-  // Auto-dismiss success messages after 3 seconds
+  // Auto-dismiss whenever a message appears (success or error)
+  // FIX: was `props.loading_message && props.loading` — but setLoading(false)
+  // is dispatched before/alongside setLoadingMessage, so props.loading is
+  // already false by the time this effect runs. Condition must be message-only.
   useEffect(() => {
-    // Check if there's a loading message (success message present)
-    if (props.loading_message && props.loading) {
-      // Clear any existing timer
-      if (autoDismissTimer.current) {
-        clearTimeout(autoDismissTimer.current);
-      }
-      
-      // Set auto-dismiss timer for success messages (10 seconds)
+    if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
+
+    if (props.loading_message) {
       autoDismissTimer.current = setTimeout(() => {
-        console.log("Auto-dismissing loading message after 3 seconds");
-        props.close(props.loading_message);
+        props.close();
       }, 3000);
     }
 
-    // Cleanup timer on unmount
     return () => {
-      if (autoDismissTimer.current) {
-        clearTimeout(autoDismissTimer.current);
-      }
+      if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
     };
-  }, [props.loading_message, props.loading]);
+  }, [props.loading_message]);
 
-  // Also clear timer if user manually closes the loader
+  // Clear timer if user manually closes the loader
   const handleClose = () => {
-    if (autoDismissTimer.current) {
-      clearTimeout(autoDismissTimer.current);
-    }
-    props.close(props.loading_message);
+    if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
+    props.close();
   };
 
   // Determine if message is an error/success
-  const isError = props.loading_message && 
-    (props.loading_message.props?.children?.some?.(c => c?.props?.style?.color === 'red') || 
+  const isError = props.loading_message &&
+    (props.loading_message.props?.children?.some?.(c => c?.props?.style?.color === 'red') ||
      String(props.loading_message).includes('error') ||
      String(props.loading_message).includes('Failed'));
 
   return (
     <Overlay visible={visible}>
       {/* Ambient orbs for depth */}
-      <Orb
-        top="15%"
-        left="10%"
-        size="320px"
-        color="rgba(220,103,14,0.13)"
-        delay="0s"
-      />
-      <Orb
-        top="60%"
-        left="75%"
-        size="260px"
-        color="rgba(220,103,14,0.09)"
-        delay="1.4s"
-      />
-      <Orb
-        top="40%"
-        left="50%"
-        size="180px"
-        color="rgba(255,255,255,0.04)"
-        delay="0.7s"
-      />
+      <Orb top="15%" left="10%"  size="320px" color="rgba(220,103,14,0.13)" delay="0s"  />
+      <Orb top="60%" left="75%"  size="260px" color="rgba(220,103,14,0.09)" delay="1.4s"/>
+      <Orb top="40%" left="50%"  size="180px" color="rgba(255,255,255,0.04)" delay="0.7s"/>
 
       <Card hasMessage={!!props.loading_message}>
         {/* Close button */}
-        <CloseBtn
-          onClick={handleClose}
-          aria-label="Dismiss"
-        >
-          &times;
-        </CloseBtn>
+        <CloseBtn onClick={handleClose} aria-label="Dismiss">&times;</CloseBtn>
 
         {props.loading_message ? (
           <MessageContent>
             <MessageIcon>
-              <SuccessIcon 
-                src={isError ? "/images/icons/error.svg" : "/images/icons/tick-circle.svg"} 
-                alt={isError ? "Error" : "Success"} 
+              <SuccessIcon
+                src={isError ? "/images/icons/error.svg" : "/images/icons/tick-circle.svg"}
+                alt={isError ? "Error" : "Success"}
               />
             </MessageIcon>
             <MessageText isError={isError}>{props.loading_message}</MessageText>
           </MessageContent>
         ) : (
           <SpinnerContent>
-            {/* Outer ring */}
             <RingWrap>
               <RingOuter />
               <RingMiddle />
               <RingInner />
-              {/* Central dot */}
               <CoreDot />
             </RingWrap>
-
-            {/* Brand wordmark */}
             <Label>
               <LabelDot />
               Loading
@@ -196,11 +161,7 @@ const Orb = styled.div`
   left: ${({ left }) => left};
   width: ${({ size }) => size};
   height: ${({ size }) => size};
-  background: radial-gradient(
-    circle,
-    ${({ color }) => color} 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, ${({ color }) => color} 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   animation: ${orbFloat} 6s ease-in-out infinite;
@@ -242,10 +203,7 @@ const CloseBtn = styled.button`
   cursor: pointer;
   padding: 2px 4px;
   transition: color 0.2s;
-
-  &:hover {
-    color: rgba(255, 255, 255, 0.8);
-  }
+  &:hover { color: rgba(255, 255, 255, 0.8); }
 `;
 
 /* ─── Spinner ────────────────────────────────────────────────────────────── */
@@ -318,7 +276,6 @@ const Label = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
-  /* font-family: Inter, 'Roboto', sans-serif; */
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -338,20 +295,12 @@ const LabelDot = styled.div`
 const Ellipsis = styled.span`
   display: inline-flex;
   gap: 1px;
-
   span {
     animation: ${dotBounce} 1.2s ease-in-out infinite;
     color: #fa8128;
-
-    &:nth-child(1) {
-      animation-delay: 0s;
-    }
-    &:nth-child(2) {
-      animation-delay: 0.18s;
-    }
-    &:nth-child(3) {
-      animation-delay: 0.36s;
-    }
+    &:nth-child(1) { animation-delay: 0s; }
+    &:nth-child(2) { animation-delay: 0.18s; }
+    &:nth-child(3) { animation-delay: 0.36s; }
   }
 `;
 
@@ -362,13 +311,7 @@ const ProgressBar = styled.div`
   bottom: 0;
   left: 0;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    #fa8128 40%,
-    #ffb366 80%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, #fa8128 40%, #ffb366 80%, transparent 100%);
   border-radius: 0 0 20px 20px;
   animation: ${progressSweep} 2.4s ease-in-out infinite;
 `;
@@ -406,13 +349,9 @@ const MessageText = styled.div`
   text-align: center;
   line-height: 1.5;
   max-width: 260px;
-  
-  /* Style images within the message - hide them, we display our own icon */
-  img {
-    display: none;
-  }
-  
-  /* Style paragraphs within the message */
+
+  img { display: none; }
+
   p {
     margin: 0;
     color: inherit;
@@ -429,7 +368,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  close: (loading_message = null) => {
+  close: () => {
     dispatch(setLoadingMessage(null));
     dispatch(setLoading(false));
   },

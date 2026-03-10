@@ -102,7 +102,12 @@ const Home = (props) => {
     setActiveCategory(category);
     const element = document.getElementById(id.toLowerCase() + "-section");
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const rect = element.getBoundingClientRect();
+      const offsetTop = window.pageYOffset + rect.top - 100; // 100px offset to account for sticky filter bar
+      window.scrollTo({
+        top: offsetTop,
+        behavior: "smooth"
+      });
     }
   };
 
@@ -452,14 +457,14 @@ const CategoryChip = styled.span`
     transform 0.15s ease,
     box-shadow 0.22s ease;
 
-  background-color: ${({ active }) => (active ? "rgba(14, 13, 11, 0.85)" : "#fff")};
+  background-color: ${({ active }) => (active ? "rgba(250,129,40,0.15)" : "#fff")};
   color: ${({ active }) => (active ? "#fa8128" : "#444")};
 
   &:hover {
     background-color: ${({ active }) => (active ? "#fa8128" : "rgba(250,129,40,0.15)")};
-    color: ${({ active }) => (active ? "rgba(14, 13, 11, 0.85)" : "#fa8128")};
+    color: ${({ active }) => (active ? "#fff" : "#fa8128")};
     transform: translateY(-1px);
-    & span {background-color: rgba(14, 13, 11, 0.85) !important;}
+    & span {background-color: #fff !important;}
   }
 
   &:active {

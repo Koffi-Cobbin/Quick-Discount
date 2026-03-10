@@ -349,7 +349,7 @@ const FieldLabel = styled.label`
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: ${T.textMuted};
+  color: ${T.text};
   margin-bottom: 7px;
 `;
 
@@ -633,7 +633,7 @@ const AssetLabel = styled.p`
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: ${T.textMuted};
+  color: ${T.textSub};
   margin: 0 0 8px;
 `;
 

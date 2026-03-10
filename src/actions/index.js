@@ -605,24 +605,36 @@ export function getDiscountsAPI() {
     dispatch(setLoading(true));
     const url = `${BASE_URL}/discounts/`;
 
+    // Abort the fetch after 3 s so setLoading(false) is always called,
+    // even if the server never responds.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     fetch(url, {
       method: "GET",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
     })
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
-        else return response.json();
+        return response.json();
       })
       .then((discounts) => {
+        clearTimeout(timeoutId);
         dispatch(setDiscounts(discounts));
         console.log("Discounts ", discounts);
         dispatch(setLoading(false));
       })
       .catch((errorMessage) => {
-        console.log(errorMessage);
+        clearTimeout(timeoutId);
+        if (errorMessage.name === "AbortError") {
+          console.log("getDiscountsAPI: request timed out after 3 s");
+        } else {
+          console.log(errorMessage);
+        }
         dispatch(setLoading(false));
       });
   };

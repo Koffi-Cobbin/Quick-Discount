@@ -366,6 +366,7 @@ function UserDashboard({
                   <Card
                     key={d.id}
                     discount={d}
+                    bgColor="light"
                     index={i}
                     onSave={toggleSave}
                     isSaved={savedIds.has(d.id)}

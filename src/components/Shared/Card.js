@@ -13,7 +13,7 @@ const DARK = {
   border: "rgba(240,236,230,0.08)",
   borderHover: "rgba(250,129,40,0.35)",
   imgBg: "#1a1a16",
-  expiryBg: "rgba(14,13,11,0.85)",
+  expiryBg: "rgba(14,13,11,0.95)",
   expiryBorder: "rgba(240,236,230,0.08)",
   orange: "#fa8128",
   orangeDim: "rgba(250,129,40,0.15)",
@@ -31,7 +31,7 @@ const LIGHT = {
   border: "rgba(0,0,0,0.1)",
   borderHover: "rgba(250,129,40,0.35)",
   imgBg: "#f0ede8",
-  expiryBg: "rgba(255,255,255,0.92)",
+  expiryBg: "rgba(255,255,255,0.98)",
   expiryBorder: "rgba(0,0,0,0.1)",
   orange: "#fa8128",
   orangeDim: "rgba(250,129,40,0.12)",
@@ -130,10 +130,12 @@ export const ExpiryTag = styled.div`
   color: ${tok("textSub")};
   font-family: "Courier New", monospace;
   font-size: 10px;
+  font-weight: bold;
   letter-spacing: 0.06em;
   padding: 3px 8px;
   border-radius: 20px;
   backdrop-filter: blur(4px);
+  z-index: 2;
 `;
 
 export const CardBody = styled.div`

@@ -1,139 +1,221 @@
 import React, { useEffect } from "react";
+import styled, { createGlobalStyle } from "styled-components";
 import { connect } from "react-redux";
-import { ReactSearchAutocomplete } from 'react-search-autocomplete';
+import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../utils/constants";
 import { setSearchResult } from "../../../actions";
 
+/* ─── Global overrides: style ReactSearchAutocomplete internals ─────────────
+   Scoped under .qd-search-root so rules never leak to SideNav's instance.   */
+const SearchGlobalStyle = createGlobalStyle`
+  /* ── Outer wrapper shell ── */
+  .qd-search-root .wrapper {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+
+  /* ── Input row ── */
+  .qd-search-root .wrapper > div:first-child {
+    background: transparent !important;
+    border-radius: 10px !important;
+    border: 1.5px solid #ffffff !important;
+    padding: 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  /* ── Search icon ── */
+  .qd-search-root .wrapper > div:first-child > svg:first-of-type {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+    color: rgba(255,255,255,0.7) !important;
+    opacity: 1 !important;
+  }
+
+  /* ── Clear (×) icon ── */
+  .qd-search-root .wrapper > div:first-child > svg:last-of-type {
+    width: 13px !important;
+    height: 13px !important;
+    color: rgba(255,255,255,0.5) !important;
+    cursor: pointer !important;
+  }
+
+  /* ── Input field ── */
+  .qd-search-root input {
+    background: transparent !important;
+    color: #ffffff !important;
+    font-family: 'Courier New', 'Consolas', monospace !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.03em !important;
+    caret-color: #ffffff !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 1 !important;
+  }
+
+  .qd-search-root input::placeholder {
+    color: rgba(255,255,255,0.5) !important;
+    font-style: italic !important;
+  }
+
+  /* ── Results dropdown ── */
+  .qd-search-root .wrapper > div:nth-child(2) {
+    background: #ffffff !important;
+    border: 1.5px solid rgba(0,0,0,0.1) !important;
+    border-top: none !important;
+    border-radius: 0 0 10px 10px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+    overflow: hidden !important;
+  }
+
+  /* ── Result rows ── */
+  .qd-search-root .wrapper > div:nth-child(2) li {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+    padding: 9px 14px !important;
+    font-size: 13px !important;
+    color: #1a1a16 !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+  }
+
+  .qd-search-root .wrapper > div:nth-child(2) li:hover,
+  .qd-search-root .wrapper > div:nth-child(2) li[aria-selected="true"] {
+    background: rgba(250,129,40,0.08) !important;
+  }
+
+  .qd-search-root .wrapper > div:nth-child(2) li:last-child {
+    border-bottom: none !important;
+  }
+`;
+
+/* ─── Wrapper — intentionally minimal so the dropdown can render freely ── */
+const Shell = styled.div`
+  position: relative;
+  width: 100%;
+
+  & > div {
+    width: 100% !important;
+  }
+`;
+
+/* ─── Category pill shown in results ────────────────────────────────────── */
+const categoryStyle = {
+  display: "block",
+  textAlign: "left",
+  border: "1px solid rgba(250,129,40,0.4)",
+  color: "#fa8128",
+  width: "fit-content",
+  padding: "1px 8px",
+  borderRadius: "10px",
+  fontSize: "10px",
+  marginTop: "2px",
+  fontFamily: "'Courier New', monospace",
+  letterSpacing: "0.04em",
+};
+
+/* ─── Component ─────────────────────────────────────────────────────────── */
 const Search = (props) => {
+  const navigate = useNavigate();
+  const items = props.discounts?.results ?? [];
 
-    const navigate = useNavigate();
+  useEffect(() => {
+    props.addSearchEvent?.();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // note: the id field is mandatory
-    const items = props.discounts.results;
-
-    useEffect(() => {
-        props.addSearchEvent();
-      }, []);
-
-
-    const search = (search_query) => {
-        // send get request to searchUrl with keywords then get response
-        async function fetchResponse(searchUrl, search_query) {
-            try {
-                const response = await fetch(`${searchUrl}?keywords=${search_query}`);
-                if (!response.ok) {
-                    throw new Error("Network response was not OK");
-                }
-                const responseBody = await response.json();
-                props.set_search_result(responseBody);
-                console.log("Search results from API ... ", responseBody);
-                navigate(`/discounts`);
-                if (props.closeNav) {
-                    props.closeNav();
-                }
-            } catch (error) {
-                console.error("There was a problem with your fetch request: ", error);
-            }
-        };
-
-        const searchUrl = `${BASE_URL}/search/`;
-
-        console.log("Search query ... ", search_query);
-
-        fetchResponse(searchUrl, search_query);
-    };
-
-
-    const handleOnSearch = (search_query, results) => {
-        // onSearch will have as the first callback parameter
-        // the string searched and for the second the results.
-        console.log("You searched for ... ", search_query);
-        console.log("Found this ... ", results);
-        
-        // send API search request if Enter is pressed
-        if (props.pressedEnter && search_query.length > 0){
-            search(search_query);
-        }
-    };
-
-
-    const handleOnHover = (result) => {
-        // the item hovered
-        console.log(result)
-    };
-
-    const handleOnSelect = (item) => {
-        // the item selected
-        console.log(item);
-        navigate(`/discounts/${item.id}`);
-        if (props.closeNav) {
-            props.closeNav();
-        }
+  const search = async (search_query) => {
+    try {
+      const response = await fetch(`${BASE_URL}/search/?keywords=${search_query}`);
+      if (!response.ok) throw new Error("Network response was not OK");
+      const body = await response.json();
+      props.set_search_result(body);
+      navigate("/discounts");
+      props.closeNav?.();
+    } catch (error) {
+      console.error("Search fetch error:", error);
     }
+  };
 
-    const handleOnFocus = () => {
-        console.log('Focused');        
+  const handleOnSearch = (search_query, results) => {
+    console.log("Searching …", search_query, results);
+    if (props.pressedEnter && search_query.length > 0) {
+      search(search_query);
     }
+  };
 
-    const categoryStyle = {
-        display: 'block',
-        textAlign: 'left',
-        border: "1px solid rgba(0,0,0,0.8)",
-        outline: "none",
-        width: "fit-content",
-        padding: "0 10px",
-        borderRadius: "12px",
-        fontSize: "10px",
-    };
+  const handleOnSelect = (item) => {
+    navigate(`/discounts/${item.id}`);
+    props.closeNav?.();
+  };
 
-    const formatResult = (item) => {
-        return (
-            <>
-                <span style={{ display: 'block', textAlign: 'left' }}>{item.title}</span>
-                <span style={categoryStyle}>{item.categories[0].name}</span>
-            </>
-        )
-    }
+  const formatResult = (item) => (
+    <>
+      <span style={{ display: "block", textAlign: "left" }}>{item.title}</span>
+      {item.categories?.[0] && (
+        <span style={categoryStyle}>{item.categories[0].name}</span>
+      )}
+    </>
+  );
 
-    const styling = {
-        border: "1.5px solid rgba(250, 129, 40, 0.6)",
-        backgroundColor: "rgba(0,0,0,0.9)",
-        color: "#fff",
-        outline: "none",
-        placeholderColor: "#FFF",
-        iconColor: "#FFF",
-        hoverBackgroundColor: "rgba(0,0,0,0.8)",
-        transition: "border-color 0.2s ease",
-    };
+  /* Styling prop — passed through only when the parent hasn't already
+     overridden everything via a CSS class (e.g. SideNav).               */
+  const defaultStyling = {
+    border: "1.5px solid #ffffff",
+    backgroundColor: "transparent",
+    color: "#ffffff",
+    outline: "none",
+    placeholderColor: "rgba(255,255,255,0.5)",
+    iconColor: "rgba(255,255,255,0.7)",
+    hoverBackgroundColor: "rgba(250,129,40,0.08)",
+    lineColor: "rgba(0,0,0,0.08)",
+    boxShadow: "none",
+    zIndex: "9999",
+    fontFamily: "'Courier New', monospace",
+    fontSize: "13px",
+    height: "38px",
+  };
 
-    return (
+  const styling = props.styling
+    ? { ...defaultStyling, ...props.styling }
+    : defaultStyling;
+
+  return (
+    <>
+      <SearchGlobalStyle />
+      <Shell className="qd-search-root">
         <ReactSearchAutocomplete
-            items={items}
-            onSearch={handleOnSearch}
-            onHover={handleOnHover}
-            onSelect={handleOnSelect}
-            onFocus={handleOnFocus}
-            formatResult={formatResult}
-            fuseOptions={{ keys: ["title", "categories.name", "organizer.name", "location"] }}
-            resultStringKeyName="title"
-            styling={props.homeSearch ? styling : {}}
+          items={items}
+          onSearch={handleOnSearch}
+          onHover={(r) => console.log(r)}
+          onSelect={handleOnSelect}
+          onFocus={() => console.log("Focused")}
+          formatResult={formatResult}
+          fuseOptions={{
+            keys: ["title", "categories.name", "organizer.name", "location"],
+          }}
+          resultStringKeyName="title"
+          styling={styling}
         />
-    )
+      </Shell>
+    </>
+  );
 };
 
-
-const mapStateToProps = (state) => {
-    return {
-        discounts: state.discountState.discounts,
-        categories: state.discountState.categories,
-    }
-};
+const mapStateToProps = (state) => ({
+  discounts: state.discountState.discounts,
+  categories: state.discountState.categories,
+});
 
 const mapDispatchToProps = (dispatch) => ({
-    set_search_result: (payload) => {
-        dispatch(setSearchResult(payload));
-      },
+  set_search_result: (payload) => dispatch(setSearchResult(payload)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Search);
