@@ -201,7 +201,7 @@ export function signUpAPI(data) {
     fetch(url, {
       method: "POST",
       headers: {
-        Accept: "application/json", //vnd.api+
+        Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
@@ -210,6 +210,7 @@ export function signUpAPI(data) {
       .then((data) => {
         if (data.success) {
           dispatch(setUserActivationStatus(true));
+          // Loading.js will force setLoading(true) and keep overlay open for user to read
           dispatch(setLoadingMessage(messages.SIGNUP_SUCCESS_MESSAGE));
         } else if (data.failed) {
           console.log(data.errors);
@@ -243,17 +244,15 @@ export const getUserTokenAPI = (payload) => (dispatch) => {
     })
     .then((data) => {
       console.log("token data ", data);
-      dispatch(setUserToken(data));      
-      // console.log("User logged in successfully!");
+      dispatch(setUserToken(data));
       let wishlist = sessionStorage.getItem('wishlist') ? JSON.parse(sessionStorage.getItem('wishlist')) : [];
       if (wishlist && wishlist.length > 0){
         let wishlist_ids = wishlist.filter(discount => discount.id);
         console.log("wishlist_ids ", wishlist_ids);
         dispatch(addToWishlistAPI({discount_ids: wishlist_ids}))
-      }      
+      }
       console.log("Fetching organizer data...");
       dispatch(getOrganizerAPI());
-      // Fetch wishlist after token is obtained
       console.log("Fetching wishlist...");
       dispatch(getWishlistAPI());
     })
@@ -300,7 +299,7 @@ export function loginAPI(payload) {
               email: data.user_data.email,
               password: payload.password,
             })
-            );
+          );
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setErrors({ login: data.errors }));
@@ -423,14 +422,6 @@ export function createDiscountAPI(formData) {
     const state = getState();
     const authToken = state.userState.token.access;
 
-    // const formData = new FormData();
-    // formData.append("payload", JSON.stringify(payload));
-    // formData.append("flyer", files.flyer);
-    // formData.append("images_length", files.images.length);
-    // for (var i = 0; i < files.images.length; i++) {
-    //   formData.append(`image-${i}`, files.images[i].file);
-    // };
-
     fetch(url, {
       method: "POST",
       headers: {
@@ -444,26 +435,26 @@ export function createDiscountAPI(formData) {
         if (data.success) {
           dispatch(setCreateDiscountStatus(true));
           dispatch(setLoading(false));
-          // dispatch(setLoadingMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE));
           console.log("DISCOUNT Success mail message ", data.message);
           console.log("FormData ", formData);
           console.log("FormData ", formData.get('payload'));
           console.log("FormData Email ", JSON.parse(formData.get('payload'))['organizer_data']['email']);
-          
-          dispatch(
-            sendMail({            
-              "toEmail": `${STAFF_EMAIL}`,
-              "fromEmail": JSON.parse(formData.get('payload'))['organizer_data']['email'],
-              "username": JSON.parse(formData.get('payload'))['organizer_data']['name'],
-              "subject": "Discount Registration", 
-              "message": data.message                
-            })
-            );
+
+          // Store mail payload in session storage to be sent after payment verification
+          const mail_payload = {
+            "toEmail": `${STAFF_EMAIL}`,
+            "fromEmail": JSON.parse(formData.get('payload'))['organizer_data']['email'],
+            "username": JSON.parse(formData.get('payload'))['organizer_data']['name'],
+            "subject": "Discount Registration",
+            "message": data.message
+          };
+          sessionStorage.setItem('mail_payload', JSON.stringify(mail_payload));
+
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setCreateDiscountStatus(false));
-          dispatch(setLoading(false));
-let msg = (
+          // setLoading(false) not needed — Loading.js forces it back to true when message is set
+          const msg = (
             <>
               <img src="/images/icons/error.svg" alt="error" />
               <p style={{ color: "red" }}>
@@ -476,7 +467,7 @@ let msg = (
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
-        dispatch(setLoading(false));
+        // setLoading(false) not needed — Loading.js forces it back to true when message is set
         dispatch(setLoadingMessage(messages.CREATE_DISCOUNT_FAILED_MESSAGE));
       });
   };
@@ -506,13 +497,14 @@ export function updateDiscountAPI({formData, discount_id}) {
       .then((data) => {
         if (data.success) {
           dispatch(setUpdateDiscountStatus(true));
+          // Loading.js will force setLoading(true) and keep overlay open for user to read
           dispatch(setLoadingMessage(messages.DISCOUNT_UPDATE_SUCCESS_MESSAGE));
           let organizer_id = state.organizerState.organizer.id;
           dispatch(getOrganizerDiscountsAPI(organizer_id));
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setUpdateDiscountStatus(false));
-let msg = (
+          const msg = (
             <>
               <img src="/images/icons/error.svg" alt="error" />
               <p style={{ color: "red" }}>
@@ -605,10 +597,10 @@ export function getDiscountsAPI() {
     dispatch(setLoading(true));
     const url = `${BASE_URL}/discounts/`;
 
-    // Abort the fetch after 3 s so setLoading(false) is always called,
-    // even if the server never responds.
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    // Stop the loading spinner after 3 s whether or not the fetch has finished.
+    // The fetch itself is not aborted — it will still resolve and dispatch
+    // setDiscounts when the server responds.
+    const loadingTimer = setTimeout(() => dispatch(setLoading(false)), 3000);
 
     fetch(url, {
       method: "GET",
@@ -616,25 +608,20 @@ export function getDiscountsAPI() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      signal: controller.signal,
     })
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         return response.json();
       })
       .then((discounts) => {
-        clearTimeout(timeoutId);
+        clearTimeout(loadingTimer);
         dispatch(setDiscounts(discounts));
         console.log("Discounts ", discounts);
         dispatch(setLoading(false));
       })
       .catch((errorMessage) => {
-        clearTimeout(timeoutId);
-        if (errorMessage.name === "AbortError") {
-          console.log("getDiscountsAPI: request timed out after 3 s");
-        } else {
-          console.log(errorMessage);
-        }
+        clearTimeout(loadingTimer);
+        console.log(errorMessage);
         dispatch(setLoading(false));
       });
   };
@@ -699,10 +686,6 @@ export function getDiscountReviewsAPI(discount_id) {
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
-        // --------TO BE REMOVED---------
-        // dispatch(setDiscountReviews(discountReviewsData));
-        // console.log("Discounts Reviews ...");
-        // ------------------------------
         dispatch(setLoading(false));
       });
   };
@@ -733,7 +716,6 @@ export function likeAndDislikeReviewAPI(data) {
       })
       .then((review) => {
         console.log("Updated Review 1", review);
-        // Get local reviews and update with new review data
         let reviews = state.discountState.reviews;
         console.log("Discount Reviews ", reviews);
         const updatedReviews = reviews.results.map(obj => obj.id === review.id? {...obj, ...review} : obj);
@@ -772,10 +754,8 @@ export function orderAPI(data) {
           return response.json();
         }
         else if (response.status === 404) {
-          // If the response status is 404 (Not Found)
           throw new Error('Data not found');
         } else {
-          // For any other non-success status code
           throw new Error('An error occurred');
         }
       })
@@ -792,6 +772,7 @@ export function orderAPI(data) {
       })
       .catch((error) => {
         console.error(error.message);
+        // Loading.js will force setLoading(true) and keep overlay open for user to read
         dispatch(setLoadingMessage(error.message));
       });
   };
@@ -827,10 +808,8 @@ export function checkoutAPI(data) {
           return response.json();
         }
         else if (response.status === 404) {
-          // If the response status is 404 (Not Found)
           throw new Error('Data not found');
         } else {
-          // For any other non-success status code
           throw new Error('An error occurred');
         }
       })
@@ -851,6 +830,7 @@ export function checkoutAPI(data) {
       })
       .catch((error) => {
         console.log(error.message);
+        // Loading.js will force setLoading(true) and keep overlay open for user to read
         dispatch(setLoadingMessage(error.message));
       });
   };
@@ -876,29 +856,30 @@ export function verifyPaymentAPI(payload) {
       },
       body: JSON.stringify(payload),
     })
-  .then((response) => { 
-    if (response.ok) {
-      return response.json();
-    }
-    else if (response.status === 404) {
-      // If the response status is 404 (Not Found)
-      throw new Error('Data not found');
-    } else {
-      // For any other non-success status code
-      throw new Error('An error occurred');
-    }
-  })
-  .then((data) => {
-    console.log(data);
-    dispatch(setPayment(data));
-  })
-  .catch((error) => {
-    console.log(error.message);
-    dispatch(setUserOrder(null));
-    dispatch(setPayment(null));
-    // dispatch(setLoadingMessage(error.message));
-  });
-};
+      .then((response) => { 
+        if (response.ok) {
+          return response.json();
+        }
+        else if (response.status === 404) {
+          throw new Error('Data not found');
+        } else {
+          throw new Error('An error occurred');
+        }
+      })
+      .then((data) => {
+        console.log(data);
+        dispatch(setPayment(data));
+        if (data.verified) {
+          let mail_payload = JSON.parse(sessionStorage.getItem('mail_payload'));
+          dispatch(sendMail(mail_payload));
+        }
+      })
+      .catch((error) => {
+        console.log(error.message);
+        dispatch(setUserOrder(null));
+        dispatch(setPayment(null));
+      });
+  };
 }
 
 
@@ -970,7 +951,6 @@ export function getWishlistAPI() {
     const state = getState();
     const token = state.userState.token;
     
-    // Check if token exists and has access property
     if (!token || !token.access) {
       console.log("Wishlist API: Token not available yet, skipping wishlist fetch");
       return Promise.resolve();
@@ -978,7 +958,6 @@ export function getWishlistAPI() {
     
     const authToken = token.access;
 
-    // Return the fetch promise so Dashboard can handle loading state
     return fetch(url, {
       method: "GET",
       headers: {
@@ -987,26 +966,24 @@ export function getWishlistAPI() {
         Authorization: `Bearer ${authToken}`,
       },
     })
-  .then((response) => { 
-    if (response.ok) {
-      return response.json();
-    }
-    else if (response.status === 404) {
-      // If the response status is 404 (Not Found)
-      throw new Error('An error occurred');
-    } else {
-      // For any other non-success status code
-      throw new Error('An error occurred');
-    }
-  })
-  .then((wishlist) => {
-    console.log("Wishlist ", wishlist);
-    dispatch(setWishlist(wishlist));
-  })
-  .catch((error) => {
-    console.log(error.message);
-  });
-};
+      .then((response) => { 
+        if (response.ok) {
+          return response.json();
+        }
+        else if (response.status === 404) {
+          throw new Error('An error occurred');
+        } else {
+          throw new Error('An error occurred');
+        }
+      })
+      .then((wishlist) => {
+        console.log("Wishlist ", wishlist);
+        dispatch(setWishlist(wishlist));
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
 }
 
 
@@ -1029,28 +1006,26 @@ export function addToWishlistAPI(payload) {
       },
       body: JSON.stringify(payload),
     })
-  .then((response) => { 
-    if (response.ok) {
-      return response.json();
-    }
-    else if (response.status === 404) {
-      // If the response status is 404 (Not Found)
-      throw new Error('An error occurred');
-    } else {
-      // For any other non-success status code
-      throw new Error('An error occurred');
-    }
-  })
-  .then((data) => {
-    console.log(data);
-    dispatch(setWishlist(data));
-    return data;
-  })
-  .catch((error) => {
-    console.log(error.message);
-    throw error;
-  });
-};
+      .then((response) => { 
+        if (response.ok) {
+          return response.json();
+        }
+        else if (response.status === 404) {
+          throw new Error('An error occurred');
+        } else {
+          throw new Error('An error occurred');
+        }
+      })
+      .then((data) => {
+        console.log(data);
+        dispatch(setWishlist(data));
+        return data;
+      })
+      .catch((error) => {
+        console.log(error.message);
+        throw error;
+      });
+  };
 }
 
 
@@ -1073,28 +1048,26 @@ export function removeFromWishlistAPI(payload) {
       },
       body: JSON.stringify(payload),
     })
-  .then((response) => { 
-    if (response.ok) {
-      return response.json();
-    }
-    else if (response.status === 404) {
-      // If the response status is 404 (Not Found)
-      throw new Error('An error occurred');
-    } else {
-      // For any other non-success status code
-      throw new Error('An error occurred');
-    }
-  })
-  .then((data) => {
-    console.log(data);
-    dispatch(setWishlist(data));
-    return data;
-  })
-  .catch((error) => {
-    console.log(error.message);
-    throw error;
-  });
-};
+      .then((response) => { 
+        if (response.ok) {
+          return response.json();
+        }
+        else if (response.status === 404) {
+          throw new Error('An error occurred');
+        } else {
+          throw new Error('An error occurred');
+        }
+      })
+      .then((data) => {
+        console.log(data);
+        dispatch(setWishlist(data));
+        return data;
+      })
+      .catch((error) => {
+        console.log(error.message);
+        throw error;
+      });
+  };
 }
 
 
@@ -1219,11 +1192,9 @@ export function getOrganizerAPI(organizer_id=null) {
     let url;
 
     if (organizer_id){
-      // Get organizer given organizer ID
       url = `${BASE_URL}/discounts/organizers/${organizer_id}/`;
     }
     else{
-      // Get organizer given user
       url = `${BASE_URL}/discounts/user/organizer/`;
     }
     
@@ -1289,7 +1260,6 @@ export function updateOrganizerAPI(payload) {
         return response.json();
       })
       .then((data) => {
-        // Handle both success response and direct data response
         const organizerData = data.success ? data : data;
         dispatch(setOrganizer(organizerData));
         dispatch(setLoading(false));
@@ -1371,7 +1341,6 @@ export function isUserFollowerAPI(organizer_id) {
 }
 
 
-
 // --------------------------------------------------------------
 // ----------------- IS DISCOUNT LIKED BY USER ------------------
 
@@ -1424,6 +1393,7 @@ export function forgetPasswordAPI(payload) {
       .then((data) => {
         console.log("reset password data ", data);        
         if (data.success) {
+          // Loading.js will force setLoading(true) and keep overlay open for user to read
           dispatch(setLoadingMessage("Check mail to reset password"));
         } else if (data.error) {
           console.log(data.error);

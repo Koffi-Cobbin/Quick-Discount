@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { setLoading, setLoadingMessage } from "../../actions";
 
 const Loading = (props) => {
-  const { loading_message, close } = props;
+  const { loading, loading_message, close } = props;
   const [visible, setVisible] = useState(false);
   const autoDismissTimer = useRef(null);
 
@@ -14,14 +14,12 @@ const Loading = (props) => {
     return () => clearTimeout(t);
   }, []);
 
-  // Auto-dismiss whenever a message appears (success or error)
-  // FIX: was `props.loading_message && props.loading` — but setLoading(false)
-  // is dispatched before/alongside setLoadingMessage, so props.loading is
-  // already false by the time this effect runs. Condition must be message-only.
+  // Auto-dismiss only when loading=true with no message (pure spinner state).
+  // Clears itself if a message arrives before the 3 s are up.
   useEffect(() => {
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
 
-    if (loading_message) {
+    if (loading && !loading_message) {
       autoDismissTimer.current = setTimeout(() => {
         close();
       }, 3000);
@@ -30,12 +28,20 @@ const Loading = (props) => {
     return () => {
       if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
     };
-  }, [loading_message, close]);
+  }, [loading, loading_message, close]);
+
+  // When a message arrives, force loading=true so the overlay stays open
+  // and let the user read at their own pace (no auto-dismiss).
+  useEffect(() => {
+    if (loading_message) {
+      props.forceLoading(true);
+    }
+  }, [loading_message]);
 
   // Clear timer if user manually closes the loader
   const handleClose = () => {
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
-    props.close();
+    close();
   };
 
   // Determine if message is an error/success
@@ -51,11 +57,11 @@ const Loading = (props) => {
       <Orb top="60%" left="75%"  size="260px" color="rgba(220,103,14,0.09)" delay="1.4s"/>
       <Orb top="40%" left="50%"  size="180px" color="rgba(255,255,255,0.04)" delay="0.7s"/>
 
-      <Card hasMessage={!!props.loading_message}>
+      <Card hasMessage={!!loading_message}>
         {/* Close button */}
         <CloseBtn onClick={handleClose} aria-label="Dismiss">&times;</CloseBtn>
 
-        {props.loading_message ? (
+        {loading_message ? (
           <MessageContent>
             <MessageIcon>
               <SuccessIcon
@@ -63,7 +69,7 @@ const Loading = (props) => {
                 alt={isError ? "Error" : "Success"}
               />
             </MessageIcon>
-            <MessageText isError={isError}>{props.loading_message}</MessageText>
+            <MessageText isError={isError}>{loading_message}</MessageText>
           </MessageContent>
         ) : (
           <SpinnerContent>
@@ -373,6 +379,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(setLoadingMessage(null));
     dispatch(setLoading(false));
   },
+  forceLoading: (status) => dispatch(setLoading(status)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Loading);
