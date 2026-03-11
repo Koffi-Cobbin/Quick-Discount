@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
-import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { getOrganizerAPI, getOrganizerDiscountsAPI, getAnalyticsAPI, getUserNotificationsAPI, updateOrganizerAPI, deleteDiscountAPI } from "../../actions";
 import Card from "../Shared/Card";
@@ -230,33 +229,6 @@ const DiscountMeta = styled.div`
   gap: 8px;
 `;
 
-const ProgressBar = styled.div`
-  width: 60px;
-  height: 4px;
-  background: rgba(0,0,0,0.08);
-  border-radius: 2px;
-  overflow: hidden;
-`;
-
-const ProgressFill = styled.div`
-  height: 100%;
-  background: ${T.orange};
-  border-radius: 2px;
-  width: ${({ pct }) => pct}%;
-`;
-
-const StatusBadge = styled.span`
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-family: "Courier New", monospace;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: ${({ status }) => status === 'active' ? T.successBg : status === 'pending' ? T.orangeDim : T.errorBg};
-  color: ${({ status }) => status === 'active' ? T.success : status === 'pending' ? T.orange : T.error};
-`;
-
 // ─── Empty State ──────────────────────────────────────────────────────────────
 const EmptyState = styled.div`
   padding: 40px 20px;
@@ -285,6 +257,17 @@ const CardGrid = styled.div`
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const OrganizerDashboard = (props) => {
+  const {
+    getOrganizer,
+    organizer,
+    getOrganizerDiscounts,
+    getAnalytics,
+    notifications,
+    getUserNotifications,
+    discounts: discountsRedux,
+    analytics: analyticsRedux
+  } = props;
+
   const [tab, setTab] = useState("all");
   
   const [orgName, setOrgName] = useState("");
@@ -295,14 +278,14 @@ const OrganizerDashboard = (props) => {
   const [saveState, setSaveState] = useState(null);
 
   useEffect(() => {
-    if (props.organizer) {
-      setOrgName(props.organizer.name || "");
-      setOrgEmail(props.organizer.email || "");
-      setOrgPhone(props.organizer.phone_number || "");
-      setOrgDescription(props.organizer.description || "");
-      setOrgLocation(props.organizer.location || "");
+    if (organizer) {
+      setOrgName(organizer.name || "");
+      setOrgEmail(organizer.email || "");
+      setOrgPhone(organizer.phone_number || "");
+      setOrgDescription(organizer.description || "");
+      setOrgLocation(organizer.location || "");
     }
-  }, [props.organizer]);
+  }, [organizer]);
 
   const handleSaveOrganizer = (e) => {
     e.preventDefault();
@@ -320,21 +303,21 @@ const OrganizerDashboard = (props) => {
     }, 900);
   };
 
-  useEffect(() => { props.getOrganizer(); }, []);
+  useEffect(() => { getOrganizer(); }, [getOrganizer]);
 
   useEffect(() => {
-    if (props.organizer && props.organizer.id) {
-      props.getOrganizerDiscounts(props.organizer.id);
-      props.getAnalytics(props.organizer.id);
+    if (organizer && organizer.id) {
+      getOrganizerDiscounts(organizer.id);
+      getAnalytics(organizer.id);
     }
-  }, [props.organizer]);
+  }, [organizer, getOrganizerDiscounts, getAnalytics]);
 
   useEffect(() => {
-    if (!props.notifications) props.getUserNotifications();
-  }, []);
+    if (!notifications) getUserNotifications();
+  }, [notifications, getUserNotifications]);
 
-  const discountsData = props.discounts?.results || props.discounts || [];
-  const analytics = props.analytics || {};
+  const discountsData = discountsRedux?.results || discountsRedux || [];
+  const analytics = analyticsRedux || {};
   const discountSummary = analytics.discount_summary || {};
   const engagement = analytics.engagement || {};
   const organizerInfo = analytics.organizer || {};

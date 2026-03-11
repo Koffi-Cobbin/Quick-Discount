@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { setLoading, setLoadingMessage } from "../../actions";
 
 const Loading = (props) => {
+  const { loading_message, close } = props;
   const [visible, setVisible] = useState(false);
   const autoDismissTimer = useRef(null);
 
@@ -20,16 +21,16 @@ const Loading = (props) => {
   useEffect(() => {
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
 
-    if (props.loading_message) {
+    if (loading_message) {
       autoDismissTimer.current = setTimeout(() => {
-        props.close();
+        close();
       }, 3000);
     }
 
     return () => {
       if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
     };
-  }, [props.loading_message]);
+  }, [loading_message, close]);
 
   // Clear timer if user manually closes the loader
   const handleClose = () => {
@@ -38,10 +39,10 @@ const Loading = (props) => {
   };
 
   // Determine if message is an error/success
-  const isError = props.loading_message &&
-    (props.loading_message.props?.children?.some?.(c => c?.props?.style?.color === 'red') ||
-     String(props.loading_message).includes('error') ||
-     String(props.loading_message).includes('Failed'));
+  const isError = loading_message &&
+    (loading_message.props?.children?.some?.(c => c?.props?.style?.color === 'red') ||
+     String(loading_message).includes('error') ||
+     String(loading_message).includes('Failed'));
 
   return (
     <Overlay visible={visible}>

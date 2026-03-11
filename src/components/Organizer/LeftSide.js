@@ -7,6 +7,7 @@ import { getOrganizerDiscountsAPI } from "../../actions";
 
 
 const LeftSide = (props) => {
+  const { organizer, getOrganizerDiscounts, toggleSection } = props;
   const navigate = useNavigate();
 
   const handleRedirect = (url) => {
@@ -31,29 +32,29 @@ const LeftSide = (props) => {
         }
       }
       element.classList.toggle("active");
-      props.toggleSection(id);
+      toggleSection(id);
     }
   };
 
   useEffect(() => {
-    if (props.organizer){
-      props.getOrganizerDiscounts(props.organizer.id);
-    };    
+    if (organizer){
+      getOrganizerDiscounts(organizer.id);
+    };
     // props.getOrganizerNotifications();
-  }, [props.organizer]);
+  }, [organizer, getOrganizerDiscounts]);
 
   return (
     <Container>
         <ArtCard>
             <UserInfo>
                 <CardBackground />
-                <a>
+                <div>
                     <Photo />
                     <UserName>Welcome, {props.organizer ? props.organizer.name : 'Organizer'}!</UserName>
-                </a>
-                <a>
+                </div>
+                <div>
                 <AddPhotoText onClick={()=>widgetOnClickHandler("settings")}>Add a photo</AddPhotoText>
-                </a>
+                </div>
             </UserInfo>
 
             <Widgets>

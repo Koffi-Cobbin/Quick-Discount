@@ -9,13 +9,13 @@ const SignupStatusMessage = (props) => {
                 <span className="close-popup">&times;</span>
                 {props.activate_user && (
                     <>
-                    <img src="/images/icons/tick-circle.svg" />
+                    <img src="/images/icons/tick-circle.svg" alt="Success" />
                     <p style={{color: "green"}}>Please confirm your account registration via the link sent to your email.</p>
                     </>
                  )}
                 {props.activate_user === false && (
                     <>
-                    <img src="/images/icons/error.svg" />
+                    <img src="/images/icons/error.svg" alt="Error" />
                     <p style={{color: "red"}}>Failed to login</p>
                     </>
                  )}

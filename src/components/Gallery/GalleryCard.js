@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
 
 const GalleryCard = (props) => {
     return (
@@ -76,24 +75,6 @@ const MediaInfo = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const MediaIcon = styled.span`
-  background: white;
-  opacity: 0.7;
-  padding: 2px;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  position: absolute;
-  right: 5px;
-  img {
-    width: 17px;
-    height: 17px;
-  }
-  &:hover{
-    cursor: pointer;
-  }
 `;
 
 export default GalleryCard;

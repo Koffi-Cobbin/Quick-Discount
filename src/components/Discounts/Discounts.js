@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import styled, { keyframes, css, createGlobalStyle } from "styled-components";
 import { connect } from "react-redux";
@@ -402,7 +402,7 @@ function DiscountsPage(props) {
   const [saved, setSaved] = useState(new Set());
   const [savingId, setSavingId] = useState(null);
 
-  const { getDiscounts, discounts, loading: propsLoading, user, token, addToWishlist, removeFromWishlist, wishlist } = props;
+  const { getDiscounts, discounts, loading: propsLoading, token, addToWishlist, removeFromWishlist, wishlist } = props;
 
   // Fetch discounts on mount if not already loaded
   useEffect(() => {
@@ -412,13 +412,13 @@ function DiscountsPage(props) {
   }, [discounts, getDiscounts]);
 
   // Derive unique category list from live data (needed for URL parameter handling)
-  const allDiscounts = discounts?.results || [];
-  const cats = [
+  const allDiscounts = useMemo(() => discounts?.results || [], [discounts]);
+  const cats = useMemo(() => [
     "All",
     ...[
       ...new Set(allDiscounts.flatMap((d) => d.categories.map((c) => c.name))),
     ],
-  ];
+  ], [allDiscounts]);
 
   // Set active category from URL parameter when categories are loaded
   useEffect(() => {
@@ -504,13 +504,6 @@ function DiscountsPage(props) {
       });
       alert("Failed to update wishlist. Please try again.");
     });
-  };
-
-  // Format end_date for display
-  const formatExpiry = (dateStr) => {
-    if (!dateStr) return null;
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   };
 
   return (

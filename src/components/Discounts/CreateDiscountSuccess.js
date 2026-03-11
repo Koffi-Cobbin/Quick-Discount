@@ -7,7 +7,7 @@ const CreateDiscountSuccess = () => {
         <Container>
              <Section>
                 <button className="close-popup">&times;</button>
-                <img src="/images/icons/tick-circle.svg" />
+                <img src="/images/icons/tick-circle.svg" alt="Success" />
                 <p>
                     Your event details have been successfully submited. 
                     Quick Events review team would reach out to you via the email you provided

@@ -7,21 +7,18 @@ import BarChart from "../UI/Chart";
 import { connect } from "react-redux";
 import { useState, useEffect } from "react";
 import { getOrganizerDiscountsAPI, getAnalyticsAPI } from "../../actions";
-import { eventsData } from "../Assets/data";
 
-const Dashboard = (props) => {
+const Dashboard = ({ events, organizer, analytics, getOrganizerDiscounts, getAnalytics }) => {
   const [activeDiscounts, setActiveDiscounts] = useState();
   const [pendingDiscounts, setPendingDiscounts] = useState();
   const [rejectedDiscounts, setRejectedDiscounts] = useState();
-  const [upcomingDiscounts, setUpcomingDiscounts] = useState([]);
   const [filterType, setFilterType] = useState("tickets");
   const [filterOption, setFilterOption] = useState("months");
 
   // Get analytics data from props
-  const analytics = props.analytics || {};
-  const discountSummary = analytics.discount_summary || {};
-  const engagement = analytics.engagement || {};
-  const organizerInfo = analytics.organizer || {};
+  const discountSummary = analytics?.discount_summary || {};
+  const engagement = analytics?.engagement || {};
+  const organizerInfo = analytics?.organizer || {};
 
   // Use analytics data for counts (fallback to manual calculation if analytics not available)
   let activeDiscountsCount = discountSummary.active_discounts !== undefined 
@@ -50,49 +47,7 @@ const Dashboard = (props) => {
     });
   };
 
-  // function to filter a list of discount objects based on date and time differences
-  function filterUpcomingDiscounts(eventsList) {
-    return eventsList.filter((discount) => {
-      // Get discount start date and end date 
-      let startDate = discount["start_date"];
-      let endDate = discount["end_date"];
-      // Calculate the difference between now and the discount's start date in days
-      let startDateDifference = Math.abs(
-        new Date(startDate).getTime() - new Date().getTime()
-      );
-      console.log("startDateDifference ", startDateDifference);
 
-      // Calculate the difference between now and the discount's end date in days
-      let endDateDifference = Math.abs(
-        new Date(endDate).getTime() - new Date().getTime()
-      );
-      console.log("endDateDifference ", endDateDifference);
-      
-      // Get discount start time and end time
-      let newDate = new Date();
-      let startTime = new Date(`${newDate.toDateString()} ${discount["start_time"]}`); 
-      let endTime = new Date(`${newDate.toDateString()} ${discount["end_time"]}`); 
-
-      // Calculate the difference between now and the discount's start time in hours
-      let startTimeDifference = Math.abs(
-        startTime - new Date().getTime()
-      );
-      console.log("startTimeDifference ", startTimeDifference);
-
-      // Calculate the difference between now and the discount's end time in hours
-      let endTimeDifference = Math.abs(
-        endTime - new Date().getTime()
-      );
-      console.log("endTimeDifference ", endTimeDifference);
-
-      if (startDateDifference >= 0 && startTimeDifference >= 0 && discount["status"] === "active") {
-        return true;
-      }
-      else{
-        return false;
-      };
-    });
-  };
 
   const toggleFilterType = (filter_type) => {
     setFilterType(filter_type);
@@ -131,26 +86,24 @@ const Dashboard = (props) => {
   };
 
   useEffect(() => {
-    if (!props.events && props.organizer) {
-      props.getOrganizerDiscounts(props.organizer.id);
+    if (!events && organizer) {
+      getOrganizerDiscounts(organizer.id);
       console.log("In organizer dashboard!");
     }
     // Fetch analytics when organizer is available
-    if (props.organizer && !props.analytics) {
-      props.getAnalytics(props.organizer.id);
+    if (organizer && !analytics) {
+      getAnalytics(organizer.id);
       console.log("Fetching analytics!");
     }
-    if (props.events) {
+    if (events) {
       // Set active events
-      setActiveDiscounts(filterByStatus(props.events, "active"));
+      setActiveDiscounts(filterByStatus(events, "active"));
       // Set pending events
-      setPendingDiscounts(filterByStatus(props.events, "pending"));
+      setPendingDiscounts(filterByStatus(events, "pending"));
       // Set rejected events
-      setRejectedDiscounts(filterByStatus(props.events, "rejected"));
-      // Filter upcoming events
-      setUpcomingDiscounts(filterUpcomingDiscounts(props.events));
+      setRejectedDiscounts(filterByStatus(events, "rejected"));
     }
-  }, []);
+  }, [events, organizer, analytics, getOrganizerDiscounts, getAnalytics]);
 
   return (
     <Container>
@@ -335,28 +288,6 @@ const Title = styled.h4`
   text-align: left;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-`;
-
-const Card = styled.div`
-  width: 180px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 5px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
-  margin-bottom: 5px;
-  p {
-    margin-top: 10px;
-  }
-  &.stats {
-    height: 110px;
-  }
-  @media (max-width: 540px) {
-    width: 100%;
-  }
 `;
 
 const BarChartWrap = styled.div`

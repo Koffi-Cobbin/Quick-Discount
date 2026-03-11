@@ -1,54 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { isEmailValid } from "../../utils/middleware";
 
 const Footer = (props) => {
-    const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
-    const [message, setMessage] = useState("");
-
-    // ERRORS
-    const [emailError, setEmailError] = useState("");
-
-    const validateEmail = (value) => {
-        setEmail(value);
-        let emailRes = isEmailValid(value);
-        setEmailError(emailRes[1] ? emailRes[1] : "");
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (e.target !== e.currentTarget) {
-            return;
-        }
-
-        const payload = {
-            name: username,
-            email: email,
-            message: message,
-        };
-
-        props.sendMessage(payload);
-        reset();
-    };
-
-    const reset = () => {
-        setEmail("");
-        setUsername("");
-        setMessage("");
-    };
-
-    useEffect(() => {
-        if (props.errors) {
-            if (props.errors.email) {
-                setEmailError(props.errors.email[0]);
-            }
-        }
-    }, [props.errors]);
 
     return (
         <FooterSection>
@@ -165,10 +119,7 @@ const Footer = (props) => {
                     . All rights reserved.
                 </p>
                 <p className="text-center">
-                    Designed by{" "}
-                    <a href="#" className="text-center">
-                        Koffi Cobbin
-                    </a>
+                    Designed by Koffi Cobbin
                 </p>
             </Copyright>
         </FooterSection>
@@ -240,103 +191,6 @@ const RightSide = styled.div`
     @media (max-width: 480px) {
         text-align: center;
         width: 100%;
-    }
-`;
-
-const FormSection = styled.div`
-    width: fit-content;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: left;
-    align-items: center;
-
-    border: 1px solid #fff;
-    border-radius: 10px;
-    padding-top: 5px;
-    @media (max-width: 768px) {
-    }
-`;
-
-const Form = styled.div`
-    border-radius: 10px;
-    margin: 20px;
-
-    & .inputbox-wrap {
-        & p {
-            text-align: left;
-            padding-left: 10px;
-            color: #fb9a52;
-        }
-        margin-bottom: 30px;
-    }
-    & .inputbox {
-        height: 50px;
-        padding: 0;
-        position: relative;
-        &:last-child {
-            margin-bottom: 0;
-        }
-    }
-    & input {
-        position: relative;
-        padding: 11px 5px;
-        border-radius: 10px;
-        /* font-size: 1.2em; */
-        color: #4a4a4a;
-        outline: none;
-        display: block;
-        width: 100%;
-        background-color: #fff;
-        &:focus ~ span,
-        &:valid ~ span {
-            transform: translateX(-13px) translateY(-35px);
-            /* font-size: 1em; */
-            color: #fff;
-        }
-    }
-
-    & span {
-        position: absolute;
-        top: 14px;
-        left: 20px;
-        transition: 0.6s;
-        color: #999;
-    }
-
-    & [type="button"] {
-        width: 100%;
-        background: #fb9a52;
-        color: #fff;
-        border: #fff;
-        &:hover {
-            background: linear-gradient(45deg, #fb9a52, #fa8128);
-        }
-    }
-
-    & .textbox {
-        width: inherit;
-        display: flex;
-        justify-content: left;
-        margin-bottom: 10px;
-        flex-direction: column;
-
-        label {
-            display: block;
-        }
-
-        .textinput {
-            border-radius: 10px;
-            background-color: #fff;
-            display: block;
-            padding: 5px;
-            color: #4a4a4a;
-        }
-    }
-
-    @media (max-width: 768px) {
-        & span {
-            top: 16px;
-        }
     }
 `;
 

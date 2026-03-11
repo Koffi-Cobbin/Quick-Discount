@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import WishlistContext from "../../store/wishlist-context";
 
@@ -300,7 +299,6 @@ const ActionButtons = styled.div`
 // bgColor prop now accepts "light" | "dark" (default: "dark") instead of a
 // raw CSS colour value, so the card self-manages all theme-dependent styles.
 function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, isLoggedIn }) {
-  const navigate = useNavigate();
   const wishlistCtx = useContext(WishlistContext);
 
   // Resolve theme: "light" string → light palette; anything else → dark

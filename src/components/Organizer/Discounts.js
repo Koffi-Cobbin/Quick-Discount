@@ -5,6 +5,7 @@ import Card from "../Shared/Card";
 
 
 const Discounts = (props) => {
+    const { discounts } = props;
     const [activeEvents, setActiveEvents] = useState();
     const [pendingEvents, setPendingEvents] = useState();
     const [rejectedEvents, setRejectedEvents] = useState();
@@ -16,15 +17,15 @@ const Discounts = (props) => {
     };
 
     useEffect(() => {
-        if (props.discounts) {
+        if (discounts) {
           // Set active discounts
-          setActiveEvents(filterByStatus(props.discounts, "active"));
+          setActiveEvents(filterByStatus(discounts, "active"));
           // Set pending discounts
-          setPendingEvents(filterByStatus(props.discounts, "pending"));
+          setPendingEvents(filterByStatus(discounts, "pending"));
           // Set rejected discounts
-          setRejectedEvents(filterByStatus(props.discounts, "rejected"));
+          setRejectedEvents(filterByStatus(discounts, "rejected"));
         }
-      }, []);
+      }, [discounts]);
 
     return (
         <Container>
@@ -133,87 +134,6 @@ const FilterBtns = styled.div`
     }
 `;
 
-const Row = styled.div`
-    display: flex;
-    align-items: center;
-    /* justify-content: space-around; */
-    @media (max-width: 540px) {
-        flex-wrap: wrap;
-        justify-content: space-between;
-    }
-`;
-
-const RowItem = styled.div`
-    width: 270px;
-    margin-right: 10px;
-    /* border: 1px solid black; */
-    @media (max-width: 540px) {
-        width: 260px;
-        margin: 0 auto;
-        margin-bottom: 10px;
-    }
-`;
-
-const Card = styled.div`
-    width: 270px;
-    height: 180px;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 5px;
-    margin: 0 auto;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    img {
-        width: 98%;
-        height: 98%;
-        border-radius: 5px;
-        background-position: center;
-        background-size: cover;
-        margin-top: 2px;
-    }
-    div.overlay {
-        width: 98%;
-        height: 98%;
-        position: absolute;
-        z-index: 1;
-        top: 1%;
-        left: 1%;
-        background: rgba(0, 0, 0, 0.35);
-        border-radius: 5px;
-    }
-    div.info {
-        position: absolute;
-        padding: 10px;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 2;
-        border-radius: 5px;
-        width: 200px;
-        height: 100px;
-        color: #fff;
-        p{
-            overflow-x: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-    }
-    @media (max-width: 600px) {
-        width: 240px;
-        height: 160px;
-    }
-
-    @media (max-width: 540px) {
-        width: 210px;
-        height: 160px;
-        div.info {width: 180px;}
-    }
-
-    @media (max-width: 479px) {
-        width: 260px;
-        height: 170px;
-        div.info {width: 200px;}
-    }
-`;
 
 const Grid = styled.div`
   display: grid;

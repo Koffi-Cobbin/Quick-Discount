@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
-import styled, { keyframes, css } from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 // ─── Section data ─────────────────────────────────────────────────────────────
 const SECTIONS = [
@@ -732,7 +732,6 @@ function Help() {
   const { secId } = useParams();
   const [activeSection, setActiveSection] = useState("basics");
   const [revealed, setRevealed] = useState({});
-  const sectionRefs = useRef({});
 
   useEffect(() => {
     if (secId) {
@@ -767,8 +766,6 @@ function Help() {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-
-  const sectionNumbers = { basics: "01", accounts: "02", payment: "03", packages: "04", location: "05" };
 
   return (
     <Page>

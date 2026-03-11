@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { connect } from "react-redux";
 import { createId } from "@paralleldrive/cuid2";
@@ -16,6 +16,7 @@ import {
   createDiscountAPI,
   updateDiscountAPI,
   getDiscountPackagesAPI,
+  getDiscountMediaAPI,
   setPreviousUrl,
 } from "../../actions";
 import Payment from "../Payment/Payment";
@@ -702,10 +703,10 @@ const NextButton = styled(NavButton)`
     background: #e67020;
   }
   &:disabled {
-    background: rgba(250, 129, 40, 0.2);
+    background: rgba(250, 129, 40, 0.25);
     border-color: transparent;
     cursor: not-allowed;
-    color: rgba(0, 0, 0, 0.25);
+    color: rgba(255, 255, 255, 0.4);
   }
 `;
 
@@ -721,7 +722,7 @@ const StepCounter = styled.span`
 // ─── InfoNote ─────────────────────────────────────────────────────────────────
 const InfoNote = styled.div`
   padding: 12px 16px;
-  border-left: 3px solid rgba(250, 129, 40, 0.45);
+  border-left: 3px solid rgba(250, 129, 40, 0.4);
   background: ${T.orangeGlow};
   border-radius: 0 8px 8px 0;
   font-size: 0.83rem;
@@ -752,10 +753,15 @@ const QtyButton = styled.button`
   cursor: pointer;
   transition: all 0.18s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: ${T.orange};
     color: ${T.orange};
     background: ${T.orangeDim};
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
   }
 `;
 
@@ -776,157 +782,218 @@ const STEPS = [
   { label: "Payment", icon: "◈" },
 ];
 
+// days contributed by one unit of each package type
+const DAYS_PER_TYPE = { daily: 1, weekly: 7, monthly: 30 };
+
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 const DiscountForm = (props) => {
-  // ── Text / form state ─────────────────────────────────────────────────────
+  // ── State ─────────────────────────────────────────────────────────────────
   const [discountTitle, setDiscountName] = useState("");
   const [discountDescription, setDiscountDescription] = useState("");
-  const [organizerName, setOrganizerName] = useState(props.organizer?.name ?? "");
+  const [organizerName, setOrganizerName] = useState(
+    props.organizer?.name ?? "",
+  );
+  const [organizerDescription, setOrganizerDescription] = useState(
+    props.organizer?.description ?? "",
+  );
   const [email, setEmail] = useState(props.organizer?.email ?? "");
-  const [phoneNumber, setPhoneNumber] = useState(props.organizer?.contact ?? "");
-  const [websiteURL, setWebsiteUrl] = useState("");
-  const [facebookURL, setFacebookURL] = useState("");
-  const [instagramURL, setInstagramURL] = useState("");
-  const [twitterURL, setTwitterURL] = useState("");
-  const [videoURL, setVideoURL] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [location, setLocation] = useState("");
-  const [percentageDiscount, setPercentageDiscount] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(
+    props.organizer?.phone_number ?? "",
+  );
   const [discountCategories, setDiscountCategories] = useState([]);
-  const [packageOption, setPackageOption] = useState(null);
-  const [agreement, setAgreement] = useState("");
-  const [mapEmbed, setMapEmbed] = useState("");
-
-  // ── Media state ───────────────────────────────────────────────────────────
-  const [discountFlyer, setDiscountFlyer] = useState(null);
+  const [percentageDiscount, setPercentageDiscount] = useState("");
+  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().slice(0, 10),
+  );
+  const [endDate, setEndDate] = useState(
+    new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+  );
+  const [discountFlyer, setDiscountFlyer] = useState();
   const [readDiscountFlyer, setReadDiscountFlyer] = useState("");
-  const [filename, setFilename] = useState("");
-  const [isFlyerEmpty, setIsFlyerEmpty] = useState(false);
   const [discountImages, setDiscountImages] = useState([]);
   const [readDiscountImages, setReadDiscountImages] = useState([]);
+  const [socialMediaHandles, setSocialMediaHandles] = useState(
+    props.organizer?.social_media_handles ?? {
+      whatsapp: "",
+      facebook: "",
+      instagram: "",
+      twitter: "",
+    },
+  );
+  const [videoURL, setVideoURL] = useState("");
+  const [websiteURL, setWebsiteUrl] = useState("");
+  const [agreement, setAgreement] = useState("");
+  const [allCategories, setAllCategories] = useState();
+  const [discountPackages, setDiscountPackages] = useState();
+  const [packageOption, setPackageOption] = useState();
 
-  // ── Error state ───────────────────────────────────────────────────────────
-  const [emailError, setEmailError] = useState("");
-  const [contactError, setContactError] = useState("");
-  const [websiteURLError, setWebsiteURLError] = useState("");
-  const [videoURLError, setVideoURLError] = useState("");
-  const [imageError, setImageError] = useState({ flyer: "", images: "" });
-
-  // ── UI state ──────────────────────────────────────────────────────────────
+  // UI state
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState("forward");
 
-  const {
-    discount,
-    allCategories,
-    discountPackages,
-    getCategories,
-    getDiscountPackages,
-    createDiscount,
-    updateDiscount,
-  } = props;
+  // Scroll to top on step change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
+  // Errors
+  const [emailError, setEmailError] = useState("");
+  const [contactError, setContactError] = useState("");
+  const [imageError, setImageError] = useState({ flyer: "", images: "" });
+  const [videoURLError, setVideoURLError] = useState("");
+  const [websiteURLError, setWebsiteURLError] = useState("");
+  const [socialMediaHandlesURLError, setSocialMediaHandlesURLError] = useState({
+    whatsappError: "",
+    facebookError: "",
+    instagramError: "",
+    twitterError: "",
+  });
+  const [isFlyerEmpty, setIsFlyerEmpty] = useState(false);
+  const [filename, setFilename] = useState("");
 
   const { pathname } = useLocation();
+  const {
+    setUrl,
+    categories,
+    discount,
+    discount_media,
+    discount_packages,
+    getCategories,
+    getDiscountPackages,
+    getDiscountMedia,
+  } = props;
 
-  // Record URL for post-login redirect
+  // ── Effects ───────────────────────────────────────────────────────────────
+  // Mount-only: record URL for post-login redirect. Refs let us read
+  // the latest values without adding them as reactive dependencies.
+  const pathnameRef = React.useRef(pathname);
+  const setUrlRef = React.useRef(setUrl);
   useEffect(() => {
-    props.setUrl?.(pathname);
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+    setUrlRef.current?.(pathnameRef.current);
+  }, []);
 
   useEffect(() => {
-    if (!allCategories) getCategories();
-    if (!discountPackages) getDiscountPackages();
-  }, [allCategories, discountPackages, getCategories, getDiscountPackages]);
+    if (categories) setAllCategories(categories);
+    else getCategories?.();
 
-
-  // Auto-select the first package once packages are available
-  useEffect(() => {
-    if (discountPackages?.length && !packageOption) {
-      setPackageOption({ ...discountPackages[0], quantity: 1 });
+    if (discount_packages) {
+      setDiscountPackages(discount_packages.results);
+      setPackageOption({ ...discount_packages.results[0], quantity: 1 });
+    } else {
+      getDiscountPackages?.();
     }
-  }, [discountPackages]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Pre-fill form when editing
-  useEffect(() => {
-    if (discount) {
-      setDiscountName(discount.title ?? "");
-      setDiscountDescription(discount.description ?? "");
-      setOrganizerName(discount.organizer_name ?? "");
-      setEmail(discount.organizer_email ?? "");
-      setPhoneNumber(discount.organizer_contact ?? "");
-      setWebsiteUrl(discount.website_url ?? "");
-      setFacebookURL(discount.facebook_url ?? "");
-      setInstagramURL(discount.instagram_url ?? "");
-      setTwitterURL(discount.twitter_url ?? "");
-      setVideoURL(discount.video_url ?? "");
-      setStartDate(discount.start_date ?? "");
-      setEndDate(discount.end_date ?? "");
-      setLocation(discount.location ?? "");
-      setPercentageDiscount(discount.percentage_discount ?? "");
-      setDiscountCategories(discount.categories ?? []);
-      setMapEmbed(discount.map_embed ?? "");
-      // Restore existing flyer preview when editing
-      if (discount.flyer) {
-        setReadDiscountFlyer(discount.flyer);
-        setFilename("Current flyer");
-      }
+
+    if (discount && !discountFlyer) {
+      setDiscountName(discount.name);
+      setDiscountDescription(discount.description);
+      setOrganizerName(discount.organizer.name);
+      setOrganizerDescription(discount.organizer.description);
+      setEmail(discount.organizer.email);
+      setPhoneNumber(discount.organizer.phone_number);
+      setDiscountCategories(discount.categories);
+      setPercentageDiscount(discount.percentage_discount);
+      setLocation(discount.location);
+      setAddress(discount.address);
+      setStartDate(discount.start_date);
+      setEndDate(discount.end_date);
+      setSocialMediaHandles(discount.organizer.social_media_handles);
+      setWebsiteUrl(discount.website_url);
+      setPackageOption(discount_packages.results[0]);
+      setDiscountFlyer(discount.flyer);
+      setAgreement(discount.agreement);
     }
-  }, [discount]);
 
-  const pct = ((step + 1) / STEPS.length) * 100;
+    if (
+      (!discount_media && discount) ||
+      (discount && discount_media?.[0]?.discount !== discount.url)
+    ) {
+      getDiscountMedia?.(discount.id);
+    }
 
-  const goTo = (next) => {
-    setDirection(next > step ? "forward" : "backward");
+    if (discount_media && !discountImages.length) {
+      setDiscountImages(discount_media);
+      setReadDiscountImages(discount_media);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    categories,
+    discount,
+    discount_media,
+    discount_packages,
+    discountFlyer,
+    discountImages.length,
+    getCategories,
+    getDiscountMedia,
+    getDiscountPackages,
+  ]);
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const goTo = useCallback((next) => {
+    setDirection(next > step ? "forward" : "back");
     setStep(next);
-    document.getElementById("top")?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, [step]);
 
-  const handleEmailChange = (value) => {
-    setEmail(value);
-    const res = isEmailValid(value);
-    setEmailError(res[1] ?? "");
-  };
+  // Returns an ISO date string (YYYY-MM-DD) for the end date given a package
+  // type and quantity. daily=1 day each, weekly=7 days each, monthly=30 days each.
+  const computeEndDate = useCallback((type, qty) => {
+    const daysPerUnit = DAYS_PER_TYPE[type?.toLowerCase()] ?? 1;
+    const end = new Date(startDate || new Date());
+    end.setDate(end.getDate() + daysPerUnit * qty);
+    return end.toISOString().slice(0, 10);
+  }, [startDate]);
 
-  const handleContactChange = (value) => {
-    setPhoneNumber(value);
-    const res = isContactValid(value);
-    setContactError(res[1] ?? "");
-  };
+  const toggleCategory = useCallback((cat) => {
+    setDiscountCategories((prev) => {
+      const exists = prev.some((c) => c.name === cat.name);
+      return exists ? prev.filter((c) => c.name !== cat.name) : [...prev, cat];
+    });
+  }, []);
 
-  const toggleCategory = (cat) => {
-    setDiscountCategories((prev) =>
-      prev.some((c) => c.name === cat.name)
-        ? prev.filter((c) => c.name !== cat.name)
-        : [...prev, cat],
-    );
-  };
+  const handleEmailChange = useCallback((val) => {
+    setEmail(val);
+    const res = isEmailValid(val);
+    setEmailError(res[1] ? res[1] : "");
+  }, []);
+
+  const handleContactChange = useCallback((val) => {
+    setPhoneNumber(val);
+    const res = isContactValid(val);
+    setContactError(res[1] ? res[1] : "");
+  }, []);
+
+  const handleSocialChange = useCallback((platform, value) => {
+    setSocialMediaHandles((prev) => ({ ...prev, [platform]: value }));
+    setSocialMediaHandlesURLError((prev) => ({
+      ...prev,
+      [`${platform}Error`]: value && !isValidURL(value) ? "Invalid URL" : "",
+    }));
+  }, []);
 
   // ── Media handlers ────────────────────────────────────────────────────────
-  const flyerImageHandler = (acceptedFiles) => {
+  const flyerImageHandler = useCallback((acceptedFiles) => {
     if (!acceptedFiles.length) return;
     const file = acceptedFiles[0];
     setDiscountFlyer(file);
     setIsFlyerEmpty(false);
     setFilename(file.name);
-    setImageError((prev) => ({ ...prev, flyer: "" }));
     const reader = new FileReader();
     reader.onload = (e) => setReadDiscountFlyer(e.target.result);
     reader.readAsDataURL(file);
-  };
+  }, []);
 
-  const onDrop = (acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles) => {
     if (discountImages.length >= 3) {
-      setImageError((prev) => ({ ...prev, images: "Maximum 3 images allowed" }));
+      setImageError((e) => ({ ...e, images: "Maximum 3 images" }));
       return;
     }
-    const remaining = 3 - discountImages.length;
-    const toAdd = acceptedFiles.slice(0, remaining);
-    toAdd.forEach((file) => {
+    acceptedFiles.forEach((file) => {
+      const reader = new FileReader();
       const imgId = createId();
       setDiscountImages((prev) => [...prev, { id: `image-${imgId}`, file }]);
-      const reader = new FileReader();
       reader.onload = (e) =>
         setReadDiscountImages((prev) => [
           ...prev,
@@ -934,59 +1001,113 @@ const DiscountForm = (props) => {
         ]);
       reader.readAsDataURL(file);
     });
-    if (acceptedFiles.length > remaining) {
-      setImageError((prev) => ({ ...prev, images: "Maximum 3 images allowed" }));
-    } else {
-      setImageError((prev) => ({ ...prev, images: "" }));
-    }
-  };
+  }, [discountImages.length]);
 
-  const popImage = (id) => {
+  const popImage = useCallback((id) => {
     setDiscountImages((prev) => prev.filter((img) => img.id !== id));
     setReadDiscountImages((prev) => prev.filter((img) => img.id !== id));
-    setImageError((prev) => ({ ...prev, images: "" }));
-  };
+  }, []);
 
-  const handlePostDiscount = () => {
-    // Validate flyer is present for new discounts
-    if (!discount && !discountFlyer) {
+  const generateEmbed = useCallback(async () => {
+    try {
+      const embed = await generateEmbedFromName(location);
+      setAddress(embed);
+      return embed;
+    } catch (err) {
+      console.error("Could not generate embed:", err);
+    }
+  }, [location]);
+
+  const handlePostDiscount = useCallback(async () => {
+    let embed_location = address;
+    if (!address?.trim()) {
+      try {
+        embed_location = await generateEmbed();
+      } catch (_) {}
+    }
+
+    const filteredSocial = Object.fromEntries(
+      Object.entries(socialMediaHandles).filter(([, v]) => v?.trim()),
+    );
+
+    const payload = {
+      discount_data: {
+        title: discountTitle,
+        description: discountDescription,
+        package_type: packageOption?.type,
+        percentage_discount: percentageDiscount,
+        start_date: startDate,
+        end_date: endDate,
+        categories: discountCategories,
+        video_url: videoURL,
+        website_url: websiteURL,
+        agreement,
+        location,
+        address: embed_location,
+      },
+      organizer_data: {
+        name: organizerName,
+        description: organizerDescription,
+        email,
+        phone_number: phoneNumber,
+        social_media_handles: filteredSocial,
+      },
+      package_data: {
+        type: packageOption?.type,
+        quantity: packageOption?.quantity,
+      },
+    };
+
+    // Guard: flyer is required for new discounts
+    const flyerIsFile = discountFlyer instanceof File;
+    if (!discount && !flyerIsFile) {
       setIsFlyerEmpty(true);
-      setImageError((prev) => ({ ...prev, flyer: "Flyer image is required" }));
       goTo(2);
       return;
     }
 
-    const payload = {
-      id: discount?.id ?? createId(),
-      title: discountTitle,
-      description: discountDescription,
-      organizer_name: organizerName,
-      organizer_email: email,
-      organizer_contact: phoneNumber,
-      website_url: websiteURL,
-      facebook_url: facebookURL,
-      instagram_url: instagramURL,
-      twitter_url: twitterURL,
-      video_url: videoURL,
-      start_date: startDate,
-      end_date: endDate,
-      location,
-      percentage_discount: percentageDiscount,
-      categories: discountCategories,
-      map_embed: mapEmbed,
-      package_type: packageOption?.type,
-    };
+    // Edit mode: if flyer hasn't been replaced it's still a URL string —
+    // pass it in the payload so the backend can keep the existing file.
+    if (discount && !flyerIsFile && typeof discountFlyer === "string") {
+      payload.discount_data.flyer_url = discountFlyer;
+    }
 
     const formData = new FormData();
     formData.append("payload", JSON.stringify(payload));
-    if (discountFlyer) formData.append("flyer", discountFlyer);
+    if (flyerIsFile) formData.append("flyer", discountFlyer);
     formData.append("images_length", discountImages.length);
-    discountImages.forEach((img, i) => {
-      formData.append(`image-${i}`, img.file ? img.file : JSON.stringify(img));
-    });
 
-    discount ? updateDiscount(formData) : createDiscount(formData);
-  };
+    if (discount) {
+      discountImages.forEach((img, i) => {
+        formData.append(`image-${i}`, img.file ? img.file : JSON.stringify(img));
+      });
+      props.updateDiscount?.({ formData, discount_id: discount.id });
+    } else {
+      discountImages.forEach((img, i) => formData.append(`image-${i}`, img.file));
+      props.postDiscount?.(formData);
+      console.log("FormData entries:");
+      // for (let pair of formData.entries()) {
+      //   console.log(pair[0], pair[1]);
+      // }
+    }
+  }, [
+    address, generateEmbed, socialMediaHandles, discountTitle, discountDescription,
+    packageOption, percentageDiscount, startDate, endDate, discountCategories,
+    videoURL, websiteURL, agreement, location, organizerName, organizerDescription,
+    email, phoneNumber, discountFlyer, discountImages, discount,
+    props.updateDiscount, props.postDiscount,
+  ]);
+
+  // ── Step validation ───────────────────────────────────────────────────────
+  const canProceed = useMemo(() => [
+    discountTitle && discountDescription && percentageDiscount,
+    organizerName && email && !emailError,
+    true, // media optional
+    agreement === "agreed" && packageOption,
+    packageOption, // payment step - just need a package selected
+  ], [discountTitle, discountDescription, percentageDiscount, organizerName, email, emailError, agreement, packageOption]);
+
+  const pct = useMemo(() => ((step + 1) / STEPS.length) * 100, [step]);
 
   // ─── Step content renderer ────────────────────────────────────────────────
   // Called as renderStepContent(), NOT as <StepContent /> — avoids React
@@ -1158,7 +1279,9 @@ const DiscountForm = (props) => {
                   onChange={(e) => {
                     setWebsiteUrl(e.target.value);
                     setWebsiteURLError(
-                      isValidURL(e.target.value) || !e.target.value ? "" : "Invalid URL",
+                      isValidURL(e.target.value) || !e.target.value
+                        ? ""
+                        : "Invalid URL",
                     );
                   }}
                 />
@@ -1166,28 +1289,52 @@ const DiscountForm = (props) => {
               </FieldGroup>
             </TwoCol>
 
+            <FieldGroup>
+              <FieldLabel>About Your Business</FieldLabel>
+              <Textarea
+                id="organizerDescription"
+                rows={3}
+                value={organizerDescription}
+                placeholder="Briefly describe your business…"
+                onChange={(e) => setOrganizerDescription(e.target.value)}
+              />
+            </FieldGroup>
+
             <Divider />
 
             <SectionHeading>
               <SectionIcon>◉</SectionIcon>
-              <SectionTitle>Social Media</SectionTitle>
+              <SectionTitle>
+                Social Handles{" "}
+                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
+                  (optional)
+                </span>
+              </SectionTitle>
             </SectionHeading>
 
-            {[
-              { handle: "facebook.com/", value: facebookURL, setter: setFacebookURL },
-              { handle: "instagram.com/", value: instagramURL, setter: setInstagramURL },
-              { handle: "twitter.com/", value: twitterURL, setter: setTwitterURL },
-            ].map(({ handle, value, setter }) => (
-              <SocialRow key={handle}>
-                <SocialHandle>{handle}</SocialHandle>
-                <SocialInput
-                  type="text"
-                  value={value}
-                  placeholder="username"
-                  onChange={(e) => setter(e.target.value)}
-                />
-              </SocialRow>
-            ))}
+            {["whatsapp", "facebook", "instagram", "twitter"].map(
+              (platform) => (
+                <SocialRow key={platform}>
+                  <SocialHandle>{platform}</SocialHandle>
+                  <SocialInput
+                    type="url"
+                    value={socialMediaHandles[platform] ?? ""}
+                    hasError={!!socialMediaHandlesURLError[`${platform}Error`]}
+                    placeholder={`https://${platform}.com/…`}
+                    onChange={(e) =>
+                      handleSocialChange(platform, e.target.value)
+                    }
+                  />
+                  {socialMediaHandlesURLError[`${platform}Error`] && (
+                    <FieldError
+                      style={{ fontSize: "0.72rem", whiteSpace: "nowrap" }}
+                    >
+                      {socialMediaHandlesURLError[`${platform}Error`]}
+                    </FieldError>
+                  )}
+                </SocialRow>
+              ),
+            )}
           </StepSlide>
         );
 
@@ -1235,19 +1382,15 @@ const DiscountForm = (props) => {
 
             <Divider />
 
-            <FieldGroup>
-              <FieldLabel>Google Maps Embed Name</FieldLabel>
-              <Input
-                type="text"
-                value={mapEmbed}
-                placeholder="e.g. Accra Mall"
-                onChange={(e) => {
-                  setMapEmbed(e.target.value);
-                  generateEmbedFromName(e.target.value);
-                }}
-              />
-              <FieldHint>Enter the place name as it appears on Google Maps.</FieldHint>
-            </FieldGroup>
+            <SectionHeading>
+              <SectionIcon>▷</SectionIcon>
+              <SectionTitle>
+                Video{" "}
+                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
+                  (optional)
+                </span>
+              </SectionTitle>
+            </SectionHeading>
 
             <FieldGroup>
               <FieldLabel>Video URL</FieldLabel>
@@ -1286,9 +1429,11 @@ const DiscountForm = (props) => {
                       key={pkg.id}
                       active={active}
                       type="button"
-                      onClick={() =>
-                        setPackageOption({ ...pkg, quantity: packageOption?.quantity || 1 })
-                      }
+                      onClick={() => {
+                        const qty = packageOption?.quantity || 1;
+                        setPackageOption({ ...pkg, quantity: qty });
+                        setEndDate(computeEndDate(pkg.type, qty));
+                      }}
                     >
                       <PackageCheck active={active}>✓</PackageCheck>
                       <PackageName active={active}>{pkg.type}</PackageName>
@@ -1308,18 +1453,23 @@ const DiscountForm = (props) => {
                 <QuantityRow>
                   <QtyButton
                     type="button"
-                    onClick={() =>
-                      setPackageOption((p) => ({ ...p, quantity: Math.max(1, p.quantity - 1) }))
-                    }
+                    disabled={packageOption.quantity <= 1}
+                    onClick={() => {
+                      const newQty = Math.max(1, packageOption.quantity - 1);
+                      setPackageOption((p) => ({ ...p, quantity: newQty }));
+                      setEndDate(computeEndDate(packageOption.type, newQty));
+                    }}
                   >
                     −
                   </QtyButton>
                   <QtyValue>{packageOption.quantity}</QtyValue>
                   <QtyButton
                     type="button"
-                    onClick={() =>
-                      setPackageOption((p) => ({ ...p, quantity: p.quantity + 1 }))
-                    }
+                    onClick={() => {
+                      const newQty = packageOption.quantity + 1;
+                      setPackageOption((p) => ({ ...p, quantity: newQty }));
+                      setEndDate(computeEndDate(packageOption.type, newQty));
+                    }}
                   >
                     +
                   </QtyButton>
@@ -1370,12 +1520,18 @@ const DiscountForm = (props) => {
               <SectionTitle>Payment</SectionTitle>
             </SectionHeading>
 
-            <InfoNote>Complete your purchase to publish your discount ad.</InfoNote>
+            <InfoNote>
+              Complete your purchase to publish your discount ad.
+            </InfoNote>
 
             <Payment
               amount={totalAmount}
               package_type={packageOption?.type}
-              user={{ name: organizerName, email, contact: phoneNumber }}
+              user={{
+                name: organizerName,
+                email: email,
+                contact: phoneNumber,
+              }}
               handlePostDiscount={handlePostDiscount}
             />
           </StepSlide>
@@ -1436,13 +1592,13 @@ const DiscountForm = (props) => {
               </PrevButton>
             )}
 
-            {step === STEPS.length - 1 ? null : (
+            {step < STEPS.length - 1 && (
               <NextButton
                 type="button"
+                disabled={!canProceed[step]}
                 onClick={() => goTo(step + 1)}
-                disabled={step === STEPS.length - 2 && agreement !== "agreed"}
               >
-                Next →
+                Continue →
               </NextButton>
             )}
           </CardFooter>
@@ -1452,18 +1608,22 @@ const DiscountForm = (props) => {
   );
 };
 
+// ─── Redux connections ────────────────────────────────────────────────────────
 const mapStateToProps = (state) => ({
-  allCategories: state.discountState.categories,
-  // discount_packages is a paginated response { results: [...] }; unwrap here
-  discountPackages: state.discountState.discount_packages?.results ?? null,
-  organizer: state.userState.user,
+  categories: state.discountState.categories,
+  discount_packages: state.discountState.discount_packages,
+  discount_media: state.organizerState.discount_media,
+  payment: state.discountState.payment,
+  organizer: state.organizerState.organizer,
+  createDiscountStatus: state.organizerState.createDiscountStatus,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   getCategories: () => dispatch(getCategoriesAPI()),
   getDiscountPackages: () => dispatch(getDiscountPackagesAPI()),
-  createDiscount: (data) => dispatch(createDiscountAPI(data)),
-  updateDiscount: (data) => dispatch(updateDiscountAPI(data)),
+  postDiscount: (payload) => dispatch(createDiscountAPI(payload)),
+  updateDiscount: (payload) => dispatch(updateDiscountAPI(payload)),
+  getDiscountMedia: (id) => dispatch(getDiscountMediaAPI(id)),
   setUrl: (url) => dispatch(setPreviousUrl(url)),
 });
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { useState, useContext, useEffect } from "react";
-import { Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useContext, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { connect } from "react-redux";
 import Modal from '../UI/Modal';
 import CartItem from './CartItem';
@@ -10,6 +10,7 @@ import { orderAPI, setPreviousUrl } from '../../actions';
 
 
 const Cart = (props) => {
+  const { order, setUrl, onClose, user, sendOrder } = props;
   const cartCtx = useContext(CartContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -18,9 +19,9 @@ const Cart = (props) => {
   const hasItems = cartCtx.items.length > 0;
   const { items } = cartCtx;
 
-  const handleRedirect = (url) => {
+  const handleRedirect = useCallback((url) => {
     navigate(url);
-  };
+  }, [navigate]);
 
   // Instead of moving to payment whenever there's an order,
   // lets always handle order and always replace the order obj in the db
@@ -31,19 +32,19 @@ const Cart = (props) => {
   }, [items]);
   
   useEffect(() => {
-    props.setUrl(location.pathname);
-    if (props.order && props.order.amount === totalAmount){
-      props.onClose();
+    setUrl(location.pathname);
+    if (order && order.amount === totalAmount){
+      onClose();
       handleRedirect('/payment');
     }
-    }, [props.order]);
+    }, [order, setUrl, onClose, location.pathname, totalAmount, handleRedirect]);
 
   const cartItemRemoveHandler = (id) => {
     cartCtx.removeItem(id);
   };
 
   const addItemHandler = () => {
-    props.onClose();
+    onClose();
     handleRedirect('/events');
   };
 
@@ -60,8 +61,8 @@ const Cart = (props) => {
     };
 
     console.log(payload);
-    if (props.user){
-      props.sendOrder(payload);
+    if (user){
+      sendOrder(payload);
     }
     else{
       handleRedirect("/login");

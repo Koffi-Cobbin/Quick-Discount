@@ -1,5 +1,5 @@
 import React from "react";
-import styled, { keyframes, css } from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { connect } from "react-redux";
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";

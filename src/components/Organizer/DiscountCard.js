@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDate, formatTime } from "../../utils/middleware";
 import { deleteDiscountAPI } from "../../actions";
@@ -197,12 +197,6 @@ const DiscountStatus = styled.div`
 const Live = styled(DiscountStatus)``;
 
 const Online = styled(DiscountStatus)``;
-
-const Upcoming = styled(DiscountStatus)``;
-
-const Postponed = styled(DiscountStatus)``;
-
-const Canceled = styled(DiscountStatus)``;
 
 const DiscountType = styled.span`
   margin-right: 2px;

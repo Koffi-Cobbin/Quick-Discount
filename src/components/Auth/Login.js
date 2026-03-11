@@ -33,7 +33,11 @@ const Login = (props) => {
 
   const navigate = useNavigate();
 
-  const handleRedirect = (url) => navigate(url || "/");
+  // compute unique tag durations once so we don't recreate classes on every render
+  const tags = React.useMemo(
+    () => TAGS.map((t) => ({ ...t, duration: 3 + Math.random() * 2 })),
+    []
+  );
 
   const validateEmail   = (v) => { setEmail(v);   setEmailError(isEmailValid(v)[1]     || ""); };
   const validatePassword= (v) => { setPassword(v); setPasswordError(isPasswordValid(v)[1] || ""); };
@@ -59,8 +63,15 @@ const Login = (props) => {
         <PanelGrain />
         <PanelGlow />
 
-        {TAGS.map(({ label, top, left, rotate, delay }) => (
-          <FloatingTag key={label} style={{ top, left, transform: `rotate(${rotate})` }} delay={delay}>
+        {tags.map(({ label, top, left, rotate, delay, duration }) => (
+          <FloatingTag
+            key={label}
+            top={top}
+            left={left}
+            rotate={rotate}
+            delay={delay}
+            duration={duration}
+          >
             {label}
           </FloatingTag>
         ))}
@@ -282,7 +293,12 @@ const PanelGlow = styled.div`
   pointer-events: none;
 `;
 
-const FloatingTag = styled.div`
+const FloatingTag = styled.div.attrs((props) => ({
+  style: {
+    top: props.top,
+    left: props.left,
+  },
+}))`
   position: absolute;
   background: rgba(250, 129, 40, 0.12);
   border: 1px solid rgba(250, 129, 40, 0.3);
@@ -294,9 +310,9 @@ const FloatingTag = styled.div`
   padding: 6px 12px;
   border-radius: 20px;
   white-space: nowrap;
-  --r: ${({ style }) => style?.transform?.match(/rotate\(([^)]+)\)/)?.[1] || '0deg'};
-  animation: ${float} ${() => 3 + Math.random() * 2}s ease-in-out infinite;
-  animation-delay: ${({ delay }) => delay};
+  --r: ${(props) => props.rotate || '0deg'};
+  animation: ${float} ${(props) => props.duration}s ease-in-out infinite;
+  animation-delay: ${(props) => props.delay};
   pointer-events: none;
 `;
 

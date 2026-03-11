@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import AddToWishlist from "../Wishlist/AddToWishlist";
@@ -51,7 +51,7 @@ const SuggestedDiscountCard = (props) => {
               <Wrapper>
                 <AddToWishlist type="icon" event={props.event} />
                 <Share onClick={getEventURL}>
-                    <img src="/images/icons/share-b.svg" />
+                    <img src="/images/icons/share-b.svg" alt="Share" />
                 </Share>
               </Wrapper>
             </LikeShareWrapper>

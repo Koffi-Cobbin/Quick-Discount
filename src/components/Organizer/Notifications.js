@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Row from "../UI/Row";
 import Column from "../UI/Column";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 
 const Notifications = (props) => {
@@ -26,9 +26,9 @@ const Notifications = (props) => {
             <Row className="max-480">
                 <Column className="col-50 md">
                     <Notification>
-                        <a>
+                        <div>
                             <Avatar />
-                        </a>
+                        </div>
 
                         <div>
                             <span>Bougie Events</span>
@@ -39,9 +39,9 @@ const Notifications = (props) => {
 
                 <Column className="col-50 md">
                     <Notification>
-                        <a>
+                        <div>
                             <Avatar />
-                        </a>
+                        </div>
 
                         <div>
                             <span>Afrochella 2023</span>
@@ -54,9 +54,9 @@ const Notifications = (props) => {
             <Row className="max-480">
                 <Column className="col-25 md">
                     <Notification>
-                        <a>
+                        <div>
                             <Avatar />
-                        </a>
+                        </div>
 
                         <div>
                             <span>Afrochella 2023</span>
@@ -67,9 +67,9 @@ const Notifications = (props) => {
 
                 <Column className="col-25 md">
                     <Notification>
-                        <a>
+                        <div>
                             <Avatar />
-                        </a>
+                        </div>
 
                         <div>
                             <span>Afrochella 2023</span>
@@ -130,14 +130,6 @@ const Notification = styled.div`
     @media (max-width: 540px) {
         width: 100%;
     }
-`;
-
-const FeedList = styled.ul`
-  margin-top: 16px;
-  max-height: 200px;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
-  /* border: 1px solid black; */
 `;
 
 const Avatar = styled.div`

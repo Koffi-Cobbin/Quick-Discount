@@ -71,7 +71,7 @@ const Signup = (props) => {
       setActivated(true);
       setTimeout(() => navigate("/login"), 5000);
     }
-  }, [props.user, props.activate_user]);
+  }, [props.user, props.activate_user, navigate]);
 
   // ── Activation success screen ──
   if (activated) {

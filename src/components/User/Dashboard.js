@@ -120,7 +120,7 @@ function UserDashboard({
     if (!notifications) {
       getUserNotifications();
     }
-  }, []); // Empty deps - only run on mount
+  }, [notifications, getUserNotifications]); // Empty deps - only run on mount
 
   // Transform wishlist API response to extract discount data
   // The API returns an array like: [{ id: 1, discount: "https://.../discounts/53/" }, ...]
@@ -202,7 +202,7 @@ function UserDashboard({
         setSavedIds(newIds);
       }
     }
-  }, [savedItems]);
+  }, [savedItems, savedIds, setSavedIds]);
 
   const toggleSave = (id) => {
     const isCurrentlySaved = savedIds.has(id);

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { setDiscounts } from '../../actions';
 import { connect } from "react-redux";
 
@@ -7,7 +7,6 @@ const Pagination = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [nextPage, setNextPage] = useState(null);
   const [nextPageURL, setNextPageURL] = useState(null);
-  const [prevPage, setPrevPage] = useState(null);
   const [prevPageURL, setPrevPageURL] = useState(null);
 
   const handlePageChange = (newPage, choice) => {
@@ -35,7 +34,6 @@ const Pagination = (props) => {
 
         if (responseData.previous) {
           setPrevPageURL(responseData.previous);
-          setPrevPage(parseInt(responseData.previous.charAt(responseData.previous.length - 1)));
         } else {
           setPrevPageURL(null);
         }
@@ -50,11 +48,12 @@ const Pagination = (props) => {
     }
   };
 
+  const { next } = props;
   useEffect(() => {    
-    setNextPageURL(props.next);
-    setNextPage(parseInt(props.next ? props.next.charAt(props.next.length - 1) : props.next));
-    console.log(props.next);
-  }, []);
+    setNextPageURL(next);
+    setNextPage(parseInt(next ? next.charAt(next.length - 1) : next));
+    console.log(next);
+  }, [next]);
 
   return (
     <div>

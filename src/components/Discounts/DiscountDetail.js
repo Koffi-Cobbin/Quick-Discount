@@ -15,7 +15,7 @@ import CustomerReview from "./CustomerReview";
 import StarRating from "./StarRating";
 import CarouselFlex from "../Shared/CarouselFlex";
 import Card from "../Shared/Card";
-import { formatDate } from "../../utils/middleware";
+
 import { 
     getDiscountsAPI,
     getDiscountMediaAPI, 
@@ -30,6 +30,20 @@ import { BASE_URL } from "../../utils/constants";
 
 
 const DiscountDetail = (props) => {
+    const {
+        discounts,
+        authToken,
+        getDiscounts,
+        setUrl,
+        getDiscountReviews,
+        discount_media,
+        getDiscountMedia,
+        is_follower,
+        user_discount_like,
+        isUserFollowing,
+        isDiscountLikedByUser
+    } = props;
+
     const followClickLock = useRef(false);
     const likeClickLock = useRef(false);
     let { discountId } = useParams();
@@ -42,7 +56,6 @@ const DiscountDetail = (props) => {
     const [play, setPlay] = useState(false);
     const [following, setFollowing] = useState(false);
     const [liked, setLiked] = useState(false);
-    const [unfollowOrganizer, setUnfollowOrganizer] = useState(false);
 
     const linkName = readMore ? 'Read Less':'Read More'
 
@@ -55,8 +68,8 @@ const DiscountDetail = (props) => {
         return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
     };
 
-    const getOrganizerDiscounts = () => {
-        const newOrganizerDiscounts= props.discounts.results.filter((discount_item) => {
+    const getOrganizerDiscounts = React.useCallback(() => {
+        const newOrganizerDiscounts= discounts.results.filter((discount_item) => {
           return ((discount_item.id !== discount.id) && (discount_item.organizer.id === discount.organizer.id))
         });
         if (newOrganizerDiscounts.length > 0){
@@ -64,10 +77,10 @@ const DiscountDetail = (props) => {
         } else{
             setOrganizerDiscounts(null);
         }          
-      };
+      }, [discounts, discount]);
 
-    const getRecomendedDiscounts = () => {
-        const newRecomendedDiscounts= props.discounts.results.filter((discount_item) => {
+    const getRecomendedDiscounts = React.useCallback(() => {
+        const newRecomendedDiscounts= discounts.results.filter((discount_item) => {
           return ((discount_item.id !== discount.id) &&
           (discount_item.categories.some((category) => {
             var categories_list = [];
@@ -82,7 +95,7 @@ const DiscountDetail = (props) => {
         } else{
             setRecomendedDiscounts(null);
         }        
-      };
+      }, [discounts, discount]);
 
     const isOverflown = () => {
         let element = document.getElementById("discount-description");
@@ -91,68 +104,67 @@ const DiscountDetail = (props) => {
 
     useEffect(() => {
         const getDiscount = () => { 
-            if (!props.discounts.results){
-                props.getDiscounts();
+            if (!discounts.results){
+                getDiscounts();
             }
             else {
-                let current_discount = props.discounts.results.find(obj => obj.id === +discountId);
+                let current_discount = discounts.results.find(obj => obj.id === +discountId);
                 console.log("Current Discount", current_discount);
                 setDiscount(current_discount);
 
-                if (current_discount && props.authToken){
-                    props.isUserFollowing(current_discount.organizer.id);
-                    props.isDiscountLikedByUser(current_discount.id)
+                if (current_discount && authToken){
+                    isUserFollowing(current_discount.organizer.id);
+                    isDiscountLikedByUser(current_discount.id)
                 }                
-                props.setUrl(location.pathname);
+                setUrl(location.pathname);
             }
           }; 
         
-        if (!discount || (discount && discount.id !== +discountId) || (discount && props.authToken)){
+        if (!discount || (discount && discount.id !== +discountId) || (discount && authToken)){
             getDiscount();            
         };
-        }, [discountId, props.discounts, props.authToken]);
+        }, [discountId, discounts, authToken, discount, location.pathname, getDiscounts, isUserFollowing, isDiscountLikedByUser, setUrl]);
 
     useEffect(() => {
-        props.getDiscountReviews(discountId);
+        getDiscountReviews(discountId);
         console.log("Discount Reviews >>> ");
-        }, [discountId]);
+        }, [discountId, getDiscountReviews]);
 
     useEffect(() => {
-        if (!props.discount_media || (discount && props.discount_media.length > 0 && props.discount_media[0].discount !== discount.url)){
-            props.getDiscountMedia(discountId);
+        if (!discount_media || (discount && discount_media.length > 0 && discount_media[0].discount !== discount.url)){
+            getDiscountMedia(discountId);
             console.log("Getting Discount Media >>")
         };
-        }, [props.discount_media]);
+        }, [discount_media, discount, getDiscountMedia, discountId]);
 
     useEffect(() => {
         if ((!organizerDiscounts && discount) || (discount && discount.organizer.id !== organizerDiscounts[0].organizer.id)){
             console.log("Getting Organizer Discounts >>> ");
             getOrganizerDiscounts();
         }  
-        }, [discount]);
+        }, [discount, organizerDiscounts, getOrganizerDiscounts]);
 
     useEffect(() => {  
         if (!recomendedDiscounts && discount){
             getRecomendedDiscounts();
             console.log("Getting Recomended Discounts");
-        };      
-    }, [discount]); 
+        }      
+    }, [discount, recomendedDiscounts, getRecomendedDiscounts]);
 
     useEffect(() => {
-        if (props.is_follower){
-            console.log("Is following ", props.is_follower.user ? true : false);
-            setFollowing(props.is_follower.user ? true : false);
-        }
-        else {
+        if (is_follower){
+            console.log("Is following ", is_follower.user ? true : false);
+            setFollowing(is_follower.user ? true : false);
+        } else {
             setFollowing(false);
         }
-    }, [props.is_follower]);
+    }, [is_follower]);
 
     useEffect(() => {
-        if (props.user_discount_like){
+        if (user_discount_like){
             setLiked(true);            
         }
-    }, [props.user_discount_like]);
+    }, [user_discount_like]);
 
     const getDiscountURL = () => {
         let url = window.location.href;
@@ -364,7 +376,7 @@ const DiscountDetail = (props) => {
         return () => {
           window.removeEventListener("scroll", handleScroll);
         };
-      }, []);
+      }, [discount]);
 
     return (
         <>
@@ -822,25 +834,8 @@ const Title = styled.h1`
     align-items: baseline;
 `;
 
-const DateTimeWrapper = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 5px;
-
-  @media (max-width: 768px) {
-    flex-wrap: wrap;
-    }
-`;
-
 const Colored = styled.span`
     color: #fa8128;
-`;
-
-const Time = styled(Date)``;
-
-const Address = styled.div`
-    font-weight: 600;
 `;
 
 const ContactSection = styled.div`
@@ -982,46 +977,6 @@ const Followers = styled(ContactButton)`
     cursor: default;
 `;
 
-const GuestReserve = styled(ContactButton)`
-    border: 1px solid blue;
-    color: blue;
-    background-color: #fff;
-`;
-
-const Owner = styled.div`
-  padding: 20px;
-  text-align: center;
-  background-color: #E5E4E2;
-  border-radius: 10px;
-  margin: 10px;
-  font-size: 12.5px;
-  p {
-    a {color: black;}
-  }
-  span {
-    display: block;
-    margin-top: 10px;
-    }
-  button {
-    width: 80px;
-    height: 30px;
-    border: none;
-    outline: none;
-    border-radius: 30px;
-    margin-top: 10px;
-  }
-`;
-
-const DiscountType = styled.div`
-    margin-right: 2px;
-`;
-
-const Free = styled.p``;
-
-const Packageed = styled.p``;
-
-const Location = styled.p``;
-
 const Like = styled.button`
   padding: 2px;
   height: 25px;
@@ -1102,14 +1057,6 @@ const Map = styled.div`
         width: 100%;
         margin: 5px;
     }
-`;
-
-const MapImage = styled.img`
-  width: 100%;
-  border-radius: 10px;
-  background-position: center;
-  background-size: cover;
-  height: 100%;
 `;
 
 const AboutOrganiser = styled.div`

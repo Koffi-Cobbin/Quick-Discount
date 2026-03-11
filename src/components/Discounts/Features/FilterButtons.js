@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
-import { cities, dateFilters } from "../../Assets/data";
+import { cities } from "../../Assets/data";
 
 const FilterButtons = ( props ) => {
-  const [curentCategory, setCurentCategory] = useState("All");
 
   let newCheckedInputs =  props.checkedInputs;
 
@@ -49,8 +48,8 @@ const FilterButtons = ( props ) => {
         <button
             className="all-btn"
             style={{
-              backgroundColor: curentCategory==="All" ? "#0000FF" : "#E5E4E2",
-              color: curentCategory==="All" ? "white" : "black"
+              backgroundColor: "#E5E4E2",
+              color: "black"
             }}
             onClick={() =>  props.setfilteredEvents(props.discounts.results)}
           >

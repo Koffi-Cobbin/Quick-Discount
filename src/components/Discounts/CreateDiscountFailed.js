@@ -6,7 +6,7 @@ const CreateDiscountFailed = () => {
     return (
         <Container>
              <Section>
-                <img src="/images/icons/error.svg" />
+                <img src="/images/icons/error.svg" alt="Error" />
                 <p>
                     Unable to submit event.
                     Please make sure all enteries are filled and with the right data
