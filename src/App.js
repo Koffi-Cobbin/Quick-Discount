@@ -270,9 +270,10 @@ function App(props) {
               <SideNav isOpen={openNav} close={closeSideNav} onShowCart={showCartHandler}/>
             )
           }
-        </Router>
 
         {props.loading && <Loading />}
+
+        </Router>
 
         <Footer />
 

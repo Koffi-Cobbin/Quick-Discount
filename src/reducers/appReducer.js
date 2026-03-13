@@ -1,7 +1,8 @@
 import { 
     SET_PREVIOUS_URL,
     SET_LOADING_STATUS,
-    SET_LOADING_MESSAGE, 
+    SET_LOADING_MESSAGE,
+    SET_PENDING_REDIRECT,
     SET_ERRORS,
 } from "../actions/actionType";
 
@@ -9,6 +10,7 @@ import {
 const INITIAL_STATE = {
     previous_url: JSON.parse(sessionStorage.getItem('previous_url')),
     loading_message: null,
+    pending_redirect: null,
     loading: false,
     errors: null,
 };
@@ -27,12 +29,23 @@ const appReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 loading: action.status,
+                // Clear any stale message whenever a fresh load cycle begins so
+                // a previous success/error never bleeds into the next page's spinner.
+                ...(action.status === true ? { loading_message: null } : {}),
             };
         
         case SET_LOADING_MESSAGE:
             return {
                 ...state,
                 loading_message: action.loading_message,
+            };
+
+        // URL to navigate to once the user manually closes the loader.
+        // Set before showing a success message; cleared by Loading.js on close.
+        case SET_PENDING_REDIRECT:
+            return {
+                ...state,
+                pending_redirect: action.url,
             };
 
         case SET_ERRORS:

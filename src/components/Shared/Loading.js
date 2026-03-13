@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { connect } from "react-redux";
-import { setLoading, setLoadingMessage } from "../../actions";
+import { useNavigate } from "react-router-dom";
+import { setLoading, setLoadingMessage, setPendingRedirect } from "../../actions";
 
 const Loading = (props) => {
   const { loading, loading_message, close } = props;
   const [visible, setVisible] = useState(false);
   const autoDismissTimer = useRef(null);
+
+  const navigate = useNavigate();
 
   // Slight delay before showing — prevents flash on fast loads
   useEffect(() => {
@@ -41,7 +44,10 @@ const Loading = (props) => {
   // Clear timer if user manually closes the loader
   const handleClose = () => {
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
+    const redirectTo = props.pending_redirect;
+    props.clearPendingRedirect();   // clear before navigating to avoid loops
     close();
+    if (redirectTo) navigate(redirectTo);
   };
 
   // Determine if message is an error/success
@@ -372,14 +378,16 @@ const MessageText = styled.div`
 const mapStateToProps = (state) => ({
   loading: state.appState.loading,
   loading_message: state.appState.loading_message,
+  pending_redirect: state.appState.pending_redirect,
 });
-
+ 
 const mapDispatchToProps = (dispatch) => ({
   close: () => {
     dispatch(setLoadingMessage(null));
     dispatch(setLoading(false));
   },
   forceLoading: (status) => dispatch(setLoading(status)),
+  clearPendingRedirect: () => dispatch(setPendingRedirect(null)),  // ← added
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Loading);

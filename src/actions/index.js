@@ -25,7 +25,8 @@ import {
   SET_ANALYTICS,
   SET_WISH_LIST,
   SET_SEARCH_RESULT,
-  USER_DISCOUNT_LIKE
+  USER_DISCOUNT_LIKE,
+  SET_PENDING_REDIRECT,
 } from "./actionType";
 import { BASE_URL, STAFF_EMAIL } from "../utils/constants";
 import * as messages from "../utils/messages";
@@ -94,6 +95,11 @@ export const setLoading = (status) => ({
 export const setLoadingMessage = (message) => ({
   type: SET_LOADING_MESSAGE,
   loading_message: message,
+});
+
+export const setPendingRedirect = (url) => ({
+  type: SET_PENDING_REDIRECT,
+  url,
 });
 
 export const setDiscounts = (payload) => ({
@@ -421,7 +427,7 @@ export function createDiscountAPI(formData) {
     const url = `${BASE_URL}/discounts/`;
     const state = getState();
     const authToken = state.userState.token.access;
-
+ 
     fetch(url, {
       method: "POST",
       headers: {
@@ -434,12 +440,13 @@ export function createDiscountAPI(formData) {
       .then((data) => {
         if (data.success) {
           dispatch(setCreateDiscountStatus(true));
-          dispatch(setLoading(false));
+          // Do NOT call setLoading(false) here — that would wipe the message.
+          // dispatch(setLoadingMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE));
           console.log("DISCOUNT Success mail message ", data.message);
           console.log("FormData ", formData);
           console.log("FormData ", formData.get('payload'));
           console.log("FormData Email ", JSON.parse(formData.get('payload'))['organizer_data']['email']);
-
+ 
           // Store mail payload in session storage to be sent after payment verification
           const mail_payload = {
             "toEmail": `${STAFF_EMAIL}`,
@@ -449,7 +456,7 @@ export function createDiscountAPI(formData) {
             "message": data.message
           };
           sessionStorage.setItem('mail_payload', JSON.stringify(mail_payload));
-
+ 
         } else if (data.failed) {
           console.log(data.errors);
           dispatch(setCreateDiscountStatus(false));
@@ -783,7 +790,7 @@ export function orderAPI(data) {
 
 export function checkoutAPI(data) {
   return (dispatch, getState) => {
-    dispatch(setLoading(true));
+    // dispatch(setLoading(true));
     const url = `${BASE_URL}/order/checkout/`;
 
     const state = getState();
@@ -817,7 +824,6 @@ export function checkoutAPI(data) {
         if (data.failed) {
           console.log(data.errors);
           dispatch(setErrors(data.errors));
-          dispatch(setLoading(false));
         }
         else {
           console.log(data);
@@ -825,7 +831,7 @@ export function checkoutAPI(data) {
           let new_payment = {...payment_address,...data};
           console.log("new_payment", new_payment);
           dispatch(setPayment(new_payment));
-          dispatch(setLoading(false));
+          // dispatch(setLoading(false));
         }  
       })
       .catch((error) => {

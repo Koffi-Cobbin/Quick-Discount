@@ -33,7 +33,7 @@ const T = {
   orangeGlow: "rgba(250,129,40,0.06)",
   text: "#1a1a16",
   textMuted: "rgba(20,20,15,0.45)",
-  textSub: "rgba(20,20,15,0.6)",
+  textSub: "rgba(20,20,15,0.9)",
   error: "#d93025",
   errorBg: "rgba(217,48,37,0.06)",
   radius: "12px",
@@ -137,11 +137,12 @@ const CardTagLine = styled.div`
 
 const CardTagText = styled.span`
   font-family: "Courier New", monospace;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(250, 129, 40, 0.6);
+  color: rgba(250, 129, 40, 0.75);
   white-space: nowrap;
+  font-weight: 600;
 `;
 
 // ─── Card shell ───────────────────────────────────────────────────────────────
@@ -175,13 +176,14 @@ const CardHeader = styled.div`
 
 const Eyebrow = styled.span`
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: ${T.orange};
-  opacity: 0.8;
+  opacity: 0.9;
   display: block;
   margin-bottom: 8px;
+  font-weight: 600;
 `;
 
 const FormTitle = styled.h1`
@@ -216,7 +218,7 @@ const StepItem = styled.button`
   padding: 0;
   flex: 1;
   min-width: 0;
-  opacity: ${({ active, done }) => (active || done ? 1 : 0.3)};
+  opacity: ${({ active, done }) => (active || done ? 1 : 0.35)};
   transition: opacity 0.3s;
 `;
 
@@ -228,7 +230,7 @@ const StepDot = styled.div`
   align-items: center;
   justify-content: center;
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 700;
   flex-shrink: 0;
   transition: all 0.3s;
@@ -236,9 +238,9 @@ const StepDot = styled.div`
     done ? T.orange : active ? "transparent" : "rgba(0,0,0,0.04)"};
   border: 1.5px solid
     ${({ active, done }) =>
-      active || done ? T.orange : "rgba(0,0,0,0.15)"};
+      active || done ? T.orange : "rgba(0,0,0,0.5)"};
   color: ${({ active, done }) =>
-    done ? "#fff" : active ? T.orange : T.textMuted};
+    done ? "#fff" : active ? T.orange : T.textSub};
 
   @media (min-width: 400px) {
     width: 28px;
@@ -249,21 +251,22 @@ const StepDot = styled.div`
 
 const StepLabel = styled.span`
   font-family: "Courier New", monospace;
-  font-size: 8px;
+  font-size: 11.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: ${({ active }) => (active ? T.orange : T.textMuted)};
+  color: ${({ active }) => (active ? T.orange : "rgba(20,20,15,0.9)")};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  font-weight: ${({ active }) => (active ? "700" : "600")};
 
   @media (max-width: 360px) {
     display: none;
   }
 
   @media (min-width: 400px) {
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 0.12em;
   }
 `;
@@ -273,7 +276,7 @@ const StepConnector = styled.div`
   min-width: 6px;
   max-width: 28px;
   height: 1px;
-  background: ${({ done }) => (done ? T.orange : "rgba(0,0,0,0.1)")};
+  background: ${({ done }) => (done ? T.orange : "rgba(0,0,0,0.15)")};
   transition: background 0.4s;
   margin-bottom: 13px;
 
@@ -284,7 +287,7 @@ const StepConnector = styled.div`
 
 const ProgressBar = styled.div`
   height: 2px;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.08);
   margin-top: 18px;
   border-radius: 2px;
   overflow: hidden;
@@ -326,14 +329,14 @@ const SectionHeading = styled.div`
 
 const SectionIcon = styled.span`
   font-size: 15px;
-  opacity: 0.6;
+  opacity: 0.75;
   color: ${T.orange};
 `;
 
 const SectionTitle = styled.h3`
   font-family: "Georgia", serif;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: ${T.text};
   margin: 0;
   letter-spacing: -0.01em;
@@ -347,11 +350,13 @@ const FieldGroup = styled.div`
 const FieldLabel = styled.label`
   display: block;
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: 11.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: ${T.text};
+  opacity: 0.85;
   margin-bottom: 7px;
+  font-weight: 600;
 `;
 
 const baseInput = css`
@@ -369,7 +374,7 @@ const baseInput = css`
   font-family: inherit;
 
   &::placeholder {
-    color: ${T.textMuted};
+    color: rgba(20,20,15,0.35);
   }
 
   &:focus {
@@ -400,15 +405,16 @@ const Textarea = styled.textarea`
 `;
 
 const FieldError = styled.p`
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: ${T.error};
   margin: 5px 0 0;
   font-family: "Courier New", monospace;
+  font-weight: 600;
 `;
 
 const FieldHint = styled.p`
-  font-size: 0.78rem;
-  color: ${T.textMuted};
+  font-size: 0.82rem;
+  color: "rgba(20,20,15,0.55)";
   margin: 5px 0 0;
   line-height: 1.5;
 `;
@@ -452,25 +458,37 @@ const ChipGrid = styled.div`
 const CategoryCount = styled.span`
   display: block;
   font-family: "Courier New", monospace;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.12em;
-  color: ${T.textMuted};
+  color: ${T.textSub};
   margin-top: 10px;
+`;
+
+// Shown when no category has been selected yet
+const CategoryRequiredHint = styled.span`
+  display: block;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: ${T.error};
+  margin-top: 6px;
+  opacity: 0.85;
 `;
 
 const Chip = styled.button`
   padding: 6px 14px;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-family: "Courier New", monospace;
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.18s;
   white-space: nowrap;
   flex-shrink: 0;
-  border: 1px solid ${({ active }) => (active ? T.orange : T.border)};
+  border: 1px solid ${({ active }) => (active ? T.orange : "rgba(0,0,0,0.18)")};
   background: ${({ active }) => (active ? T.orangeDim : "transparent")};
-  color: ${({ active }) => (active ? T.orange : T.textSub)};
+  color: ${({ active }) => (active ? T.orange : "rgba(20,20,15,0.7)")};
+  font-weight: ${({ active }) => (active ? "600" : "400")};
 
   &:hover {
     border-color: ${T.orange};
@@ -491,12 +509,13 @@ const SocialRow = styled.div`
 
 const SocialHandle = styled.span`
   font-family: "Courier New", monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: ${T.orange};
-  opacity: 0.75;
+  opacity: 0.9;
   width: 80px;
   flex-shrink: 0;
   letter-spacing: 0.05em;
+  font-weight: 600;
 `;
 
 const SocialInput = styled(Input)`
@@ -536,11 +555,12 @@ const PackageCard = styled.button`
 
 const PackageName = styled.div`
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: ${({ active }) => (active ? T.orange : T.textMuted)};
+  color: ${({ active }) => (active ? T.orange : "rgba(20,20,15,0.6)")};
   margin-bottom: 6px;
+  font-weight: 600;
 `;
 
 const PackagePrice = styled.div`
@@ -551,9 +571,9 @@ const PackagePrice = styled.div`
 `;
 
 const PackagePricePer = styled.span`
-  font-size: 0.7rem;
-  font-weight: 400;
-  color: ${T.textMuted};
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: ${T.textSub};
   margin-left: 2px;
 `;
 
@@ -602,13 +622,14 @@ const Checkbox = styled.input`
 `;
 
 const AgreementText = styled.span`
-  font-size: 0.85rem;
-  color: ${T.textSub};
+  font-size: 0.88rem;
+  color: rgba(20,20,15,0.75);
   line-height: 1.55;
 
   a {
     color: ${T.orange};
     text-decoration: none;
+    font-weight: 600;
     &:hover { text-decoration: underline; }
   }
 `;
@@ -631,11 +652,13 @@ const AssetSlot = styled.div`
 
 const AssetLabel = styled.p`
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: 11.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: ${T.textSub};
+  color: ${T.text};
+  opacity: 0.85;
   margin: 0 0 8px;
+  font-weight: 600;
 `;
 
 // ─── Footer actions ───────────────────────────────────────────────────────────
@@ -677,8 +700,8 @@ const NavButton = styled.button`
 
 const PrevButton = styled(NavButton)`
   background: transparent;
-  border: 1px solid ${T.border};
-  color: ${T.textSub};
+  border: 1px solid rgba(0,0,0,0.15);
+  color: rgba(20,20,15,0.7);
   flex-shrink: 0;
 
   &:hover {
@@ -694,6 +717,7 @@ const NextButton = styled(NavButton)`
   color: #fff;
   margin-left: auto;
   flex-shrink: 0;
+  font-weight: 600;
 
   @media (max-width: 479px) {
     flex: 1;
@@ -712,11 +736,12 @@ const NextButton = styled(NavButton)`
 
 const StepCounter = styled.span`
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
-  color: ${T.textMuted};
+  color: rgba(20,20,15,0.55);
   flex-shrink: 0;
   white-space: nowrap;
+  font-weight: 500;
 `;
 
 // ─── InfoNote ─────────────────────────────────────────────────────────────────
@@ -725,8 +750,8 @@ const InfoNote = styled.div`
   border-left: 3px solid rgba(250, 129, 40, 0.4);
   background: ${T.orangeGlow};
   border-radius: 0 8px 8px 0;
-  font-size: 0.83rem;
-  color: ${T.textSub};
+  font-size: 0.86rem;
+  color: rgba(20,20,15,0.7);
   line-height: 1.55;
   margin-bottom: 20px;
 `;
@@ -743,7 +768,7 @@ const QtyButton = styled.button`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid ${T.border};
+  border: 1px solid rgba(0,0,0,0.15);
   background: transparent;
   color: ${T.text};
   font-size: 1.1rem;
@@ -768,6 +793,7 @@ const QtyButton = styled.button`
 const QtyValue = styled.span`
   font-family: "Georgia", serif;
   font-size: 1.1rem;
+  font-weight: 700;
   color: ${T.text};
   min-width: 24px;
   text-align: center;
@@ -946,6 +972,11 @@ const DiscountForm = (props) => {
     return end.toISOString().slice(0, 10);
   }, [startDate]);
 
+  // Recompute end date whenever start date or package selection changes
+  useEffect(() => {
+    setEndDate(computeEndDate(packageOption?.type, packageOption?.quantity ?? 1));
+  }, [startDate, packageOption, computeEndDate]);
+
   const toggleCategory = useCallback((cat) => {
     setDiscountCategories((prev) => {
       const exists = prev.some((c) => c.name === cat.name);
@@ -1100,12 +1131,40 @@ const DiscountForm = (props) => {
 
   // ── Step validation ───────────────────────────────────────────────────────
   const canProceed = useMemo(() => [
-    discountTitle && discountDescription && percentageDiscount,
-    organizerName && email && !emailError,
-    true, // media optional
-    agreement === "agreed" && packageOption,
-    packageOption, // payment step - just need a package selected
-  ], [discountTitle, discountDescription, percentageDiscount, organizerName, email, emailError, agreement, packageOption]);
+    // Step 0: title, description, percentage value, at least one category,
+    //         and a start date. End date is always valid (computed automatically).
+    Boolean(
+      discountTitle?.trim() &&
+      discountDescription?.trim() &&
+      percentageDiscount?.trim() &&
+      discountCategories?.length > 0 &&
+      startDate
+    ),
+    // Step 1: organizer name + valid email, no outstanding field errors
+    Boolean(
+      organizerName?.trim() &&
+      email?.trim() &&
+      !emailError &&
+      !contactError &&
+      !Object.values(socialMediaHandlesURLError).some(Boolean) &&
+      !websiteURLError
+    ),
+    // Step 2: flyer required for new discounts; no invalid video URL
+    Boolean(
+      (discount ? true : Boolean(discountFlyer)) &&
+      !videoURLError
+    ),
+    // Step 3: a package must be selected and T&Cs must be agreed
+    Boolean(agreement === "agreed" && packageOption),
+    // Step 4: payment — package just needs to be set (payment handled inline)
+    Boolean(packageOption),
+  ], [
+    discountTitle, discountDescription, percentageDiscount, discountCategories,
+    startDate,
+    organizerName, email, emailError, contactError, socialMediaHandlesURLError, websiteURLError,
+    discount, discountFlyer, videoURLError,
+    agreement, packageOption,
+  ]);
 
   const pct = useMemo(() => ((step + 1) / STEPS.length) * 100, [step]);
 
@@ -1152,7 +1211,7 @@ const DiscountForm = (props) => {
                   id="percentageDiscount"
                   type="text"
                   value={percentageDiscount}
-                  placeholder="e.g. 30% or GHS 50"
+                  placeholder="e.g. 30% OFF or GHS 50 OFF"
                   onChange={(e) => setPercentageDiscount(e.target.value)}
                 />
               </FieldGroup>
@@ -1170,7 +1229,7 @@ const DiscountForm = (props) => {
 
             <TwoCol>
               <FieldGroup>
-                <FieldLabel>Start Date</FieldLabel>
+                <FieldLabel>Start Date *</FieldLabel>
                 <Input
                   id="startDate"
                   type="date"
@@ -1184,8 +1243,12 @@ const DiscountForm = (props) => {
                   id="endDate"
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  readOnly
+                  style={{ opacity: 0.6, cursor: "not-allowed", background: "rgba(0,0,0,0.03)" }}
                 />
+                <FieldHint style={{ color: "rgba(20,20,15,0.5)", marginTop: 5 }}>
+                  Set automatically by package &amp; quantity
+                </FieldHint>
               </FieldGroup>
             </TwoCol>
 
@@ -1193,7 +1256,7 @@ const DiscountForm = (props) => {
 
             <SectionHeading>
               <SectionIcon>◈</SectionIcon>
-              <SectionTitle>Categories</SectionTitle>
+              <SectionTitle>Categories *</SectionTitle>
             </SectionHeading>
 
             {allCategories ? (
@@ -1210,11 +1273,15 @@ const DiscountForm = (props) => {
                     </Chip>
                   ))}
                 </ChipGrid>
-                <CategoryCount>
-                  {discountCategories?.length
-                    ? `${discountCategories.length} selected · scroll to see all`
-                    : `${allCategories.length} categories · scroll to see all`}
-                </CategoryCount>
+                {discountCategories?.length > 0 ? (
+                  <CategoryCount>
+                    {discountCategories.length} selected · scroll to see all
+                  </CategoryCount>
+                ) : (
+                  <CategoryRequiredHint>
+                    Select at least one category to continue
+                  </CategoryRequiredHint>
+                )}
               </CategoryWrap>
             ) : (
               <FieldHint>Loading categories…</FieldHint>
@@ -1306,7 +1373,7 @@ const DiscountForm = (props) => {
               <SectionIcon>◉</SectionIcon>
               <SectionTitle>
                 Social Handles{" "}
-                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
+                <span style={{ opacity: 0.55, fontSize: "0.78rem" }}>
                   (optional)
                 </span>
               </SectionTitle>
@@ -1361,6 +1428,9 @@ const DiscountForm = (props) => {
                   isEmpty={isFlyerEmpty}
                   error={imageError.flyer}
                 />
+                {!discountFlyer && !discount && (
+                  <FieldError style={{ marginTop: 6 }}>Flyer is required to continue</FieldError>
+                )}
               </AssetSlot>
 
               <AssetSlot>
@@ -1386,7 +1456,7 @@ const DiscountForm = (props) => {
               <SectionIcon>▷</SectionIcon>
               <SectionTitle>
                 Video{" "}
-                <span style={{ opacity: 0.45, fontSize: "0.78rem" }}>
+                <span style={{ opacity: 0.55, fontSize: "0.78rem" }}>
                   (optional)
                 </span>
               </SectionTitle>
@@ -1417,7 +1487,7 @@ const DiscountForm = (props) => {
           <StepSlide direction={direction}>
             <SectionHeading>
               <SectionIcon>◇</SectionIcon>
-              <SectionTitle>Ad Package</SectionTitle>
+              <SectionTitle>Ad Package *</SectionTitle>
             </SectionHeading>
 
             {discountPackages && (
@@ -1473,7 +1543,7 @@ const DiscountForm = (props) => {
                   >
                     +
                   </QtyButton>
-                  <span style={{ color: T.textMuted, fontSize: "0.85rem", marginLeft: 8 }}>
+                  <span style={{ color: "rgba(20,20,15,0.65)", fontSize: "0.88rem", marginLeft: 8 }}>
                     Total: GHS {(parseFloat(packageOption.price) * packageOption.quantity).toFixed(2)}
                   </span>
                 </QuantityRow>
@@ -1484,7 +1554,7 @@ const DiscountForm = (props) => {
 
             <SectionHeading>
               <SectionIcon>✦</SectionIcon>
-              <SectionTitle>Agreement</SectionTitle>
+              <SectionTitle>Agreement *</SectionTitle>
             </SectionHeading>
 
             <AgreementBox

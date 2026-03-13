@@ -118,10 +118,11 @@ const FieldGroup = styled.div`
 const FieldLabel = styled.label`
   display: block;
   font-family: "Courier New", monospace;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: ${T.textMuted};
+  color: ${T.textSub};
   margin-bottom: 7px;
 `;
 

@@ -15,6 +15,7 @@ import CustomerReview from "./CustomerReview";
 import StarRating from "./StarRating";
 import CarouselFlex from "../Shared/CarouselFlex";
 import Card from "../Shared/Card";
+import { Badge } from "../Shared/Card";
 
 import { 
     getDiscountsAPI,
@@ -131,11 +132,17 @@ const DiscountDetail = (props) => {
         }, [discountId, getDiscountReviews]);
 
     useEffect(() => {
-        if (!discount_media || (discount && discount_media.length > 0 && discount_media[0].discount !== discount.url)){
+        if (!discount) return; // Wait until discount is resolved
+
+        const mediaIsEmpty = !discount_media || discount_media.length === 0;
+        const mediaIsForDifferentDiscount = 
+            discount_media?.length > 0 && discount_media[0].discount !== discount.url;
+
+        if (mediaIsEmpty || mediaIsForDifferentDiscount) {
             getDiscountMedia(discountId);
             console.log("Getting Discount Media >>")
-        };
-        }, [discount_media, discount, getDiscountMedia, discountId]);
+        }
+    }, [discount_media, discount, getDiscountMedia, discountId]);
 
     useEffect(() => {
         if ((!organizerDiscounts && discount) || (discount && discount.organizer.id !== organizerDiscounts[0].organizer.id)){
@@ -385,6 +392,9 @@ const DiscountDetail = (props) => {
             <DiscountImageWrapper>
                 <DiscountImage imgUrl={discount.flyer}/>
                 <ButtonsContainer>
+                    <DiscountBadge >
+                        {discount.percentage_discount ? discount.percentage_discount : "Deal"}
+                    </DiscountBadge >
                     {discount.end_date && (
                         <ExpiryTag>Ends {formatExpiry(discount.end_date)}</ExpiryTag>
                     )}
@@ -414,10 +424,10 @@ const DiscountDetail = (props) => {
                     </Title>
 
                     <Description>
-                        <p>
+                        {/* <p>
                             <b>Discount: </b> 
                             <Colored> {discount.percentage_discount} </Colored>            
-                        </p>
+                        </p> */}
                         {/* <p>
                             <b>Duration: </b> 
                             <Colored> {formatDate(discount.start_date)} </Colored> to        
@@ -702,6 +712,19 @@ const DiscountImage = styled.div`
   border-radius: 0 0 30px 30px;
 `;
 
+const DiscountBadge = styled(Badge)`
+    position: static;
+    box-shadow: none;
+    transform: none;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px;
+
+    &:hover {
+        transform: none;
+    }
+`;
+
 const ButtonsContainer = styled.div`
     position: absolute;
     bottom: 10px;
@@ -709,6 +732,16 @@ const ButtonsContainer = styled.div`
     display: flex;
     align-items: center;
     gap: 10px;
+
+    @media (max-width: 380px) {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+
+        ${DiscountBadge} {
+            width: 100%;
+            text-align: center;
+        }
+    }
 `;
 
 const ShareDiscount = styled.button`
