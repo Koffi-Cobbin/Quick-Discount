@@ -181,7 +181,7 @@
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.03em;
-  color: rgba(26, 23, 16, 0.42);
+  color: #444;  /* rgba(26, 23, 16, 0.42); */
   background: none;
   border: none;
   cursor: pointer;

@@ -134,7 +134,7 @@ const TabBtn = styled.button`
   text-transform: uppercase;
   background: ${({ active }) => active ? T.orange : 'transparent'};
   border: none;
-  color: ${({ active }) => active ? '#fff' : T.textMuted};
+  color: ${({ active }) => active ? '#fff' : "#5b5b5b"};
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;

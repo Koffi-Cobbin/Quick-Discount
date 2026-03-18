@@ -472,7 +472,7 @@ const Logo = styled.span`
 
 const SearchWrapper = styled.div`
     position: relative;
-    width: 380px;
+    width: 280px;
     flex-shrink: 0;
 
     @media (max-width: 1020px) {
