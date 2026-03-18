@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import { connect } from "react-redux";
 import { getOrganizerAPI, getOrganizerDiscountsAPI, getAnalyticsAPI, getUserNotificationsAPI, updateOrganizerAPI, deleteDiscountAPI } from "../../actions";
@@ -257,6 +258,11 @@ const CardGrid = styled.div`
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const OrganizerDashboard = (props) => {
+  const navigate = useNavigate();
+
+  const handleEdit = (discountId) => {
+    navigate(`/discounts/update/${discountId}`);
+  };
   const {
     getOrganizer,
     organizer,
@@ -267,6 +273,8 @@ const OrganizerDashboard = (props) => {
     discounts: discountsRedux,
     analytics: analyticsRedux
   } = props;
+
+  const discountsFlat = discountsRedux?.results || discountsRedux || []; // Ensure flat array for UpdateDiscount
 
   const [tab, setTab] = useState("all");
   
@@ -539,12 +547,13 @@ const OrganizerDashboard = (props) => {
             </SectionHeader>
             {filteredDiscounts.length > 0 ? (
               <CardGrid>
-                {filteredDiscounts.map((discount) => (
+{filteredDiscounts.map((discount) => (
                   <Card
                     key={discount.id}
                     discount={discount}
                     bgColor="light"
                     isEditMode={true}
+                    onEdit={handleEdit}
                     onDelete={(id) => {
                       if (window.confirm("Are you sure you want to delete this discount?")) {
                         props.deleteDiscount(id);

@@ -5,13 +5,15 @@ import DiscountForm from "./DiscountForm";
 
 const UpdateDiscount = (props) => {
     const [discount, setDiscount] = useState();
-    const { eventId } = useParams();
+    const { discountId } = useParams();
 
     useEffect(() => {
-        if (props.discounts) {
-            setDiscount(props.discounts.find((d) => d.id === +eventId));
+        if (props.discounts?.results) {
+            setDiscount(props.discounts.results.find((d) => d.id === +discountId));
+        } else if (props.discounts) {
+            setDiscount(props.discounts.find((d) => d.id === +discountId));
         }
-    }, [eventId, props.discounts]);
+    }, [discountId, props.discounts]);
 
     return <DiscountForm {...props} discount={discount} />;
 };

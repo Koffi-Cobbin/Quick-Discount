@@ -143,7 +143,7 @@ function App(props) {
             />
 
             <Route
-              path="/discounts/update/:eventId"
+              path="/discounts/update/:discountId"
               element={[
                 <Navbar
                   sidenav={openSideNav}

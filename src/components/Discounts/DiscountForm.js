@@ -914,7 +914,7 @@ const DiscountForm = (props) => {
     }
 
     if (discount && !discountFlyer) {
-      setDiscountName(discount.name);
+      setDiscountName(discount.title);
       setDiscountDescription(discount.description);
       setOrganizerName(discount.organizer.name);
       setOrganizerDescription(discount.organizer.description);
@@ -930,6 +930,13 @@ const DiscountForm = (props) => {
       setWebsiteUrl(discount.website_url);
       setPackageOption(discount_packages.results[0]);
       setDiscountFlyer(discount.flyer);
+
+      // If the flyer is already a URL (edit mode), show it as the dropzone preview.
+      if (typeof discount.flyer === "string") {
+        setReadDiscountFlyer(discount.flyer);
+        setFilename(discount.flyer.split("/").pop() ?? "");
+      }
+
       setAgreement(discount.agreement);
     }
 
@@ -1109,9 +1116,29 @@ const DiscountForm = (props) => {
     formData.append("images_length", discountImages.length);
 
     if (discount) {
-      discountImages.forEach((img, i) => {
-        formData.append(`image-${i}`, img.file ? img.file : JSON.stringify(img));
+      const newImages = [];
+      const existingImages = [];
+
+      discountImages.forEach((img) => {
+        if (img.file) {
+          newImages.push(img);
+        } else {
+          // Image is from API (URL or object without file property) — hasn't been replaced
+          existingImages.push(img);
+        }
       });
+
+      newImages.forEach((img, i) => {
+        formData.append(`image-${i}`, img.file);
+      });
+
+      // Edit mode: if images haven't been replaced, pass them in the payload
+      // so the backend can keep the existing files.
+      if (existingImages.length > 0) {
+        payload.discount_data.existing_images = existingImages;
+      }
+
+      formData.append("images_length", newImages.length);
       props.updateDiscount?.({ formData, discount_id: discount.id });
     } else {
       discountImages.forEach((img, i) => formData.append(`image-${i}`, img.file));
@@ -1166,12 +1193,22 @@ const DiscountForm = (props) => {
     agreement, packageOption,
   ]);
 
-  const pct = useMemo(() => ((step + 1) / STEPS.length) * 100, [step]);
+  // Filter out Package and Payment steps when editing an active discount
+  const visibleSteps = useMemo(
+    () => discount?.status === "active" ? STEPS.slice(0, -2) : STEPS,
+    [discount?.status],
+  );
+
+  const pct = useMemo(() => ((step + 1) / visibleSteps.length) * 100, [step, visibleSteps.length]);
 
   // ─── Step content renderer ────────────────────────────────────────────────
   // Called as renderStepContent(), NOT as <StepContent /> — avoids React
   // treating it as a new component type each render which unmounts inputs.
   const renderStepContent = () => {
+    // Skip Package and Payment steps (cases 3 & 4) when editing an active discount
+    if ((step === 3 || step === 4) && discount?.status === "active") {
+      return null;
+    }
     switch (step) {
       // ── Step 0: Discount Details ────────────────────────────────────────
       case 0:
@@ -1628,7 +1665,7 @@ const DiscountForm = (props) => {
             <FormTitle>{discount ? "Update Discount Ad" : "Create Discount Ad"}</FormTitle>
 
             <StepRow>
-              {STEPS.map((s, i) => (
+              {visibleSteps.map((s, i) => (
                 <React.Fragment key={s.label}>
                   <StepItem
                     type="button"
@@ -1641,7 +1678,7 @@ const DiscountForm = (props) => {
                     </StepDot>
                     <StepLabel active={i === step}>{s.label}</StepLabel>
                   </StepItem>
-                  {i < STEPS.length - 1 && <StepConnector done={i < step} />}
+                  {i < visibleSteps.length - 1 && <StepConnector done={i < step} />}
                 </React.Fragment>
               ))}
             </StepRow>
@@ -1654,7 +1691,7 @@ const DiscountForm = (props) => {
 
           {/* ── Footer ── */}
           <CardFooter>
-            <StepCounter>{step + 1} / {STEPS.length}</StepCounter>
+            <StepCounter>{step + 1} / {visibleSteps.length}</StepCounter>
 
             {step > 0 && (
               <PrevButton type="button" onClick={() => goTo(step - 1)}>
@@ -1662,13 +1699,23 @@ const DiscountForm = (props) => {
               </PrevButton>
             )}
 
-            {step < STEPS.length - 1 && (
+            {step < visibleSteps.length - 1 && (
               <NextButton
                 type="button"
                 disabled={!canProceed[step]}
                 onClick={() => goTo(step + 1)}
               >
                 Continue →
+              </NextButton>
+            )}
+
+            {step === visibleSteps.length - 1 && (
+              <NextButton
+                type="button"
+                disabled={!canProceed[step]}
+                onClick={handlePostDiscount}
+              >
+                {discount ? "Save" : "Submit →"}
               </NextButton>
             )}
           </CardFooter>
