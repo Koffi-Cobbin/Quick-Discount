@@ -339,11 +339,11 @@ export function sendMail(payload) {
       })
       .then((data) => {
         console.log("Mail Response ", data);
-        dispatch(setLoading(false));
+        // remove mail_payload from session storage after sending
+        sessionStorage.removeItem('mail_payload');
       })
       .catch((errorMessage) => {
         console.log(errorMessage);
-        dispatch(setLoading(false));
       });
   };
 }

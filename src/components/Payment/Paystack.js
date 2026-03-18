@@ -6,9 +6,7 @@ import { useNavigate } from "react-router-dom";
 import {
   verifyPaymentAPI,
   setLoadingMessage,
-  setCreateDiscountStatus,
   setLoading,
-  setPayment,
   setPendingRedirect,
 } from "../../actions";
 import * as messages from "../../utils/messages";
@@ -255,19 +253,13 @@ const PaystackComponent = (props) => {
   );
 
 useEffect(() => {
-    if (props.payment?.verified && !hasProcessedPayment.current) {
-      console.log("Payment verified! Showing success message and redirecting...");
-      hasProcessedPayment.current = true;
-      props.showLoader();
-      props.setPendingRedirect("/");
-      setTimeout(() => {
-        props.showSuccessMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE);
-      }, 100);
-      props.resetCreateDiscountStatus?.();
-      props.clearPayment?.();
-      // ← navigate("/") removed — Loading.js handles it on close
-    }
-  }, [props.payment?.verified]); 
+  if (props.payment?.verified && !hasProcessedPayment.current) {
+    hasProcessedPayment.current = true;
+    props.setPendingRedirect("/");
+    props.showLoader();
+    props.showSuccessMessage(messages.CREATE_DISCOUNT_SUCCESS_MESSAGE);
+  }
+}, [props.payment?.verified]);
 
   return (
     <Container>
@@ -315,9 +307,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
   showLoader: () => dispatch(setLoading(true)),
   verifyPayment: (payload) => dispatch(verifyPaymentAPI(payload)),
-  clearPayment: () => dispatch(setPayment(null)),
   showSuccessMessage: (message) => dispatch(setLoadingMessage(message)),
-  resetCreateDiscountStatus: () => dispatch(setCreateDiscountStatus(null)),
   setPendingRedirect: (url) => dispatch(setPendingRedirect(url)),  // ← added
 });
 

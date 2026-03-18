@@ -2,12 +2,19 @@ import React, { useEffect, useState, useRef } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setLoading, setLoadingMessage, setPendingRedirect } from "../../actions";
+import { 
+  setLoading, 
+  setLoadingMessage, 
+  setPendingRedirect, 
+  setCreateDiscountStatus, 
+  setPayment,
+} from "../../actions";
 
 const Loading = (props) => {
   const { loading, loading_message, close } = props;
   const [visible, setVisible] = useState(false);
   const autoDismissTimer = useRef(null);
+  const hasReset = useRef(false);
 
   const navigate = useNavigate();
 
@@ -38,14 +45,33 @@ const Loading = (props) => {
   useEffect(() => {
     if (loading_message) {
       props.forceLoading(true);
+      console.log("Message set, forcing loading=true:", loading_message);
     }
+    console.log("Loading message effect:", { loading_message });
   }, [loading_message]);
+
+  // When payment is successful, reset discount status once to prevent loop.
+  // Guard with hasReset ref to avoid dispatch → re-render → infinite loop.
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Create discount status or payment changed:", { createDiscountStatus: props.createDiscountStatus, payment: props.payment });
+    }
+    if (props.createDiscountStatus && props.payment?.verified && !hasReset.current) {
+      hasReset.current = true;
+      props.resetCreateDiscountStatus?.();
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Payment verified, resetting create discount status.");
+      }
+    }
+  }, [props.createDiscountStatus, props.payment]);
 
   // Clear timer if user manually closes the loader
   const handleClose = () => {
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
     const redirectTo = props.pending_redirect;
     props.clearPendingRedirect();   // clear before navigating to avoid loops
+    // Clear payment too
+    props.clearPayment();
     close();
     if (redirectTo) navigate(redirectTo);
   };
@@ -185,7 +211,7 @@ const Orb = styled.div`
 
 const Card = styled.div`
   position: relative;
-  width: ${({ hasMessage }) => hasMessage ? '320px' : '200px'};
+  width: ${({ hasMessage }) => hasMessage ? 'min(320px, 90vw)' : '200px'};
   background: rgba(20, 13, 6, 0.82);
   border: 1px solid rgba(220, 103, 14, 0.28);
   border-radius: 20px;
@@ -378,16 +404,21 @@ const MessageText = styled.div`
 const mapStateToProps = (state) => ({
   loading: state.appState.loading,
   loading_message: state.appState.loading_message,
+  createDiscountStatus: state.discountState.createDiscountStatus,
+  payment: state.userState.payment,
   pending_redirect: state.appState.pending_redirect,
 });
  
-const mapDispatchToProps = (dispatch) => ({
+  const mapDispatchToProps = (dispatch) => ({
   close: () => {
+    console.log("Closing loader, clearing pending redirect and loading message.");
     dispatch(setLoadingMessage(null));
     dispatch(setLoading(false));
   },
   forceLoading: (status) => dispatch(setLoading(status)),
-  clearPendingRedirect: () => dispatch(setPendingRedirect(null)),  // ← added
+  clearPayment: () => dispatch(setPayment(null)),
+  clearPendingRedirect: () => dispatch(setPendingRedirect(null)),
+  resetCreateDiscountStatus: () => dispatch(setCreateDiscountStatus(null)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Loading);

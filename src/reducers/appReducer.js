@@ -29,9 +29,6 @@ const appReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 loading: action.status,
-                // Clear any stale message whenever a fresh load cycle begins so
-                // a previous success/error never bleeds into the next page's spinner.
-                ...(action.status === true ? { loading_message: null } : {}),
             };
         
         case SET_LOADING_MESSAGE:

@@ -864,7 +864,7 @@ const DiscountForm = (props) => {
   // Scroll to top on step change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [step]);
+  }, [step, props.payment]);
 
   // Errors
   const [emailError, setEmailError] = useState("");
@@ -1685,7 +1685,6 @@ const mapStateToProps = (state) => ({
   discount_media: state.organizerState.discount_media,
   payment: state.discountState.payment,
   organizer: state.organizerState.organizer,
-  createDiscountStatus: state.organizerState.createDiscountStatus,
 });
 
 const mapDispatchToProps = (dispatch) => ({
