@@ -8,9 +8,10 @@ const UpdateDiscount = (props) => {
     const { discountId } = useParams();
 
     useEffect(() => {
-        if (props.discounts?.results) {
-            setDiscount(props.discounts.results.find((d) => d.id === +discountId));
-        } else if (props.discounts) {
+        // if (props.discounts?.results) {
+        //     setDiscount(props.discounts.results.find((d) => d.id === +discountId));
+        // } else 
+        if (props.discounts) {
             setDiscount(props.discounts.find((d) => d.id === +discountId));
         }
     }, [discountId, props.discounts]);
