@@ -296,9 +296,9 @@ const SkeletonShimmer = keyframes`
 const SkeletonBase = css`
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.04) 25%,
-    rgba(0, 0, 0, 0.08) 37%,
-    rgba(0, 0, 0, 0.04) 63%
+    rgba(0, 0, 0, 0.08) 25%,
+    rgba(0, 0, 0, 0.15) 37%,
+    rgba(0, 0, 0, 0.08) 63%
   );
   background-size: 600px 100%;
   animation: ${SkeletonShimmer} 1.4s infinite linear;
@@ -306,8 +306,8 @@ const SkeletonBase = css`
 `;
 
 const SkeletonCard = styled.div`
-  background: ${T.surface};
-  border: 1px solid ${T.border};
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: ${T.radius};
   overflow: hidden;
 `;
@@ -400,16 +400,24 @@ function DiscountsPage(props) {
   const [sort, setSort] = useState("Popular");
   const [query, setQuery] = useState("");
   const [saved, setSaved] = useState(new Set());
-  const [savingId, setSavingId] = useState(null);
+const [savingId, setSavingId] = useState(null);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const { getDiscounts, discounts, loading: propsLoading, token, addToWishlist, removeFromWishlist, wishlist } = props;
 
-  // Fetch discounts on mount if not already loaded
+// Fetch discounts on mount if no data
   useEffect(() => {
-    if (!discounts?.results) {
+    if (!discounts?.results || discounts.results.length === 0) {
       getDiscounts();
     }
-  }, [discounts, getDiscounts]);
+  }, [getDiscounts, discounts]);
+
+  // Hide page loading when data arrives
+  useEffect(() => {
+    if (discounts?.results && discounts.results.length > 0) {
+      setPageLoading(false);
+    }
+  }, [discounts]);
 
   // Derive unique category list from live data (needed for URL parameter handling)
   const allDiscounts = useMemo(() => discounts?.results || [], [discounts]);
@@ -441,7 +449,7 @@ function DiscountsPage(props) {
     }
   }, [wishlist]);
 
-  const loading = propsLoading || !discounts?.results;
+const loading = pageLoading || propsLoading || !discounts?.results?.length;
 
   // Filter + sort
   const filtered = allDiscounts

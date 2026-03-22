@@ -601,13 +601,10 @@ export function getCategoriesAPI() {
 
 export function getDiscountsAPI() {
   return (dispatch) => {
-    dispatch(setLoading(true));
+    // dispatch(setLoading(true));  // Rely on page skeletons, no global loader
     const url = `${BASE_URL}/discounts/`;
 
-    // Stop the loading spinner after 3 s whether or not the fetch has finished.
-    // The fetch itself is not aborted — it will still resolve and dispatch
-    // setDiscounts when the server responds.
-    const loadingTimer = setTimeout(() => dispatch(setLoading(false)), 3000);
+    const loadingTimer = setTimeout(() => {}, 3000);  // No-op timer
 
     fetch(url, {
       method: "GET",
@@ -624,12 +621,12 @@ export function getDiscountsAPI() {
         clearTimeout(loadingTimer);
         dispatch(setDiscounts(discounts));
         console.log("Discounts ", discounts);
-        dispatch(setLoading(false));
+        // dispatch(setLoading(false));
       })
       .catch((errorMessage) => {
         clearTimeout(loadingTimer);
         console.log(errorMessage);
-        dispatch(setLoading(false));
+        // dispatch(setLoading(false));
       });
   };
 }

@@ -1,12 +1,8 @@
 {
-  "short_name": "Quick Events",
-  "name": "Quick Events",
+  "short_name": "Quick Discounts",
+  "name": "Quick Discounts - All Deals in One Place",
+  "description": "Get all your latest discounts on one platform",
   "icons": [
-    {
-      "src": "logo.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
     {
       "src": "logo.png",
       "type": "image/png",
@@ -18,8 +14,12 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "categories": ["shopping", "lifestyle"],
+  "prefer_related_applications": false
 }

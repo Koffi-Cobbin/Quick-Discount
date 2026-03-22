@@ -30,14 +30,14 @@ import Payment from "./components/Payment/Payment";
 import Logout from "./components/Auth/Logout";
 import Help from "./components/Help/Help";
 import TermsAndConditions from "./components/Discounts/TermsAndConditions";
-import { getUserAuth } from "./actions";
+import { getUserAuth, getDiscountsAPI } from "./actions";
 import Protected from "./ProtectedRoute";
 
 import Test from "./components/Tests/Test";
 
 
 function App(props) {
-  const { getUserAuth } = props;
+  const { getUserAuth, getDiscounts } = props;
   const [scrollTop, setScrollTop] = useState(0);
   const [openNav, setOpenNav] = useState(false);
   const [cartIsShown, setCartIsShown] = useState(false);
@@ -56,7 +56,8 @@ function App(props) {
 
   useEffect(() => {
     getUserAuth();
-  }, [getUserAuth]);
+    getDiscounts();
+  }, [getUserAuth, getDiscounts]);
 
   const openSideNav = () => {
     setOpenNav(true);
@@ -112,7 +113,7 @@ function App(props) {
                     onShowCart={showCartHandler}
                     style={{}}
                   />,
-                  <Discounts />,
+                  <Discounts />
                 ]}
               />
             ))}
@@ -335,6 +336,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
   getUserAuth: () => dispatch(getUserAuth()),
+  getDiscounts: () => dispatch(getDiscountsAPI()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

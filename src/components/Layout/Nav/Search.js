@@ -95,6 +95,11 @@ const SearchGlobalStyle = createGlobalStyle`
   .qd-search-root .wrapper > div:nth-child(2) li:last-child {
     border-bottom: none !important;
   }
+
+  /* ── Hide search icon in result items ── */
+  .qd-search-root .wrapper > div:nth-child(2) li svg {
+    display: none !important;
+  }
 `;
 
 /* ─── Wrapper — intentionally minimal so the dropdown can render freely ── */
