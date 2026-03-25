@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { getDiscountsAPI, addToWishlistAPI, removeFromWishlistAPI } from "../../actions";
 import Card from "../Shared/Card";
 
-// ─── Theme tokens (matches QuickDiscount app) ─────────────────────────────────
+// ─── Theme tokens ─────────────────────────────────────────────────────────────
 const T = {
   bg: "#ffffff",
   surface: "rgba(0,0,0,0.03)",
@@ -24,6 +24,19 @@ const T = {
 
 const SORTS = ["Popular", "Newest", "Biggest Deal"];
 
+// ─── Helper — normalise whatever shape discounts arrives in ──────────────────
+// Redux may hold: null | [] | {results:[]} | [{...}]
+function getResults(discounts) {
+  if (!discounts) return null;                          // nothing yet
+  if (Array.isArray(discounts)) {
+    return discounts.length > 0 ? discounts : null;    // plain array from old cache
+  }
+  if (discounts.results !== undefined) {
+    return discounts.results;                          // paginated API shape
+  }
+  return null;
+}
+
 // ─── Animations ───────────────────────────────────────────────────────────────
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(22px); }
@@ -40,8 +53,6 @@ const grain = keyframes`
 
 // ─── Global ───────────────────────────────────────────────────────────────────
 const Global = createGlobalStyle`
-  @import url('...');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: ${T.bg}; color: ${T.text}; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -77,11 +88,7 @@ const AmbientBlob = styled.div`
   width: 700px;
   height: 700px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(250, 129, 40, 0.07) 0%,
-    transparent 65%
-  );
+  background: radial-gradient(circle, rgba(250,129,40,0.07) 0%, transparent 65%);
   z-index: 0;
 `;
 
@@ -91,21 +98,15 @@ const Inner = styled.div`
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px 80px;
-
-  @media (max-width: 600px) {
-    padding: 0 16px 60px;
-  }
+  @media (max-width: 600px) { padding: 0 16px 60px; }
 `;
 
-// ─── Header band ─────────────────────────────────────────────────────────────
+// ─── Header ───────────────────────────────────────────────────────────────────
 const Header = styled.div`
   padding: 72px 0 0;
   text-align: center;
-  animation: ${fadeUp} 0.55s ease both;
-
-  @media (min-width: 600px) {
-    padding-top: 96px;
-  }
+  // animation: ${fadeUp} 0.35s ease both;
+  @media (min-width: 600px) { padding-top: 96px; }
 `;
 
 const Headline = styled.h1`
@@ -115,20 +116,16 @@ const Headline = styled.h1`
   line-height: 1.08;
   color: ${T.text};
   text-align: center;
-  em {
-    font-style: italic;
-    color: ${T.orange};
-  }
+  em { font-style: italic; color: ${T.orange}; }
 `;
 
-// ─── Divider ─────────────────────────────────────────────────────────────────
 const Rule = styled.div`
   height: 1px;
   background: ${T.border};
   margin: 36px 0 28px;
 `;
 
-// ─── Controls row ────────────────────────────────────────────────────────────
+// ─── Controls ────────────────────────────────────────────────────────────────
 const Controls = styled.div`
   display: flex;
   align-items: flex-start;
@@ -136,8 +133,6 @@ const Controls = styled.div`
   flex-wrap: wrap;
   justify-content: space-between;
   margin-bottom: 32px;
-  animation: ${fadeUp} 0.55s 0.1s ease both;
-
   @media (max-width: 480px) {
     flex-direction: column;
     align-items: stretch;
@@ -157,8 +152,6 @@ const CatRail = styled.div`
   scroll-snap-type: x mandatory;
   padding: 4px 0;
   margin: -4px 0;
-
-  /* Ensure horizontal scroll on mobile */
   @media (max-width: 480px) {
     width: calc(100% + 32px);
     margin-left: -16px;
@@ -166,10 +159,7 @@ const CatRail = styled.div`
     padding-left: 16px;
     padding-right: 16px;
   }
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 `;
 
 const Chip = styled.button`
@@ -185,8 +175,9 @@ const Chip = styled.button`
   scroll-snap-align: start;
   border: 1px solid ${({ $active }) => ($active ? T.orange : T.border)};
   background: ${({ $active }) => ($active ? T.orangeDim : "transparent")};
-  color: ${({ $active }) => ($active ? T.orange : T.textSub)};
-
+  color: ${({ $active }) => ($active ? T.orange : T.text)};
+  font-weight: ${({ $active }) => ($active ? "600" : "400")};
+  opacity: 1;
   &:hover {
     border-color: ${T.orange};
     color: ${T.orange};
@@ -199,17 +190,13 @@ const RightControls = styled.div`
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-
-  @media (max-width: 480px) {
-    width: 100%;
-    flex-shrink: 1;
-  }
+  @media (max-width: 480px) { width: 100%; flex-shrink: 1; }
 `;
 
 const SortSelect = styled.select`
-  background: ${T.surface};
+  background: #fff;
   border: 1px solid ${T.border};
-  color: ${T.textSub};
+  color: ${T.text};
   font-family: "Courier New", monospace;
   font-size: 0.78rem;
   letter-spacing: 0.04em;
@@ -221,29 +208,17 @@ const SortSelect = styled.select`
   transition: border-color 0.2s;
   min-width: 0;
   flex-shrink: 1;
-
-  @media (max-width: 480px) {
-    flex: 1;
-  }
-
-  &:focus,
-  &:hover {
-    border-color: rgba(250, 129, 40, 0.35);
-    color: ${T.text};
-  }
-
-  option {
-    background: #ffffff;
-  }
+  @media (max-width: 480px) { flex: 1; }
+  &:focus, &:hover { border-color: rgba(250,129,40,0.35); color: ${T.text}; }
+  option { background: #ffffff; }
 `;
 
-// ─── Results count ───────────────────────────────────────────────────────────
+// ─── Results meta ─────────────────────────────────────────────────────────────
 const ResultsMeta = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
-  animation: ${fadeUp} 0.55s 0.15s ease both;
 `;
 
 const ResultsCount = styled.p`
@@ -269,13 +244,10 @@ const FilterPill = styled.span`
   font-size: 0.72rem;
   font-family: "Courier New", monospace;
   background: ${T.orangeDim};
-  border: 1px solid rgba(250, 129, 40, 0.3);
+  border: 1px solid rgba(250,129,40,0.3);
   color: ${T.orange};
   cursor: pointer;
-
-  &:hover {
-    background: rgba(250, 129, 40, 0.25);
-  }
+  &:hover { background: rgba(250,129,40,0.25); }
 `;
 
 // ─── Grid ────────────────────────────────────────────────────────────────────
@@ -283,9 +255,7 @@ const Grid = styled.div`
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  animation: ${fadeUp} 0.5s 0.2s ease both;
 `;
-
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 const SkeletonShimmer = keyframes`
@@ -294,38 +264,50 @@ const SkeletonShimmer = keyframes`
 `;
 
 const SkeletonBase = css`
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.08) 25%,
-    rgba(0, 0, 0, 0.15) 37%,
-    rgba(0, 0, 0, 0.08) 63%
-  );
+  background: linear-gradient(90deg, #e0e0e0 25%, #c8c8c8 37%, #e0e0e0 63%);
   background-size: 600px 100%;
   animation: ${SkeletonShimmer} 1.4s infinite linear;
   border-radius: 6px;
 `;
 
 const SkeletonCard = styled.div`
-  background: rgba(0,0,0,0.06);
-  border: 1px solid rgba(0,0,0,0.08);
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
   border-radius: ${T.radius};
   overflow: hidden;
+  min-height: 280px;
 `;
+
 const SkeletonImg = styled.div`
   ${SkeletonBase};
   height: 190px;
+  border-radius: 0;
 `;
+
+const SkeletonBody = styled.div`
+  padding: 14px 18px 18px;
+`;
+
 const SkeletonLine = styled.div`
   ${SkeletonBase};
   height: 14px;
   width: ${({ w }) => w || "80%"};
-  margin: 10px 18px 0;
+  margin-bottom: 10px;
 `;
+
 const SkeletonThin = styled.div`
   ${SkeletonBase};
   height: 10px;
   width: ${({ w }) => w || "55%"};
-  margin: 8px 18px 18px;
+  margin-bottom: 8px;
+`;
+
+const SkeletonChip = styled.div`
+  ${SkeletonBase};
+  height: 34px;
+  width: ${({ w }) => w || "80px"};
+  border-radius: 30px;
+  flex-shrink: 0;
 `;
 
 // ─── Empty ───────────────────────────────────────────────────────────────────
@@ -335,10 +317,7 @@ const Empty = styled.div`
   padding: 80px 20px;
   animation: ${fadeUp} 0.4s ease both;
 `;
-const EmptyIcon = styled.div`
-  font-size: 3rem;
-  margin-bottom: 16px;
-`;
+const EmptyIcon = styled.div`font-size: 3rem; margin-bottom: 16px;`;
 const EmptyText = styled.p`
   font-family: "Playfair Display", serif;
   font-size: 1.4rem;
@@ -346,26 +325,20 @@ const EmptyText = styled.p`
   color: ${T.textSub};
   margin-bottom: 8px;
 `;
-const EmptySub = styled.p`
-  font-size: 0.85rem;
-  color: ${T.textMuted};
-`;
+const EmptySub = styled.p`font-size: 0.85rem; color: ${T.textMuted};`;
 
-// ─── Search bar ──────────────────────────────────────────────────────────────
+// ─── Search bar ───────────────────────────────────────────────────────────────
 const SearchWrap = styled.div`
   position: relative;
   flex: 1;
   min-width: 0;
   max-width: 340px;
-
-  @media (max-width: 480px) {
-    max-width: none;
-  }
+  @media (max-width: 480px) { max-width: none; }
 `;
 
 const SearchInput = styled.input`
   width: 100%;
-  background: ${T.surface};
+  background: #fff;
   border: 1px solid ${T.border};
   border-radius: 30px;
   color: ${T.text};
@@ -374,13 +347,8 @@ const SearchInput = styled.input`
   padding: 8px 16px 8px 38px;
   outline: none;
   transition: border-color 0.2s;
-
-  &::placeholder {
-    color: ${T.textMuted};
-  }
-  &:focus {
-    border-color: rgba(250, 129, 40, 0.4);
-  }
+  &::placeholder { color: ${T.textMuted}; }
+  &:focus { border-color: rgba(250,129,40,0.4); }
 `;
 
 const SearchIcon = styled.span`
@@ -400,63 +368,56 @@ function DiscountsPage(props) {
   const [sort, setSort] = useState("Popular");
   const [query, setQuery] = useState("");
   const [saved, setSaved] = useState(new Set());
-const [savingId, setSavingId] = useState(null);
-  const [pageLoading, setPageLoading] = useState(true);
+  const [savingId, setSavingId] = useState(null);
 
-  const { getDiscounts, discounts, loading: propsLoading, token, addToWishlist, removeFromWishlist, wishlist } = props;
+  const { getDiscounts, discounts, token, addToWishlist, removeFromWishlist, wishlist } = props;
 
-// Fetch discounts on mount if no data
+  // Normalise whatever shape Redux holds into a plain array (or null if not ready)
+  const allDiscounts = useMemo(() => getResults(discounts) || [], [discounts]);
+  const hasData = useMemo(() => getResults(discounts) !== null, [discounts]);
+
+  // pageLoading: true only while we genuinely have no data yet
+  const [pageLoading, setPageLoading] = useState(!hasData);
+
+  // Fetch only if no usable data on mount
   useEffect(() => {
-    if (!discounts?.results || discounts.results.length === 0) {
+    if (!hasData) {
       getDiscounts();
     }
-  }, [getDiscounts, discounts]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Hide page loading when data arrives
+  // Stop loading as soon as usable data appears
   useEffect(() => {
-    if (discounts?.results && discounts.results.length > 0) {
+    if (hasData) {
       setPageLoading(false);
     }
-  }, [discounts]);
+  }, [hasData]);
 
-  // Derive unique category list from live data (needed for URL parameter handling)
-  const allDiscounts = useMemo(() => discounts?.results || [], [discounts]);
   const cats = useMemo(() => [
     "All",
-    ...[
-      ...new Set(allDiscounts.flatMap((d) => d.categories.map((c) => c.name))),
-    ],
+    ...[...new Set(allDiscounts.flatMap((d) => d.categories.map((c) => c.name)))],
   ], [allDiscounts]);
 
-  // Set active category from URL parameter when categories are loaded
+  // Sync active category from URL param
   useEffect(() => {
-    if (catId && discounts?.results) {
-      // Find matching category (case-insensitive)
-      const matchingCat = cats.find(
-        (cat) => cat.toLowerCase() === catId.toLowerCase()
-      );
-      if (matchingCat) {
-        setActiveCat(matchingCat);
-      }
+    if (catId && allDiscounts.length > 0) {
+      const matchingCat = cats.find((cat) => cat.toLowerCase() === catId.toLowerCase());
+      if (matchingCat) setActiveCat(matchingCat);
     }
-  }, [catId, discounts?.results, cats]);
+  }, [catId, allDiscounts.length, cats]);
 
-  // Initialize saved state from wishlist
+  // Sync saved state from wishlist
   useEffect(() => {
     if (wishlist?.results) {
-      const savedIds = new Set(wishlist.results.map(item => item.discount?.id || item.discount));
-      setSaved(savedIds);
+      setSaved(new Set(wishlist.results.map((item) => item.discount?.id || item.discount)));
     }
   }, [wishlist]);
 
-const loading = pageLoading || propsLoading || !discounts?.results?.length;
+  const loading = pageLoading;
 
   // Filter + sort
   const filtered = allDiscounts
-    .filter(
-      (d) =>
-        activeCat === "All" || d.categories.some((c) => c.name === activeCat),
-    )
+    .filter((d) => activeCat === "All" || d.categories.some((c) => c.name === activeCat))
     .filter(
       (d) =>
         !query ||
@@ -465,53 +426,34 @@ const loading = pageLoading || propsLoading || !discounts?.results?.length;
     )
     .sort((a, b) => {
       if (sort === "Popular") return (b.likes || 0) - (a.likes || 0);
-      if (sort === "Biggest Deal")
-        return (b.percentage_discount || 0) - (a.percentage_discount || 0);
+      if (sort === "Biggest Deal") return (b.percentage_discount || 0) - (a.percentage_discount || 0);
       return 0;
     });
 
   const toggleSave = (id) => {
-    // Prevent multiple clicks while processing
     if (savingId) return;
-
     const isCurrentlySaved = saved.has(id);
-    
-    // Optimistically update UI
     setSaved((prev) => {
       const next = new Set(prev);
-      if (isCurrentlySaved) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      isCurrentlySaved ? next.delete(id) : next.add(id);
       return next;
     });
-
-    // Set loading state for this specific card
     setSavingId(id);
-
-    // Call appropriate API
-    const action = isCurrentlySaved 
+    const action = isCurrentlySaved
       ? removeFromWishlist({ discount_id: id })
       : addToWishlist({ discount_id: id });
-
-    action.then(() => {
-      setSavingId(null);
-    }).catch((error) => {
-      console.error("Wishlist operation failed:", error);
-      setSavingId(null);
-      // Revert optimistic update on error
-      setSaved((prev) => {
-        const next = new Set(prev);
-        if (isCurrentlySaved) {
-          next.add(id);
-        } else {
-          next.delete(id);
-        }
-        return next;
+    action
+      .then(() => setSavingId(null))
+      .catch((error) => {
+        console.error("Wishlist operation failed:", error);
+        setSavingId(null);
+        setSaved((prev) => {
+          const next = new Set(prev);
+          isCurrentlySaved ? next.add(id) : next.delete(id);
+          return next;
+        });
+        alert("Failed to update wishlist. Please try again.");
       });
-      alert("Failed to update wishlist. Please try again.");
-    });
   };
 
   return (
@@ -522,7 +464,7 @@ const loading = pageLoading || propsLoading || !discounts?.results?.length;
         <AmbientBlob />
 
         <Inner>
-          {/* ── Header ── */}
+          {/* ── Header — always visible ── */}
           <Header>
             <Headline>
               Fresh deals, <em>no wahala.</em>
@@ -534,15 +476,19 @@ const loading = pageLoading || propsLoading || !discounts?.results?.length;
           {/* ── Controls ── */}
           <Controls>
             <CatRail>
-              {cats.map((cat) => (
-                <Chip
-                  key={cat}
-                  $active={activeCat === cat}
-                  onClick={() => setActiveCat(cat)}
-                >
-                  {cat}
-                </Chip>
-              ))}
+              {loading
+                ? [90, 70, 80, 65, 75, 60].map((w, i) => (
+                    <SkeletonChip key={i} w={`${w}px`} />
+                  ))
+                : cats.map((cat) => (
+                    <Chip
+                      key={cat}
+                      $active={activeCat === cat}
+                      onClick={() => setActiveCat(cat)}
+                    >
+                      {cat}
+                    </Chip>
+                  ))}
             </CatRail>
 
             <RightControls>
@@ -552,12 +498,13 @@ const loading = pageLoading || propsLoading || !discounts?.results?.length;
                   placeholder="Search deals..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  disabled={loading}
                 />
               </SearchWrap>
-
               <SortSelect
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
+                disabled={loading}
               >
                 {SORTS.map((s) => (
                   <option key={s}>{s}</option>
@@ -575,14 +522,10 @@ const loading = pageLoading || propsLoading || !discounts?.results?.length;
               </ResultsCount>
               <ActiveFilters>
                 {activeCat !== "All" && (
-                  <FilterPill onClick={() => setActiveCat("All")}>
-                    {activeCat} ✕
-                  </FilterPill>
+                  <FilterPill onClick={() => setActiveCat("All")}>{activeCat} ✕</FilterPill>
                 )}
                 {query && (
-                  <FilterPill onClick={() => setQuery("")}>
-                    "{query}" ✕
-                  </FilterPill>
+                  <FilterPill onClick={() => setQuery("")}>"{query}" ✕</FilterPill>
                 )}
               </ActiveFilters>
             </ResultsMeta>
@@ -594,9 +537,12 @@ const loading = pageLoading || propsLoading || !discounts?.results?.length;
               Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonCard key={i}>
                   <SkeletonImg />
-                  <SkeletonLine w="75%" />
-                  <SkeletonLine w="55%" />
-                  <SkeletonThin w="40%" />
+                  <SkeletonBody>
+                    <SkeletonLine w="75%" />
+                    <SkeletonLine w="55%" />
+                    <SkeletonThin w="40%" />
+                    <SkeletonThin w="60%" />
+                  </SkeletonBody>
                 </SkeletonCard>
               ))
             ) : filtered.length === 0 ? (
@@ -606,11 +552,11 @@ const loading = pageLoading || propsLoading || !discounts?.results?.length;
                 <EmptySub>Try a different category or search term.</EmptySub>
               </Empty>
             ) : (
-            filtered.map((d) => (
-                <Card 
-                  key={d.id} 
-                  discount={d} 
-                  onSave={toggleSave} 
+              filtered.map((d) => (
+                <Card
+                  key={d.id}
+                  discount={d}
+                  onSave={toggleSave}
                   isSaved={saved.has(d.id)}
                   isLoading={savingId === d.id}
                   bgColor="light"

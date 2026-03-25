@@ -380,6 +380,7 @@ const baseInput = css`
   &:focus {
     border-color: ${T.borderFocus};
     background: ${T.surface};
+    color: ${T.text};
     box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.08);
   }
 

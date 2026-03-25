@@ -25,7 +25,7 @@ const DARK = {
 };
 
 const LIGHT = {
-  surface: "#ffffff",
+  surface: "#f6f5f4",
   surfaceHover: "rgba(0,0,0,0.02)",
   border: "rgba(0,0,0,0.1)",
   borderHover: "rgba(250,129,40,0.35)",
