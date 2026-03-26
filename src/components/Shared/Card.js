@@ -2,6 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import { useContext } from "react";
 import WishlistContext from "../../store/wishlist-context";
+import LikesContext from "../../store/likes-context";
+import { useState } from "react";
+import { BASE_URL } from "../../utils/constants";
+import { useNavigate } from "react-router-dom";
 
 // ─── Theme tokens ─────────────────────────────────────────────────────────────
 // Two palettes: dark (original) and light (white-background contexts).
@@ -25,7 +29,7 @@ const DARK = {
 };
 
 const LIGHT = {
-  surface: "#f6f5f4",
+  surface: "#fafaf9",
   surfaceHover: "rgba(0,0,0,0.02)",
   border: "rgba(0,0,0,0.1)",
   borderHover: "rgba(250,129,40,0.35)",
@@ -49,7 +53,7 @@ const radius = "14px";
 
 // ─── Styled Components ────────────────────────────────────────────────────────
 
-export const CardWrapper = styled.a`
+export const CardWrapper = styled.div`
   position: relative;
   background: ${tok("surface")};
   border: 1px solid ${tok("border")};
@@ -206,18 +210,44 @@ export const CardFooter = styled.div`
   border-top: 1px solid ${tok("footerBorder")};
 `;
 
-export const Likes = styled.span`
+
+export const LikeBtn = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.78rem;
-  color: ${tok("textMuted")};
-  transition: color 0.2s;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid ${({ $isLiked, $theme }) =>
+    $isLiked ? ($theme === "light" ? LIGHT.orange : DARK.orange) : ($theme === "light" ? LIGHT.border : DARK.border)};
+  background: ${({ $isLiked, $theme }) =>
+    $isLiked ? ($theme === "light" ? LIGHT.orangeDim : DARK.orangeDim) : "transparent"};
+  color: ${({ $isLiked, $theme }) => {
+    const t = $theme === "light" ? LIGHT : DARK;
+    return $isLiked ? t.orange : t.textSub;
+  }};
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.18s;
 
-  ${CardWrapper}:hover & {
+  &:hover {
+    border-color: ${tok("orange")};
     color: ${tok("orange")};
+    background: ${tok("orangeDim")};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 13px;
+    height: 13px;
+    fill: currentColor;
   }
 `;
+
+
 
 export const SaveBtn = styled.button`
   display: inline-flex;
@@ -298,8 +328,11 @@ const ActionButtons = styled.div`
 // ─── Card React Component ─────────────────────────────────────────────────────
 // bgColor prop now accepts "light" | "dark" (default: "dark") instead of a
 // raw CSS colour value, so the card self-manages all theme-dependent styles.
-function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, isLoggedIn }) {
+function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, isLoggedIn, onLike, isLiked }) {
   const wishlistCtx = useContext(WishlistContext);
+  const likesCtx = useContext(LikesContext);
+  const navigate = useNavigate();
+  const [isLoadingLike, setIsLoadingLike] = useState(false);
 
   // Resolve theme: "light" string → light palette; anything else → dark
   const theme = bgColor === "light" ? "light" : "dark";
@@ -324,13 +357,30 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   };
 
+  const getAuthToken = () => {
+    const storedToken = sessionStorage.getItem("user-token") ?? localStorage.getItem("user-token");
+    if (!storedToken) return null;
+
+    try {
+      return JSON.parse(storedToken)?.access ?? null;
+    } catch (error) {
+      return null;
+    }
+  };
+
   const isLocallySaved = wishlistCtx.wishlist?.some((item) => item.id === discount.id) || false;
   const isItemSaved = isSaved || isLocallySaved;
+
+  const isLocallyLiked = likesCtx.localLikes.includes(discount.id);
+  const isLikedFinal = isLiked || isLocallyLiked;
 
   const handleSaveClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isLoggedIn) {
+    const authToken = getAuthToken();
+    const effectiveIsLoggedIn = isLoggedIn ?? Boolean(authToken);
+
+    if (!effectiveIsLoggedIn) {
       isLocallySaved ? wishlistCtx.removeWishItem(discount.id) : wishlistCtx.addWishItem({ id: discount.id });
       return;
     }
@@ -349,10 +399,170 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
     if (onDelete) onDelete(discount.id);
   };
 
+  const handleLikeClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const authToken = getAuthToken();
+    const effectiveIsLoggedIn = isLoggedIn ?? Boolean(authToken);
+
+    console.log("[Card][handleLikeClick] Click received", {
+      discountId: discount?.id,
+      isLoggedIn,
+      effectiveIsLoggedIn,
+      isLoadingLike,
+      isLikedFinal,
+      isLocallyLiked,
+      currentLikes: discount?.likes,
+    });
+
+    if (isLoadingLike) {
+      console.log("[Card][handleLikeClick] Skipping click because like request is in-flight");
+      return;
+    }
+
+    if (!effectiveIsLoggedIn) {
+      console.log("[Card][handleLikeClick] User not logged in, applying local like toggle", {
+        wasLocallyLiked: isLocallyLiked,
+      });
+      // Local toggle for non-logged users
+      if (isLocallyLiked) {
+        likesCtx.removeLocalLike(discount.id);
+        console.log("[Card][handleLikeClick] Removed local like", { discountId: discount.id });
+      } else {
+        likesCtx.addLocalLike(discount.id);
+        console.log("[Card][handleLikeClick] Added local like", { discountId: discount.id });
+      }
+      return;
+    }
+
+    // Logged in: server toggle (optimistic)
+    console.log("[Card][handleLikeClick] User logged in, starting optimistic server toggle");
+    setIsLoadingLike(true);
+    const previousLikes = discount.likes;
+    const wasLiked = isLikedFinal; // current state
+    const newLikesCount = wasLiked ? previousLikes - 1 : previousLikes + 1;
+    console.log("[Card][handleLikeClick] Computed like transition", {
+      previousLikes,
+      wasLiked,
+      newLikesCount,
+    });
+
+    // Optimistic update if parent provides callback
+    if (typeof onLike === 'function') {
+      console.log("[Card][handleLikeClick] Applying optimistic UI update");
+      onLike(discount.id, !wasLiked, newLikesCount);
+    }
+
+    try {
+      console.log("[Card][handleLikeClick] Auth token check", { hasAuthToken: Boolean(authToken) });
+      if (!authToken) {
+        throw new Error("Missing auth token");
+      }
+
+      if (wasLiked) {
+        console.log("[Card][handleLikeClick] Processing unlike request path");
+        let likeId =
+          discount.user_discount_like?.id ||
+          discount.user_like?.id ||
+          discount.like_id;
+        console.log("[Card][handleLikeClick] Initial likeId resolution", { likeId });
+
+        if (!likeId) {
+          console.log("[Card][handleLikeClick] No likeId on discount payload, verifying via API");
+          const verifyResponse = await fetch(`${BASE_URL}/discounts/likes/verify/0/${discount.id}/`, {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+
+          if (!verifyResponse.ok) {
+            throw new Error(`Like verify failed: ${verifyResponse.status}`);
+          }
+
+          const verifyData = await verifyResponse.json();
+          likeId = verifyData?.id;
+          console.log("[Card][handleLikeClick] Verify API result", { verifyData, likeId });
+        }
+
+        if (!likeId) {
+          throw new Error("Missing like id");
+        }
+
+        console.log("[Card][handleLikeClick] Sending unlike request", { likeId });
+        const unlikeResponse = await fetch(`${BASE_URL}/discounts/likes/delete/${likeId}/`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+        console.log("[Card][handleLikeClick] Unlike response status", {
+          status: unlikeResponse.status,
+          ok: unlikeResponse.ok,
+        });
+
+        if (!unlikeResponse.ok && unlikeResponse.status !== 204) {
+          throw new Error(`Unlike failed: ${unlikeResponse.status}`);
+        }
+      } else {
+        console.log("[Card][handleLikeClick] Sending like request");
+        const likeResponse = await fetch(`${BASE_URL}/discounts/likes/add/`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({ discount_id: discount.id }),
+        });
+        console.log("[Card][handleLikeClick] Like response status", {
+          status: likeResponse.status,
+          ok: likeResponse.ok,
+        });
+
+        if (!likeResponse.ok) {
+          throw new Error(`Like failed: ${likeResponse.status}`);
+        }
+      }
+      console.log("[Card][handleLikeClick] Like operation completed successfully");
+    } catch (error) {
+      console.error("Like operation failed:", error);
+      if (typeof onLike === 'function') {
+        console.log("[Card][handleLikeClick] Reverting optimistic update", {
+          rollbackLikedState: wasLiked,
+          rollbackLikes: previousLikes,
+        });
+        onLike(discount.id, wasLiked, previousLikes);
+      }
+    } finally {
+      setIsLoadingLike(false);
+      console.log("[Card][handleLikeClick] Finished request and cleared loading state");
+    }
+  };
+
+  const handleCardClick = () => {
+    navigate(`/discounts/${discount.id}`);
+  };
+
+  const handleCardKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      navigate(`/discounts/${discount.id}`);
+    }
+  };
+
   if (!discount) return null;
 
   return (
-    <CardWrapper href={`/discounts/${discount.id}`} $theme={theme}>
+    <CardWrapper
+      $theme={theme}
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+    >
       <CardImg $theme={theme}>
         <img src={discount.flyer} alt={discount.title} />
         {discount.percentage_discount ? (
@@ -380,12 +590,17 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
           {discount.location}
         </CardLoc>
         <CardFooter $theme={theme}>
-          <Likes $theme={theme}>
-            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
+          <LikeBtn
+            $theme={theme}
+            $isLiked={isLikedFinal}
+            onClick={handleLikeClick}
+            disabled={isLoading || isLoadingLike}
+          >
+            <svg viewBox="0 0 24 24">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
-            <b>{discount.likes}</b> likes
-          </Likes>
+            <b>{discount.likes}</b>
+          </LikeBtn>
           {isEditMode ? (
             <ActionButtons>
               <EditBtn $theme={theme} onClick={handleEditClick}>✎ Edit</EditBtn>

@@ -103,6 +103,17 @@ const baseInput = css`
     box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.08);
   }
 
+  /* Override browser autofill yellow/grey background and mismatched text */
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #faf9f7 inset !important;
+    -webkit-text-fill-color: ${T.text} !important;
+    caret-color: ${T.text};
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
   ${({ hasError }) =>
     hasError &&
     css`

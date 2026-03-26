@@ -136,7 +136,7 @@ const CardTagLine = styled.div`
 `;
 
 const CardTagText = styled.span`
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -175,7 +175,7 @@ const CardHeader = styled.div`
 `;
 
 const Eyebrow = styled.span`
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -229,7 +229,7 @@ const StepDot = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 11.5px;
   font-weight: 700;
   flex-shrink: 0;
@@ -250,7 +250,7 @@ const StepDot = styled.div`
 `;
 
 const StepLabel = styled.span`
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 11.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -334,7 +334,7 @@ const SectionIcon = styled.span`
 `;
 
 const SectionTitle = styled.h3`
-  font-family: "Georgia", serif;
+  font-family: var(--font-sans);
   font-size: 1.05rem;
   font-weight: 700;
   color: ${T.text};
@@ -349,7 +349,7 @@ const FieldGroup = styled.div`
 
 const FieldLabel = styled.label`
   display: block;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 11.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -384,6 +384,17 @@ const baseInput = css`
     box-shadow: 0 0 0 3px rgba(250, 129, 40, 0.08);
   }
 
+  /* Override browser autofill yellow/grey background and mismatched text */
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #faf9f7 inset !important;
+    -webkit-text-fill-color: ${T.text} !important;
+    caret-color: ${T.text};
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
   ${({ hasError }) =>
     hasError &&
     css`
@@ -409,7 +420,7 @@ const FieldError = styled.p`
   font-size: 0.8rem;
   color: ${T.error};
   margin: 5px 0 0;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-weight: 600;
 `;
 
@@ -458,7 +469,7 @@ const ChipGrid = styled.div`
 
 const CategoryCount = styled.span`
   display: block;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   letter-spacing: 0.12em;
   color: ${T.textSub};
@@ -468,7 +479,7 @@ const CategoryCount = styled.span`
 // Shown when no category has been selected yet
 const CategoryRequiredHint = styled.span`
   display: block;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   letter-spacing: 0.1em;
   color: ${T.error};
@@ -480,7 +491,7 @@ const Chip = styled.button`
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.82rem;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.18s;
@@ -509,7 +520,7 @@ const SocialRow = styled.div`
 `;
 
 const SocialHandle = styled.span`
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 12px;
   color: ${T.orange};
   opacity: 0.9;
@@ -555,7 +566,7 @@ const PackageCard = styled.button`
 `;
 
 const PackageName = styled.div`
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -652,7 +663,7 @@ const AssetSlot = styled.div`
 `;
 
 const AssetLabel = styled.p`
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 11.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -685,7 +696,7 @@ const NavButton = styled.button`
   justify-content: center;
   gap: 6px;
   border-radius: 40px;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: all 0.2s;
@@ -736,7 +747,7 @@ const NextButton = styled(NavButton)`
 `;
 
 const StepCounter = styled.span`
-  font-family: "Courier New", monospace;
+  font-family: var(--font-sans);
   font-size: 11px;
   letter-spacing: 0.14em;
   color: rgba(20,20,15,0.55);
@@ -792,7 +803,7 @@ const QtyButton = styled.button`
 `;
 
 const QtyValue = styled.span`
-  font-family: "Georgia", serif;
+  font-family: var(--font-sans);
   font-size: 1.1rem;
   font-weight: 700;
   color: ${T.text};
@@ -1285,7 +1296,7 @@ const DiscountForm = (props) => {
                   style={{ opacity: 0.6, cursor: "not-allowed", background: "rgba(0,0,0,0.03)" }}
                 />
                 <FieldHint style={{ color: "rgba(20,20,15,0.5)", marginTop: 5 }}>
-                  Set automatically by package &amp; quantity
+                  Automatically sets by package &amp; quantity
                 </FieldHint>
               </FieldGroup>
             </TwoCol>

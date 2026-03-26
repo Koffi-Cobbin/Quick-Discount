@@ -22,6 +22,7 @@ import ForgetPassword from "./components/Auth/ForgetPassword";
 import Loading from "./components/Shared/Loading";
 import Footer from "./components/Layout/Footer";
 import CartProvider from "./store/CartProvider";
+import LikesProvider from "./store/LikesProvider";
 import WishlistProvider from "./store/WishlistProvider";
 import Cart from "./components/Cart/Cart";
 import Profile from "./components/User/Profile";
@@ -83,7 +84,8 @@ function App(props) {
   };
 
   return (
-    <CartProvider>
+  <CartProvider>
+      <LikesProvider>
       <WishlistProvider>
       <div className="App" id="app">
         <Router>
@@ -286,6 +288,7 @@ function App(props) {
         </ScrollToTopButton>
       </div>
       </WishlistProvider>
+      </LikesProvider>
     </CartProvider>
   );
 }
