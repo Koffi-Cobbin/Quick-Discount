@@ -327,7 +327,7 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
 
   // Optimistic save state: initialised from the prop so it's correct on mount,
   // then updated immediately on click without waiting for the parent to re-render.
-  const isLocallySaved = wishlistCtx.wishlist?.some((item) => item.id === discount.id) || false;
+  const isLocallySaved = wishlistCtx.wishlist?.some((item) => item.discount === discount.url) || false;
   const [optimisticSaved, setOptimisticSaved] = useState(isSaved || isLocallySaved);
 
   const theme = bgColor === "light" ? "light" : "dark";
