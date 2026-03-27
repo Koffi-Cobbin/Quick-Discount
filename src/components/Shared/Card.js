@@ -1,15 +1,12 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
-import { useContext } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import WishlistContext from "../../store/wishlist-context";
-import LikesContext from "../../store/likes-context";
-import { useState } from "react";
+import { updateDiscountLikes, isDiscountLikedByUserAPI } from "../../actions/index.js";
+
 import { BASE_URL } from "../../utils/constants";
 import { useNavigate } from "react-router-dom";
 
-// ─── Theme tokens ─────────────────────────────────────────────────────────────
-// Two palettes: dark (original) and light (white-background contexts).
-// Consumers pass bgColor="light" or bgColor="dark" (default: dark).
 const DARK = {
   surface: "rgba(255,255,255,0.034)",
   surfaceHover: "rgba(255,255,255,0.06)",
@@ -46,12 +43,9 @@ const LIGHT = {
   errorBg: "rgba(239,68,68,0.08)",
 };
 
-// Resolve the right palette from the $theme prop ("light" | "dark")
 const tok = (prop) => ({ $theme }) => ($theme === "light" ? LIGHT : DARK)[prop];
 
 const radius = "14px";
-
-// ─── Styled Components ────────────────────────────────────────────────────────
 
 export const CardWrapper = styled.div`
   position: relative;
@@ -76,7 +70,7 @@ export const CardWrapper = styled.div`
     box-shadow: ${({ $theme }) =>
       $theme === "light"
         ? "0 8px 28px rgba(0,0,0,0.09)"
-        : "0 8px 28px rgba(0,0,0,0.35)"};
+        : "0 8px 28px rgba(0,0,0,0.35)"}; 
     text-decoration: none;
     color: inherit;
   }
@@ -210,7 +204,6 @@ export const CardFooter = styled.div`
   border-top: 1px solid ${tok("footerBorder")};
 `;
 
-
 export const LikeBtn = styled.button`
   display: inline-flex;
   align-items: center;
@@ -246,8 +239,6 @@ export const LikeBtn = styled.button`
     fill: currentColor;
   }
 `;
-
-
 
 export const SaveBtn = styled.button`
   display: inline-flex;
@@ -319,23 +310,26 @@ export const DeleteBtn = styled.button`
   }
 `;
 
-// ─── Action buttons container ─────────────────────────────────────────────────
 const ActionButtons = styled.div`
   display: flex;
   gap: 8px;
 `;
 
-// ─── Card React Component ─────────────────────────────────────────────────────
-// bgColor prop now accepts "light" | "dark" (default: "dark") instead of a
-// raw CSS colour value, so the card self-manages all theme-dependent styles.
 function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, isLoggedIn, onLike, isLiked }) {
   const wishlistCtx = useContext(WishlistContext);
-  const likesCtx = useContext(LikesContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isLoadingLike, setIsLoadingLike] = useState(false);
+  const [localLiked, setLocalLiked] = useState(false);
 
-  // Resolve theme: "light" string → light palette; anything else → dark
   const theme = bgColor === "light" ? "light" : "dark";
+
+  const reduxDiscounts = useSelector((state) => state.discountState?.discounts?.results || []);
+  const userDiscountLike = useSelector((state) => state.discountState?.user_discount_like);
+  const authToken = useSelector((state) => state.userState?.token?.access);
+  const reduxDiscount = reduxDiscounts.find((d) => d.id === discount.id);
+  const likesCount = reduxDiscount?.likes ?? discount.likes ?? 0;
+  const isLikedRedux = userDiscountLike?.discount_id === discount.id;
 
   const handleSlice = (data, size) => {
     if (!data || data.length <= size) return data;
@@ -370,9 +364,7 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
 
   const isLocallySaved = wishlistCtx.wishlist?.some((item) => item.id === discount.id) || false;
   const isItemSaved = isSaved || isLocallySaved;
-
-  const isLocallyLiked = likesCtx.localLikes.includes(discount.id);
-  const isLikedFinal = isLiked || isLocallyLiked;
+  const isLikedFinal = authToken ? isLikedRedux : localLiked;
 
   const handleSaveClick = (e) => {
     e.preventDefault();
@@ -402,73 +394,32 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
   const handleLikeClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const authToken = getAuthToken();
-    const effectiveIsLoggedIn = isLoggedIn ?? Boolean(authToken);
 
-    console.log("[Card][handleLikeClick] Click received", {
-      discountId: discount?.id,
-      isLoggedIn,
-      effectiveIsLoggedIn,
-      isLoadingLike,
-      isLikedFinal,
-      isLocallyLiked,
-      currentLikes: discount?.likes,
-    });
+    if (isLoadingLike) return;
 
-    if (isLoadingLike) {
-      console.log("[Card][handleLikeClick] Skipping click because like request is in-flight");
+    if (!authToken) {
+      setLocalLiked(!localLiked);
       return;
     }
 
-    if (!effectiveIsLoggedIn) {
-      console.log("[Card][handleLikeClick] User not logged in, applying local like toggle", {
-        wasLocallyLiked: isLocallyLiked,
-      });
-      // Local toggle for non-logged users
-      if (isLocallyLiked) {
-        likesCtx.removeLocalLike(discount.id);
-        console.log("[Card][handleLikeClick] Removed local like", { discountId: discount.id });
-      } else {
-        likesCtx.addLocalLike(discount.id);
-        console.log("[Card][handleLikeClick] Added local like", { discountId: discount.id });
-      }
-      return;
-    }
-
-    // Logged in: server toggle (optimistic)
-    console.log("[Card][handleLikeClick] User logged in, starting optimistic server toggle");
     setIsLoadingLike(true);
-    const previousLikes = discount.likes;
-    const wasLiked = isLikedFinal; // current state
-    const newLikesCount = wasLiked ? previousLikes - 1 : previousLikes + 1;
-    console.log("[Card][handleLikeClick] Computed like transition", {
-      previousLikes,
-      wasLiked,
-      newLikesCount,
-    });
 
-    // Optimistic update if parent provides callback
+    const previousLikes = likesCount;
+    const wasLiked = isLikedFinal;
+    const newLikesCount = wasLiked ? previousLikes - 1 : previousLikes + 1;
+
+    // Optimistic update
+    dispatch(updateDiscountLikes(discount.id, newLikesCount));
     if (typeof onLike === 'function') {
-      console.log("[Card][handleLikeClick] Applying optimistic UI update");
       onLike(discount.id, !wasLiked, newLikesCount);
     }
 
     try {
-      console.log("[Card][handleLikeClick] Auth token check", { hasAuthToken: Boolean(authToken) });
-      if (!authToken) {
-        throw new Error("Missing auth token");
-      }
+      let likeId = discount.user_discount_like?.id || discount.user_like?.id || discount.like_id;
 
       if (wasLiked) {
-        console.log("[Card][handleLikeClick] Processing unlike request path");
-        let likeId =
-          discount.user_discount_like?.id ||
-          discount.user_like?.id ||
-          discount.like_id;
-        console.log("[Card][handleLikeClick] Initial likeId resolution", { likeId });
-
+        // Unlike
         if (!likeId) {
-          console.log("[Card][handleLikeClick] No likeId on discount payload, verifying via API");
           const verifyResponse = await fetch(`${BASE_URL}/discounts/likes/verify/0/${discount.id}/`, {
             method: "GET",
             headers: {
@@ -479,35 +430,27 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
           });
 
           if (!verifyResponse.ok) {
-            throw new Error(`Like verify failed: ${verifyResponse.status}`);
+            throw new Error(`Verify failed: ${verifyResponse.status}`);
           }
 
           const verifyData = await verifyResponse.json();
           likeId = verifyData?.id;
-          console.log("[Card][handleLikeClick] Verify API result", { verifyData, likeId });
         }
 
         if (!likeId) {
-          throw new Error("Missing like id");
+          throw new Error("Missing like ID for unlike");
         }
 
-        console.log("[Card][handleLikeClick] Sending unlike request", { likeId });
-        const unlikeResponse = await fetch(`${BASE_URL}/discounts/likes/delete/${likeId}/`, {
+        const deleteResponse = await fetch(`${BASE_URL}/discounts/likes/delete/${likeId}/`, {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
-        console.log("[Card][handleLikeClick] Unlike response status", {
-          status: unlikeResponse.status,
-          ok: unlikeResponse.ok,
+          headers: { Authorization: `Bearer ${authToken}` },
         });
 
-        if (!unlikeResponse.ok && unlikeResponse.status !== 204) {
-          throw new Error(`Unlike failed: ${unlikeResponse.status}`);
+        if (!deleteResponse.ok && deleteResponse.status !== 204) {
+          throw new Error(`Unlike failed: ${deleteResponse.status}`);
         }
       } else {
-        console.log("[Card][handleLikeClick] Sending like request");
+        // Like
         const likeResponse = await fetch(`${BASE_URL}/discounts/likes/add/`, {
           method: "POST",
           headers: {
@@ -517,28 +460,22 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
           },
           body: JSON.stringify({ discount_id: discount.id }),
         });
-        console.log("[Card][handleLikeClick] Like response status", {
-          status: likeResponse.status,
-          ok: likeResponse.ok,
-        });
 
         if (!likeResponse.ok) {
           throw new Error(`Like failed: ${likeResponse.status}`);
         }
       }
-      console.log("[Card][handleLikeClick] Like operation completed successfully");
+
+      // Success: sync state
+      dispatch(isDiscountLikedByUserAPI(discount.id));
     } catch (error) {
-      console.error("Like operation failed:", error);
+      // Revert optimistic updates
+      dispatch(updateDiscountLikes(discount.id, previousLikes));
       if (typeof onLike === 'function') {
-        console.log("[Card][handleLikeClick] Reverting optimistic update", {
-          rollbackLikedState: wasLiked,
-          rollbackLikes: previousLikes,
-        });
         onLike(discount.id, wasLiked, previousLikes);
       }
     } finally {
       setIsLoadingLike(false);
-      console.log("[Card][handleLikeClick] Finished request and cleared loading state");
     }
   };
 
@@ -599,7 +536,7 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
             <svg viewBox="0 0 24 24">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
-            <b>{discount.likes}</b>
+            <b>{likesCount}</b>
           </LikeBtn>
           {isEditMode ? (
             <ActionButtons>
@@ -623,3 +560,4 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
 }
 
 export default Card;
+

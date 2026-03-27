@@ -27,6 +27,8 @@ import {
   SET_SEARCH_RESULT,
   USER_DISCOUNT_LIKE,
   SET_PENDING_REDIRECT,
+  UPDATE_DISCOUNT_LIKES,
+  UPDATE_ORGANIZER_FOLLOWERS
 } from "./actionType";
 import { BASE_URL, STAFF_EMAIL } from "../utils/constants";
 import * as messages from "../utils/messages";
@@ -65,6 +67,16 @@ export const setUserIsFollower = (payload) => ({
 export const setUserDiscountLike = (payload) => ({
   type: USER_DISCOUNT_LIKE,
   user_discount_like: payload,
+});
+
+export const updateDiscountLikes = (discountId, likes) => ({
+    type: UPDATE_DISCOUNT_LIKES,
+    payload: { discountId, likes }
+});
+
+export const updateOrganizerFollowers = (organizerId, followers) => ({
+    type: UPDATE_ORGANIZER_FOLLOWERS,
+    payload: { organizerId, followers }
 });
 
 export const setPayment = (payload) => ({

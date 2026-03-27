@@ -1,1 +1,10 @@
-# Fix Loading.js Effect Loop After Payment Verification\n\n## Steps:\n\n- [x] 1. Create TODO.md with plan breakdown ✅\n- [ ] 2. Edit src/components/Shared/Loading.js:\n  - Add `const hasReset = useRef(false);`\n  - Guard useEffect condition: `if (createDiscountStatus && payment?.verified && !hasReset.current)`\n  - After dispatch: `hasReset.current = true;`\n  - Wrap console.logs in `if (process.env.NODE_ENV === 'development')`\n- [ ] 3. Test payment flow: create discount → pay → verify no loop logs\n- [ ] 4. Update TODO.md with progress\n- [ ] 5. attempt_completion\n
+# Fix ESLint errors in handleLikeClick (src/components/Shared/Card.js)
+
+## Steps:
+- [ ] Step 1: Fix syntax errors, remove console.error/logs in primary handleLikeClick function
+- [ ] Step 2: Remove duplicate debug version of handleLikeClick (with console.logs)
+- [ ] Step 3: Run ESLint check to verify fixes
+- [ ] Step 4: Manual test like/unlike functionality
+- [ ] Step 5: Complete task
+
+Current progress: Starting edits...

@@ -7,7 +7,9 @@ import { SET_DISCOUNTS,
     SET_DISCOUNT_MEDIA,
     SET_DISCOUNT_REVIEWS,
     SET_SEARCH_RESULT,
-    USER_DISCOUNT_LIKE
+    USER_DISCOUNT_LIKE,
+    UPDATE_DISCOUNT_LIKES,
+    UPDATE_ORGANIZER_FOLLOWERS
  } from "../actions/actionType";
 
 export const initState = {
@@ -105,6 +107,38 @@ const discountReducer = (state = initState, action) => {
             return {
                 ...state,
                 search_result: action.search_result
+            };
+
+        case UPDATE_DISCOUNT_LIKES:
+            return {
+                ...state,
+                discounts: {
+                    ...state.discounts,
+                    results: state.discounts.results.map(d =>
+                        d.id === action.payload.discountId
+                            ? { ...d, likes: action.payload.likes }
+                            : d
+                    )
+                }
+            };
+
+        case UPDATE_ORGANIZER_FOLLOWERS:
+            return {
+                ...state,
+                discounts: {
+                    ...state.discounts,
+                    results: state.discounts.results.map(d =>
+                        d.organizer.id === action.payload.organizerId
+                            ? {
+                                ...d,
+                                organizer: {
+                                    ...d.organizer,
+                                    followers: action.payload.followers
+                                }
+                            }
+                            : d
+                    )
+                }
             };
 
         default:
