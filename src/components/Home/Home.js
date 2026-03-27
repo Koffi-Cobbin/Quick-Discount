@@ -9,7 +9,7 @@ import CarouselFlex from "../Shared/CarouselFlex";
 import TopDiscounts from "../Discounts/TopDiscounts";
 import Card from "../Shared/Card";
 
-import { getDiscountsAPI, getUserDiscountLikesAPI } from "../../actions";
+import { getDiscountsAPI, getUserDiscountLikesAPI, addToWishlistAPI, removeFromWishlistAPI } from "../../actions";
 
 // ─── Skeleton card for loading state ─────────────────────────────────────────
 const SkeletonCard = () => (
@@ -29,10 +29,12 @@ const Home = (props) => {
   const [loading, setLoading] = useState(true);
   const [leftFade, setLeftFade] = useState(false);
   const [rightFade, setRightFade] = useState(true);
+  const [saved, setSaved] = useState(new Set());
+  const [savingId, setSavingId] = useState(null);
   const filterRef = useRef(null);
   const isInitialMount = useRef(true);
 
-  const { getDiscounts, getUserDiscountLikes, token } = props;
+  const { getDiscounts, getUserDiscountLikes, token, addToWishlist, removeFromWishlist, wishlist } = props;
 
   useEffect(() => {
     console.log("token on mount:", token);
@@ -41,6 +43,39 @@ const Home = (props) => {
       getUserDiscountLikes();
     }
   }, [getDiscounts, getUserDiscountLikes, token?.access]);
+
+  // Sync saved state from Redux wishlist
+  useEffect(() => {
+    if (wishlist?.results) {
+      setSaved(new Set(wishlist.results.map((item) => item.discount?.id ?? item.discount)));
+    } else if (Array.isArray(wishlist) && wishlist.length > 0) {
+      setSaved(new Set(wishlist.map((item) => item.discount?.id ?? item.discount ?? item.id)));
+    }
+  }, [wishlist]);
+
+  const toggleSave = (id) => {
+    if (savingId) return;
+    const isCurrentlySaved = saved.has(id);
+    setSaved((prev) => {
+      const next = new Set(prev);
+      isCurrentlySaved ? next.delete(id) : next.add(id);
+      return next;
+    });
+    setSavingId(id);
+    const action = isCurrentlySaved
+      ? removeFromWishlist({ discount_id: id })
+      : addToWishlist({ discount_id: id });
+    action
+      .then(() => setSavingId(null))
+      .catch(() => {
+        setSavingId(null);
+        setSaved((prev) => {
+          const next = new Set(prev);
+          isCurrentlySaved ? next.add(id) : next.delete(id);
+          return next;
+        });
+      });
+  };
 
   const { discounts } = props;
   useEffect(() => {
@@ -266,6 +301,10 @@ const Home = (props) => {
                             index={key}
                             discount={discount}
                             bgColor="light"
+                            onSave={toggleSave}
+                            isSaved={saved.has(discount.id)}
+                            isLoading={savingId === discount.id}
+                            isLoggedIn={!!token?.access}
                           />
                         ))}
                     </CarouselFlex>
@@ -634,12 +673,15 @@ const mapStateToProps = (state) => {
     token: state.userState.token,  
     discounts: state.discountState.discounts,  
     userDiscountLikes: state.discountState.userDiscountLikes,
+    wishlist: state.discountState.wishlist,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
   getDiscounts: () => dispatch(getDiscountsAPI()),
   getUserDiscountLikes: () => dispatch(getUserDiscountLikesAPI()),
+  addToWishlist: (data) => dispatch(addToWishlistAPI(data)),
+  removeFromWishlist: (data) => dispatch(removeFromWishlistAPI(data)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

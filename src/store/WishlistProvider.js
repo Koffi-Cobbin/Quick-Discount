@@ -52,7 +52,8 @@ const wishlistReducer = (state = defaultWishlistState, action)  => {
   }
 
   if(action.type === 'CLEAR'){ 
-    sessionStorage.setItem('wishlist', []);
+    sessionStorage.setItem('wishlist', JSON.stringify([]));
+    return { wishlist: [] };
   }
     
   return defaultWishlistState;

@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import WishlistContext from "../../store/wishlist-context";
-import { updateDiscountLikes, isDiscountLikedByUserAPI, removeUserDiscountLike, addUserDiscountLike } from "../../actions/index.js";
+import { updateDiscountLikes, isDiscountLikedByUserAPI, removeUserDiscountLike, addUserDiscountLike, addToWishlistAPI, removeFromWishlistAPI } from "../../actions/index.js";
 
 import { BASE_URL } from "../../utils/constants";
 import { useNavigate } from "react-router-dom";
@@ -317,22 +317,33 @@ const ActionButtons = styled.div`
   gap: 8px;
 `;
 
-function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, isLoggedIn, onLike, isLiked }) {
+function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDelete, isLoading, bgColor, onLike, isLiked }) {
   const wishlistCtx = useContext(WishlistContext);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isLoadingLike, setIsLoadingLike] = useState(false);
   const [localLiked, setLocalLiked] = useState(false);
+  const [isSavingLocal, setIsSavingLocal] = useState(false);
+
+  // Optimistic save state: initialised from the prop so it's correct on mount,
+  // then updated immediately on click without waiting for the parent to re-render.
+  const isLocallySaved = wishlistCtx.wishlist?.some((item) => item.id === discount.id) || false;
+  const [optimisticSaved, setOptimisticSaved] = useState(isSaved || isLocallySaved);
 
   const theme = bgColor === "light" ? "light" : "dark";
 
   const reduxDiscounts = useSelector((state) => state.discountState?.discounts?.results || []);
-
-  const userDiscountLikes = useSelector(
-    (state) => state.discountState?.userDiscountLikes || {}
-  );
-
+  const userDiscountLikes = useSelector((state) => state.discountState?.userDiscountLikes || {});
   const authToken = useSelector((state) => state.userState?.token?.access);
+
+  // When no onSave prop is provided, Card reads its own saved status from Redux
+  // wishlist so it doesn't depend on the parent at all.
+  const reduxWishlist = useSelector((state) => state.discountState?.wishlist);
+  const reduxIsSaved = React.useMemo(() => {
+    if (!reduxWishlist) return false;
+    const list = reduxWishlist?.results ?? (Array.isArray(reduxWishlist) ? reduxWishlist : []);
+    return list.some((item) => (item.discount?.id ?? item.discount ?? item.id) === discount.id);
+  }, [reduxWishlist, discount.id]);
 
   const reduxDiscount = reduxDiscounts.find((d) => d.id === discount.id);
   
@@ -362,32 +373,57 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   };
 
-  const getAuthToken = () => {
-    const storedToken = sessionStorage.getItem("user-token") ?? localStorage.getItem("user-token");
-    if (!storedToken) return null;
 
-    try {
-      return JSON.parse(storedToken)?.access ?? null;
-    } catch (error) {
-      return null;
-    }
-  };
+  // Keep optimisticSaved in sync when the authoritative source changes.
+  // - With onSave prop:    parent owns the isSaved value, sync from that.
+  // - Without onSave prop: Card owns the state, sync from Redux wishlist.
+  React.useEffect(() => {
+    const authoritative = onSave ? (isSaved || isLocallySaved) : (reduxIsSaved || isLocallySaved);
+    setOptimisticSaved(authoritative);
+  }, [isSaved, isLocallySaved, reduxIsSaved, onSave]);
 
-  const isLocallySaved = wishlistCtx.wishlist?.some((item) => item.id === discount.id) || false;
-  const isItemSaved = isSaved || isLocallySaved;
+  const isItemSaved = optimisticSaved;
   const isLikedFinal = authToken ? isLikedRedux : localLiked;
+  // Combine parent-controlled loading with internal save loading
+  const isSaveLoading = isLoading || isSavingLocal;
 
-  const handleSaveClick = (e) => {
+  const handleSaveClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const authToken = getAuthToken();
-    const effectiveIsLoggedIn = isLoggedIn ?? Boolean(authToken);
 
-    if (!effectiveIsLoggedIn) {
-      isLocallySaved ? wishlistCtx.removeWishItem(discount.id) : wishlistCtx.addWishItem({ id: discount.id });
+    // Guest path: toggle local wishlist context, same for both prop/no-prop cases.
+    if (!authToken) {
+      isLocallySaved
+        ? wishlistCtx.removeWishItem(discount.id)
+        : wishlistCtx.addWishItem({ id: discount.id });
       return;
     }
-    if (onSave && !isLoading) onSave(discount.id);
+
+    if (isSaveLoading) return;
+
+    // Delegate to parent if it provided a handler.
+    if (onSave) {
+      setOptimisticSaved((prev) => !prev);
+      onSave(discount.id);
+      return;
+    }
+
+    // Self-managed path: Card dispatches the API action directly.
+    const wasSaved = isItemSaved;
+    setOptimisticSaved((prev) => !prev);
+    setIsSavingLocal(true);
+    try {
+      if (wasSaved) {
+        await dispatch(removeFromWishlistAPI({ discount_id: discount.id }));
+      } else {
+        await dispatch(addToWishlistAPI({ discount_id: discount.id }));
+      }
+    } catch {
+      // Rollback optimistic flip on failure.
+      setOptimisticSaved(wasSaved);
+    } finally {
+      setIsSavingLocal(false);
+    }
   };
 
   const handleEditClick = (e) => {
@@ -558,9 +594,9 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
               $theme={theme}
               $isSaved={isItemSaved}
               onClick={handleSaveClick}
-              disabled={isLoading}
+              disabled={isSaveLoading}
             >
-              {isLoading ? "..." : isItemSaved ? "✦ Saved" : "♡ Save"}
+              {isSaveLoading ? "..." : isItemSaved ? "✦ Saved" : "♡ Save"}
             </SaveBtn>
           )}
         </CardFooter>

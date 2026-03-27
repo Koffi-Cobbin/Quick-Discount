@@ -406,10 +406,12 @@ function DiscountsPage(props) {
     }
   }, [catId, allDiscounts.length, cats]);
 
-  // Sync saved state from wishlist
+  // Sync saved state from wishlist — handles both {results:[]} and plain array shapes
   useEffect(() => {
     if (wishlist?.results) {
-      setSaved(new Set(wishlist.results.map((item) => item.discount?.id || item.discount)));
+      setSaved(new Set(wishlist.results.map((item) => item.discount?.id ?? item.discount)));
+    } else if (Array.isArray(wishlist) && wishlist.length > 0) {
+      setSaved(new Set(wishlist.map((item) => item.discount?.id ?? item.discount ?? item.id)));
     }
   }, [wishlist]);
 
