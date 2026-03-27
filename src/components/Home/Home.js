@@ -9,7 +9,7 @@ import CarouselFlex from "../Shared/CarouselFlex";
 import TopDiscounts from "../Discounts/TopDiscounts";
 import Card from "../Shared/Card";
 
-import { getDiscountsAPI } from "../../actions";
+import { getDiscountsAPI, getUserDiscountLikesAPI } from "../../actions";
 
 // ─── Skeleton card for loading state ─────────────────────────────────────────
 const SkeletonCard = () => (
@@ -32,10 +32,15 @@ const Home = (props) => {
   const filterRef = useRef(null);
   const isInitialMount = useRef(true);
 
-  const { getDiscounts } = props;
+  const { getDiscounts, getUserDiscountLikes, token } = props;
+
   useEffect(() => {
+    console.log("token on mount:", token);
     getDiscounts();
-  }, [getDiscounts]);
+    if (token?.access) {
+      getUserDiscountLikes();
+    }
+  }, [getDiscounts, getUserDiscountLikes, token?.access]);
 
   const { discounts } = props;
   useEffect(() => {
@@ -624,17 +629,17 @@ const SkeletonLine = styled.div`
 // ─── Redux ────────────────────────────────────────────────────────────────────
 
 const mapStateToProps = (state) => {
-  return {
-    user: state.userState.user,
-    token: state.userState.token,
-    discounts: state.discountState.discounts,
+  return {  
+    user: state.userState.user,  
+    token: state.userState.token,  
+    discounts: state.discountState.discounts,  
+    userDiscountLikes: state.discountState.userDiscountLikes,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  getDiscounts: () => {
-    dispatch(getDiscountsAPI());
-  },
+  getDiscounts: () => dispatch(getDiscountsAPI()),
+  getUserDiscountLikes: () => dispatch(getUserDiscountLikesAPI()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

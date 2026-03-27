@@ -2,12 +2,11 @@ import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import WishlistContext from "../../store/wishlist-context";
-import { updateDiscountLikes, isDiscountLikedByUserAPI, removeUserDiscountLike, addUserDiscountLike } from "../../actions/index.js";
+import { updateDiscountLikes, isDiscountLikedByUserAPI } from "../../actions/index.js";
 
 import { BASE_URL } from "../../utils/constants";
 import { useNavigate } from "react-router-dom";
 
-// Theme tokens (DARK and LIGHT objects unchanged)
 const DARK = {
   surface: "rgba(255,255,255,0.034)",
   surfaceHover: "rgba(255,255,255,0.06)",
@@ -44,7 +43,6 @@ const LIGHT = {
   errorBg: "rgba(239,68,68,0.08)",
 };
 
-// tok function unchanged
 const tok = (prop) => ({ $theme }) => ($theme === "light" ? LIGHT : DARK)[prop];
 
 const radius = "14px";
@@ -327,20 +325,11 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
   const theme = bgColor === "light" ? "light" : "dark";
 
   const reduxDiscounts = useSelector((state) => state.discountState?.discounts?.results || []);
-
-  const userDiscountLikes = useSelector(
-    (state) => state.discountState?.userDiscountLikes || {}
-  );
-
+  const userDiscountLike = useSelector((state) => state.discountState?.user_discount_like);
   const authToken = useSelector((state) => state.userState?.token?.access);
-
   const reduxDiscount = reduxDiscounts.find((d) => d.id === discount.id);
-  
   const likesCount = reduxDiscount?.likes ?? discount.likes ?? 0;
-
-  const likedItem = userDiscountLikes[discount.id];
-  const isLikedRedux = !!likedItem;
-  const likeId = likedItem?.id; // ✅ IMPORTANT for unlike
+  const isLikedRedux = userDiscountLike?.discount_id === discount.id;
 
   const handleSlice = (data, size) => {
     if (!data || data.length <= size) return data;
@@ -408,82 +397,83 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
 
     if (isLoadingLike) return;
 
-    // Handle non-auth users (local toggle only)
     if (!authToken) {
-      setLocalLiked((prev) => !prev);
+      setLocalLiked(!localLiked);
       return;
     }
 
     setIsLoadingLike(true);
 
-    const wasLiked = isLikedFinal;
-    console.log("Was liked ", wasLiked);
     const previousLikes = likesCount;
-    const updatedLikes = Math.max(0, wasLiked ? previousLikes - 1 : previousLikes + 1);
+    const wasLiked = isLikedFinal;
+    const newLikesCount = wasLiked ? previousLikes - 1 : previousLikes + 1;
 
-    // ✅ Optimistic UI update
-    dispatch(updateDiscountLikes(discount.id, updatedLikes));
-    onLike?.(discount.id, !wasLiked, updatedLikes);
+    // Optimistic update
+    dispatch(updateDiscountLikes(discount.id, newLikesCount));
+    if (typeof onLike === 'function') {
+      onLike(discount.id, !wasLiked, newLikesCount);
+    }
 
     try {
-      console.log("Like ID for discount", discount.id, likeId);
+      let likeId = discount.user_discount_like?.id || discount.user_like?.id || discount.like_id;
+
       if (wasLiked) {
-        // ========================
-        // 🔻 UNLIKE FLOW
-        // ========================
-        console.log("Attempting to unlike with likeId:", likeId);
-
+        // Unlike
         if (!likeId) {
-          console.error("Missing likeId for unlike");
-          throw new Error("Like ID not found");
-        }
-
-        const res = await fetch(
-          `${BASE_URL}/discounts/likes/delete/${likeId}/`,
-          {
-            method: "DELETE",
+          const verifyResponse = await fetch(`${BASE_URL}/discounts/likes/verify/0/${discount.id}/`, {
+            method: "GET",
             headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
               Authorization: `Bearer ${authToken}`,
             },
-          }
-        );
+          });
 
-        if (!res.ok) {
-          throw new Error("Failed to unlike");
+          if (!verifyResponse.ok) {
+            throw new Error(`Verify failed: ${verifyResponse.status}`);
+          }
+
+          const verifyData = await verifyResponse.json();
+          likeId = verifyData?.id;
         }
 
-        dispatch(removeUserDiscountLike(discount.id));
+        if (!likeId) {
+          throw new Error("Missing like ID for unlike");
+        }
 
+        const deleteResponse = await fetch(`${BASE_URL}/discounts/likes/delete/${likeId}/`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+
+        if (!deleteResponse.ok && deleteResponse.status !== 204) {
+          throw new Error(`Unlike failed: ${deleteResponse.status}`);
+        }
       } else {
-        // ========================
-        // ❤️ LIKE FLOW
-        // ========================
-
-        console.log("Attempting to like discount ID:", discount.id);
-
-        const res = await fetch(`${BASE_URL}/discounts/likes/add/`, {
+        // Like
+        const likeResponse = await fetch(`${BASE_URL}/discounts/likes/add/`, {
           method: "POST",
           headers: {
+            Accept: "application/json",
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({ discount_id: discount.id }),
         });
 
-        if (!res.ok) {
-          throw new Error("Failed to like");
+        if (!likeResponse.ok) {
+          throw new Error(`Like failed: ${likeResponse.status}`);
         }
-
-        const data = await res.json();
-        // Optimistically update Redux with the new like entry so isLikedRedux
-        // and likeId are available immediately without a re-fetch
-        dispatch(addUserDiscountLike(discount.id, { id: data.id, discount_id: discount.id }));
       }
 
-    } catch (err) {
-      // ❌ Rollback UI if error
+      // Success: sync state
+      dispatch(isDiscountLikedByUserAPI(discount.id));
+    } catch (error) {
+      // Revert optimistic updates
       dispatch(updateDiscountLikes(discount.id, previousLikes));
-      onLike?.(discount.id, wasLiked, previousLikes);
+      if (typeof onLike === 'function') {
+        onLike(discount.id, wasLiked, previousLikes);
+      }
     } finally {
       setIsLoadingLike(false);
     }
@@ -570,3 +560,4 @@ function Card({ discount, index = 0, onSave, isSaved, isEditMode, onEdit, onDele
 }
 
 export default Card;
+

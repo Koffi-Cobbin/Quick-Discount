@@ -1,20 +1,3 @@
-/**
- * DiscountDetail — fully refactored
- *
- * Key improvements:
- *  • Redux: connect() → useSelector / useDispatch (no more mapState/mapDispatch)
- *  • Architecture: monolith → 6 focused sub-components, each with a single concern
- *  • Performance: all derived data is memoised; click-locks use refs; video uses
- *    IntersectionObserver; optimistic updates clear automatically via useEffect
- *  • Correctness: stable keys (id-based), no index keys; safe optional-chaining
- *    throughout; getDaysLeft uses a consistent UTC boundary
- *  • Naming: typos fixed (recomended → recommended), camelCase everywhere
- *  • Accessibility: <button> elements carry aria-label / aria-pressed; images have
- *    explicit width/height to prevent layout shift; <label htmlFor> pairs intact
- *  • Removed: unused imports (Gallery already imported via sub-component),
- *    duplicate styled imports
- */
-
 import React, {
     useRef,
     useCallback,

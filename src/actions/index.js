@@ -26,9 +26,13 @@ import {
   SET_WISH_LIST,
   SET_SEARCH_RESULT,
   USER_DISCOUNT_LIKE,
+  USER_DISCOUNT_LIKES,
   SET_PENDING_REDIRECT,
   UPDATE_DISCOUNT_LIKES,
-  UPDATE_ORGANIZER_FOLLOWERS
+  SET_DISCOUNT_LIKED,
+  UPDATE_ORGANIZER_FOLLOWERS,
+  REMOVE_USER_DISCOUNT_LIKE,
+  ADD_USER_DISCOUNT_LIKE
 } from "./actionType";
 import { BASE_URL, STAFF_EMAIL } from "../utils/constants";
 import * as messages from "../utils/messages";
@@ -69,10 +73,84 @@ export const setUserDiscountLike = (payload) => ({
   user_discount_like: payload,
 });
 
+export const setUserDiscountLikes = (payload) => ({
+  type: USER_DISCOUNT_LIKES,
+  userDiscountLikes: payload,
+});
+
+export const removeUserDiscountLike = (discountId) => ({
+  type: REMOVE_USER_DISCOUNT_LIKE,
+  discountId
+});
+
+export const addUserDiscountLike = (discountId, likeData) => ({
+  type: ADD_USER_DISCOUNT_LIKE,
+  discountId,
+  likeData,
+});
+
+// -------------------------------
+// ---- GET USER DISCOUNT LIKES API --------
+
+export function getUserDiscountLikesAPI() {
+  return (dispatch, getState) => {
+    const url = `${BASE_URL}/discounts/user-likes/`;
+
+    const state = getState();
+    const token = state.userState.token;
+
+    if (!token || !token.access) {
+      console.log(
+        "User Discount Likes API: Token not available yet, skipping fetch"
+      );
+      return Promise.resolve();
+    }
+
+    console.log("Fetching user discount likes with token ", token);
+
+    const authToken = token.access;
+
+    return fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("An error occurred");
+        }
+      })
+      .then((userLikes) => {
+        console.log("User Discount Likes", userLikes);
+
+        // ✅ Normalize into lookup map
+        const likesMap = {};
+        userLikes.likes.forEach((like) => {
+          likesMap[like.discount_id] = { id: like.id, discount_id: like.discount_id };
+        });
+
+        dispatch(setUserDiscountLikes(likesMap));
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
+}
+
 export const updateDiscountLikes = (discountId, likes) => ({
     type: UPDATE_DISCOUNT_LIKES,
     payload: { discountId, likes }
 });
+
+// export const setDiscountLiked = (id, liked, likeId = null) => ({
+//   type: SET_DISCOUNT_LIKED,
+//   payload: { id, liked, likeId },
+// });
 
 export const updateOrganizerFollowers = (organizerId, followers) => ({
     type: UPDATE_ORGANIZER_FOLLOWERS,

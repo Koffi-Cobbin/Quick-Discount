@@ -8,8 +8,12 @@ import { SET_DISCOUNTS,
     SET_DISCOUNT_REVIEWS,
     SET_SEARCH_RESULT,
     USER_DISCOUNT_LIKE,
+    USER_DISCOUNT_LIKES,
     UPDATE_DISCOUNT_LIKES,
-    UPDATE_ORGANIZER_FOLLOWERS
+    SET_DISCOUNT_LIKED,
+    ADD_USER_DISCOUNT_LIKE,
+    UPDATE_ORGANIZER_FOLLOWERS,
+    REMOVE_USER_DISCOUNT_LIKE
  } from "../actions/actionType";
 
 export const initState = {
@@ -30,10 +34,12 @@ export const initState = {
     JSON.parse(sessionStorage.getItem('discount_media')) : [],
     reviews: sessionStorage.getItem('reviews') ?
     JSON.parse(sessionStorage.getItem('reviews')) : null, 
-    search_result: sessionStorage.getItem('search_result') ?
+    search_result: sessionStorage.getItem('search_result') ? 
     JSON.parse(sessionStorage.getItem('search_result')) : [],  
-    user_discount_like: sessionStorage.getItem('user_discount_like') ?
-    JSON.parse(sessionStorage.getItem('user_discount_like')) : null
+    user_discount_like: sessionStorage.getItem('user_discount_like') ? 
+    JSON.parse(sessionStorage.getItem('user_discount_like')) : null, 
+    userDiscountLikes: sessionStorage.getItem('userDiscountLikes') ? 
+    JSON.parse(sessionStorage.getItem('userDiscountLikes')) : {}
 }
 
 const discountReducer = (state = initState, action) => {
@@ -102,6 +108,13 @@ const discountReducer = (state = initState, action) => {
                 user_discount_like: action.user_discount_like
                 };
 
+        case USER_DISCOUNT_LIKES:
+            sessionStorage.setItem('userDiscountLikes', JSON.stringify(action.userDiscountLikes));
+            return {
+                ...state,
+                userDiscountLikes: action.userDiscountLikes,
+            };
+
         case SET_SEARCH_RESULT:
             sessionStorage.setItem('search_result', JSON.stringify(action.search_result));
             return {
@@ -113,15 +126,24 @@ const discountReducer = (state = initState, action) => {
             return {
                 ...state,
                 discounts: {
-                    ...state.discounts,
-                    results: state.discounts.results.map(d =>
-                        d.id === action.payload.discountId
-                            ? { ...d, likes: action.payload.likes }
-                            : d
-                    )
-                }
+                ...state.discounts,
+                results: state.discounts.results.map((d) =>
+                    d.id === action.payload.discountId
+                    ? { ...d, likes: action.payload.likes }
+                    : d
+                ),
+                },
             };
 
+        case ADD_USER_DISCOUNT_LIKE: {
+            const updated = {
+                ...state.userDiscountLikes,
+                [action.discountId]: action.likeData,
+            };
+            sessionStorage.setItem('userDiscountLikes', JSON.stringify(updated));
+            return { ...state, userDiscountLikes: updated };
+        }
+     
         case UPDATE_ORGANIZER_FOLLOWERS:
             return {
                 ...state,
@@ -140,6 +162,13 @@ const discountReducer = (state = initState, action) => {
                     )
                 }
             };
+
+        case REMOVE_USER_DISCOUNT_LIKE: {
+            const newLikes = { ...state.userDiscountLikes };
+            delete newLikes[action.discountId];
+            sessionStorage.setItem('userDiscountLikes', JSON.stringify(newLikes));
+            return { ...state, userDiscountLikes: newLikes };
+        }
 
         default:
             return state;
