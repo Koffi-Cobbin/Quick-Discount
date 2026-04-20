@@ -1015,11 +1015,30 @@ const DiscountForm = (props) => {
     setContactError(res[1] ? res[1] : "");
   }, []);
 
+  const WA_PREFIX = "https://wa.me/";
+
   const handleSocialChange = useCallback((platform, value) => {
-    setSocialMediaHandles((prev) => ({ ...prev, [platform]: value }));
+    let stored = value;
+
+    // WhatsApp: if the value isn't a URL, treat it as a phone number and
+    // auto-construct the wa.me link (e.g. "0244245139" → "https://wa.me/0244245139").
+    if (platform === "whatsapp" && value?.trim() && !value.trim().startsWith("http")) {
+      stored = WA_PREFIX + value.trim().replace(/\s+/g, "");
+    }
+
+    setSocialMediaHandles((prev) => ({ ...prev, [platform]: stored }));
     setSocialMediaHandlesURLError((prev) => ({
       ...prev,
-      [`${platform}Error`]: value && !isValidURL(value) ? "Invalid URL" : "",
+      [`${platform}Error`]:
+        platform === "whatsapp"
+          ? !stored?.trim()
+            ? "WhatsApp is required"
+            : !isValidURL(stored)
+            ? "Invalid URL"
+            : ""
+          : value && !isValidURL(value)
+          ? "Invalid URL"
+          : "",
     }));
   }, []);
 
@@ -1179,12 +1198,14 @@ const DiscountForm = (props) => {
       discountCategories?.length > 0 &&
       startDate
     ),
-    // Step 1: organizer name + valid email, no outstanding field errors
+    // Step 1: organizer name + valid email, WhatsApp required, no outstanding field errors
     Boolean(
       organizerName?.trim() &&
       email?.trim() &&
       !emailError &&
       !contactError &&
+      socialMediaHandles.whatsapp?.trim() &&
+      isValidURL(socialMediaHandles.whatsapp) &&
       !Object.values(socialMediaHandlesURLError).some(Boolean) &&
       !websiteURLError
     ),
@@ -1200,7 +1221,7 @@ const DiscountForm = (props) => {
   ], [
     discountTitle, discountDescription, percentageDiscount, discountCategories,
     startDate,
-    organizerName, email, emailError, contactError, socialMediaHandlesURLError, websiteURLError,
+    organizerName, email, emailError, contactError, socialMediaHandles, socialMediaHandlesURLError, websiteURLError,
     discount, discountFlyer, videoURLError,
     agreement, packageOption,
   ]);
@@ -1423,33 +1444,71 @@ const DiscountForm = (props) => {
               <SectionTitle>
                 Social Handles{" "}
                 <span style={{ opacity: 0.55, fontSize: "0.78rem" }}>
-                  (optional)
+                  (WhatsApp required)
                 </span>
               </SectionTitle>
             </SectionHeading>
 
             {["whatsapp", "facebook", "instagram", "twitter"].map(
-              (platform) => (
-                <SocialRow key={platform}>
-                  <SocialHandle>{platform}</SocialHandle>
-                  <SocialInput
-                    type="url"
-                    value={socialMediaHandles[platform] ?? ""}
-                    hasError={!!socialMediaHandlesURLError[`${platform}Error`]}
-                    placeholder={`https://${platform}.com/…`}
-                    onChange={(e) =>
-                      handleSocialChange(platform, e.target.value)
-                    }
-                  />
-                  {socialMediaHandlesURLError[`${platform}Error`] && (
-                    <FieldError
-                      style={{ fontSize: "0.72rem", whiteSpace: "nowrap" }}
-                    >
-                      {socialMediaHandlesURLError[`${platform}Error`]}
-                    </FieldError>
-                  )}
-                </SocialRow>
-              ),
+              (platform) => {
+                const isWA = platform === "whatsapp";
+                const waValue = socialMediaHandles.whatsapp ?? "";
+                // Show auto-constructed hint when the stored value was built from a phone number
+                const showWAHint =
+                  isWA &&
+                  waValue.startsWith("https://wa.me/") &&
+                  waValue !== "https://wa.me/";
+
+                return (
+                  <SocialRow key={platform} style={{ flexWrap: "wrap" }}>
+                    <SocialHandle>
+                      {platform}
+                      {isWA && (
+                        <span style={{ color: T.error, marginLeft: 2 }}>*</span>
+                      )}
+                    </SocialHandle>
+                    <SocialInput
+                      type={isWA ? "text" : "url"}
+                      value={socialMediaHandles[platform] ?? ""}
+                      hasError={!!socialMediaHandlesURLError[`${platform}Error`]}
+                      placeholder={
+                        isWA
+                          ? "https://wa.me/… or phone number"
+                          : `https://${platform}.com/…`
+                      }
+                      onChange={(e) =>
+                        handleSocialChange(platform, e.target.value)
+                      }
+                    />
+                    {showWAHint && (
+                      <FieldHint
+                        style={{
+                          width: "100%",
+                          paddingLeft: 90,
+                          color: T.orange,
+                          opacity: 0.8,
+                          fontSize: "0.75rem",
+                          marginTop: 4,
+                        }}
+                      >
+                        ↳ Link: {waValue}
+                      </FieldHint>
+                    )}
+                    {socialMediaHandlesURLError[`${platform}Error`] && (
+                      <FieldError
+                        style={{
+                          fontSize: "0.72rem",
+                          whiteSpace: "nowrap",
+                          width: "100%",
+                          paddingLeft: 90,
+                        }}
+                      >
+                        {socialMediaHandlesURLError[`${platform}Error`]}
+                      </FieldError>
+                    )}
+                  </SocialRow>
+                );
+              },
             )}
           </StepSlide>
         );

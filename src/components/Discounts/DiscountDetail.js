@@ -150,6 +150,8 @@ const DiscountInfoSection = ({ discount, liked, displayedLikes, onLike }) => (
                 <b>Location: </b>
                 <Colored> {discount.location} </Colored>
             </p>
+
+            <b>Description </b>
             <ExpandableDescription html={discount.description} />
         </Description>
     </DiscountInfo>
