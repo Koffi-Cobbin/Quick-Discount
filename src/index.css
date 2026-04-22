@@ -8,7 +8,17 @@
    Fallback 2: sans-serif        — OS default sans (Helvetica, Arial, etc.)
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
+    --color-text-secondary: #6c757d;
+    --color-text-danger: #d32f2f;
+    --color-border-danger: #d32f2f;
+    --review-primary: #007bff;
+    --border-radius-md: 6px;
   --font-sans: "Inter Variable", "Roboto", sans-serif;
+
+  /* Added for Reviews component visibility */
+  --color-background-secondary: #f8f9fa;
+  --color-border-tertiary: #dee2e6;
+  --avatar-bg: #e9ecef;
 
   font-family: var(--font-sans);
   font-feature-settings: 'liga' 1, 'calt' 1; /* contextual alternates & ligatures */
