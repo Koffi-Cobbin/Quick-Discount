@@ -298,10 +298,11 @@ const ReviewsSection = ({ discount, reviews }) => {
     setLoading(true);
     try {
       const res = await dispatch(
-        getDiscountReviewsAPI(discount.id, {
-          sort,
-          ratingFilter,
-          verifiedOnly,
+        getDiscountReviewsAPI({
+          discount: discount.id,
+          sort: sort || "helpful",
+          rating: ratingFilter,
+          is_verified: verifiedOnly,
         })
       );
       return res;
@@ -333,35 +334,6 @@ const ReviewsSection = ({ discount, reviews }) => {
           },
         }
       );
-      // handle the response as needed, e.g., update local state or refetch reviews
-      // Example response structure:
-      // {
-      //     "url": "https://quickdiscount.pythonanywhere.com/reviews/3/",
-      //     "id": 3,
-      //     "discount": 9,
-      //     "reviewer": {
-      //         "url": "https://quickdiscount.pythonanywhere.com/users/1/",
-      //         "id": 1,
-      //         "name": "Koffi Cobbin",
-      //         "email": "admin@email.com",
-      //         "contact": "0541197607",
-      //         "password": "pbkdf2_sha256$720000$KMXbPgIP9eT1PW4w2IcULy$CqNeLZHQd0xUFObe+4N4MEEB4LOq/vh3Ny7lNxCZsC8=",
-      //         "profile_pic": "https://res.cloudinary.com/quickdiscountcloudstorage/image/upload/v1763494549/g3mkyodc8bocq8mx6tjz.jpg",
-      //         "is_organizer": false
-      //     },
-      //     "rating": 3,
-      //     "rating_display": "3 Stars - Good",
-      //     "title": "Test Review",
-      //     "content": "Create discount status or payment changed",
-      //     "is_verified_purchase": false,
-      //     "is_active": true,
-      //     "helpful_count": 0,
-      //     "unhelpful_count": 0,
-      //     "helpfulness_percentage": 0,
-      //     "replies": [],
-      //     "created_at": "2026-04-22T10:18:17.590385Z",
-      //     "updated_at": "2026-04-22T10:18:17.590429Z"
-      // }
         return res.data;
       } catch (error) {
         console.error("Error creating review:", error);
@@ -569,7 +541,7 @@ const ReviewsSection = ({ discount, reviews }) => {
 
     // Load reviews whenever the route param changes
     useEffect(() => {
-      dispatch(getDiscountReviewsAPI(discountId));
+      dispatch(getDiscountReviewsAPI({discount: discount.id}));
     }, [discountId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Load media only when the discount changes or media belongs to a different discount

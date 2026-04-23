@@ -248,3 +248,27 @@ export const generateEmbedFromName = (locationName) => {
     return iframeCode;
   };
 
+
+  /**
+ * Extracts reviewer initials from their name
+ * @param {string} name - Reviewer's full name
+ * @returns {string} - Two-character uppercase initials
+ * @example
+ * getReviewerInitials("John Smith") // Returns "JS"
+ * getReviewerInitials("Sarah") // Returns "SA"
+ * getReviewerInitials("") // Returns ""
+ */
+export const getReviewerInitials = (name) => {
+  if (!name || typeof name !== "string") return "";
+  
+  const trimmed = name.trim();
+  if (!trimmed) return "";
+  
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return trimmed.slice(0, 2).toUpperCase();
+  
+  // For two or more parts, take first letter of first and second names
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}

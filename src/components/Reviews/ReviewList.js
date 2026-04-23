@@ -214,7 +214,7 @@ export default function ReviewList({
 
   return (
     <div>
-      {stats && <ReviewStats stats={stats} />}
+      {stats && <ReviewStats stats={stats} total_reviews={reviews.length} />}
 
       <ControlsRow>
         <ControlsLeft>

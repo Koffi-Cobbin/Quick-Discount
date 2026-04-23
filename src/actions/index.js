@@ -757,10 +757,12 @@ export function getOrganizerDiscountsAPI(organizer_id) {
 // ------------------------------
 // ------ GET DISCOUNT REVIEWS --------
 
-export function getDiscountReviewsAPI(discount_id) {
+export function getDiscountReviewsAPI(params = {}) {
   return (dispatch) => {
     dispatch(setLoading(true));
-    const url = `${BASE_URL}/discounts/reviews/discount/${discount_id}/`;
+
+    const query = new URLSearchParams(params).toString();
+    const url = `${BASE_URL}/reviews/?${query}`;
 
     fetch(url, {
       method: "GET",
@@ -771,15 +773,14 @@ export function getDiscountReviewsAPI(discount_id) {
     })
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
-        else return response.json();
+        return response.json();
       })
       .then((reviews) => {
         dispatch(setDiscountReviews(reviews));
-        console.log("Discount Reviews ", reviews);
         dispatch(setLoading(false));
       })
-      .catch((errorMessage) => {
-        console.log(errorMessage);
+      .catch((error) => {
+        console.error("Discount Reviews fetch failed:", error);
         dispatch(setLoading(false));
       });
   };

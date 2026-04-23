@@ -1,26 +1,147 @@
 import { useState } from "react";
+import styled from "styled-components";
 import StarDisplay from "../Shared/StarDisplay";
-import ReplyBox from "./ReplyBox"; 
+import { getReviewerInitials } from "../../utils/middleware";
+
+/* =======================
+   Styled Components
+======================= */
+
+const Container = styled.div`
+  padding: 20px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  margin-bottom: 20px;
+`;
+
+const Header = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+`;
+
+const Avatar = styled.div`
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--avatar-bg, #eee);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 13px;
+`;
+
+const HeaderContent = styled.div`
+  flex: 1;
+`;
+
+const TopRow = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 3px;
+  align-items: center;
+`;
+
+const Name = styled.span`
+  font-weight: 500;
+`;
+
+const VerifiedBadge = styled.span`
+  font-size: 11px;
+`;
+
+const Time = styled.span`
+  margin-left: auto;
+  font-size: 12px;
+`;
+
+const RatingRow = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const Title = styled.p`
+  font-weight: 500;
+  margin: 0 0 6px;
+`;
+
+const Content = styled.p`
+  line-height: 1.6;
+  margin: 0 0 12px;
+`;
+
+const InlineButton = styled.button`
+  margin-left: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+`;
+
+const VoteRow = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+`;
+
+const VoteButton = styled.button`
+  cursor: pointer;
+  color: var(--color-text-secondary);
+`;
+
+const RepliesSection = styled.div`
+  margin-top: 12px;
+`;
+
+const ToggleRepliesButton = styled.button`
+  cursor: pointer;
+`;
+
+const ReplyItem = styled.div`
+  margin-top: 10px;
+  margin-left: 16px;
+  padding: 12px;
+  background: var(--color-background-secondary);
+`;
+
+const ReplyHeader = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const ReplyAuthor = styled.strong``;
+
+const ReplyTime = styled.span`
+  margin-left: auto;
+  font-size: 11px;
+`;
+
+const ReplyContent = styled.p`
+  margin: 0;
+`;
+
+const ReplyBoxWrapper = styled.div`
+  margin-top: 10px;
+`;
+
+/* =======================
+   Component
+======================= */
 
 export default function ReviewItem({
   review,
   isOrganizer = false,
 
-  // Actions
   onVote,
   onReplyAdd,
 
-  // UI / behavior config
   maxContentLength = 200,
   defaultRepliesOpen = true,
 
-  // Utilities
   formatTime,
-
-  // Optional component injection
   ReplyComponent,
 
-  // Labels
   labels = {},
 }) {
   const {
@@ -43,7 +164,6 @@ export default function ReviewItem({
 
     setVoted(type);
 
-    // optimistic update
     setLocalReview((r) => ({
       ...r,
       helpful_count:
@@ -55,7 +175,6 @@ export default function ReviewItem({
     try {
       await onVote?.(type, localReview);
     } catch {
-      // rollback on failure
       setLocalReview(review);
       setVoted(null);
     }
@@ -79,128 +198,92 @@ export default function ReviewItem({
       : localReview.content;
 
   return (
-    <div
-      style={{
-        padding: "20px 0",
-        borderBottom: "0.5px solid var(--color-border-tertiary)",
-      }}
-    >
+    <Container>
       {/* Header */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-        <div
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: "50%",
-            background: "var(--avatar-bg, #eee)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 500,
-            fontSize: 13,
-          }}
-        >
-          {localReview.user.initials}
-        </div>
+      <Header>
+        <Avatar>
+          {getReviewerInitials(localReview.reviewer_name)}
+        </Avatar>
 
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 3 }}>
-            <span style={{ fontWeight: 500 }}>
-              {localReview.user.name}
-            </span>
+        <HeaderContent>
+          <TopRow>
+            <Name>{localReview.reviewer_name}</Name>
 
             {localReview.is_verified_purchase && (
-              <span style={{ fontSize: 11 }}>
-                Verified purchase
-              </span>
+              <VerifiedBadge>Verified purchase</VerifiedBadge>
             )}
 
-            <span style={{ marginLeft: "auto", fontSize: 12 }}>
-              {formatTime?.(localReview.created_at)}
-            </span>
-          </div>
+            <Time>{formatTime?.(localReview.created_at)}</Time>
+          </TopRow>
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <StarDisplay rating={localReview.rating} size={14} />
-            <span style={{ fontSize: 12 }}>
-              {localReview.rating}/5
-            </span>
-          </div>
-        </div>
-      </div>
+          <RatingRow>
+            <StarDisplay value={localReview.rating} size={14} />
+            <span>{localReview.rating}/5</span>
+          </RatingRow>
+        </HeaderContent>
+      </Header>
 
       {/* Title */}
-      <p style={{ fontWeight: 500 }}>{localReview.title}</p>
+      <Title>{localReview.title}</Title>
 
       {/* Content */}
-      <p style={{ lineHeight: 1.6 }}>
+      <Content>
         {displayContent}
 
         {isLong && (
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            style={{ marginLeft: 4 }}
-          >
+          <InlineButton onClick={() => setExpanded((v) => !v)}>
             {expanded ? showLess : readMore}
-          </button>
+          </InlineButton>
         )}
-      </p>
+      </Content>
 
       {/* Voting */}
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <span style={{ fontSize: 12 }}>{helpfulLabel}</span>
+      <VoteRow>
+        <span>{helpfulLabel}</span>
 
-        <button onClick={() => handleVote("helpful")}>
+        <VoteButton onClick={() => handleVote("helpful")}>
           👍 {localReview.helpful_count}
-        </button>
+        </VoteButton>
 
-        <button onClick={() => handleVote("unhelpful")}>
+        <VoteButton onClick={() => handleVote("unhelpful")}>
           👎 {localReview.unhelpful_count}
-        </button>
-      </div>
+        </VoteButton>
+      </VoteRow>
 
       {/* Replies */}
       {localReview.replies?.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <button onClick={() => setRepliesOpen((v) => !v)}>
+        <RepliesSection>
+          <ToggleRepliesButton onClick={() => setRepliesOpen((v) => !v)}>
             {repliesOpen ? hideReplies : showReplies}{" "}
             {localReview.replies.length}{" "}
             {localReview.replies.length === 1 ? "reply" : "replies"}
-          </button>
+          </ToggleRepliesButton>
 
           {repliesOpen &&
             localReview.replies.map((rep) => (
-              <div
-                key={rep.id}
-                style={{
-                  marginTop: 10,
-                  marginLeft: 16,
-                  padding: 12,
-                  background: "var(--color-background-secondary)",
-                }}
-              >
-                <div style={{ display: "flex", gap: 8 }}>
-                  <strong>{rep.author}</strong>
-                  <span style={{ marginLeft: "auto", fontSize: 11 }}>
+              <ReplyItem key={rep.id}>
+                <ReplyHeader>
+                  <ReplyAuthor>{rep.author}</ReplyAuthor>
+                  <ReplyTime>
                     {formatTime?.(rep.created_at)}
-                  </span>
-                </div>
-                <p style={{ margin: 0 }}>{rep.content}</p>
-              </div>
+                  </ReplyTime>
+                </ReplyHeader>
+                <ReplyContent>{rep.content}</ReplyContent>
+              </ReplyItem>
             ))}
-        </div>
+        </RepliesSection>
       )}
 
       {/* Reply Box */}
       {ReplyComponent && (
-        <div style={{ marginTop: 10 }}>
+        <ReplyBoxWrapper>
           <ReplyComponent
             reviewId={localReview.id}
             isOrganizer={isOrganizer}
             onReplyAdded={handleReplyAdded}
           />
-        </div>
+        </ReplyBoxWrapper>
       )}
-    </div>
+    </Container>
   );
 }
