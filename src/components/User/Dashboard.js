@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
-import { 
-  addToWishlistAPI, 
-  removeFromWishlistAPI, 
-  getWishlistAPI, 
+import {
+  addToWishlistAPI,
+  removeFromWishlistAPI,
+  getWishlistAPI,
   getUserNotificationsAPI,
   userUpdateAPI,
-  getDiscountsAPI 
+  getDiscountsAPI,
+  markNotificationAsReadAPI,
+  markAllNotificationsAsReadAPI
 } from "../../actions";
+import NotificationList from "./NotificationList";
 import Card from "../Shared/Card";
 import "./Dashboard.css";
 
@@ -34,7 +37,9 @@ function UserDashboard({
   getWishlist,
   getUserNotifications,
   getDiscounts,
-  updateUser
+  updateUser,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
 }) {
   const isOrganizer = !!(user?.organizer_detail || organizer);
 
@@ -43,10 +48,11 @@ function UserDashboard({
   const [savedIds, setSavedIds] = useState(new Set());
   const [loadingWishlist, setLoadingWishlist] = useState(false);
   const [wishlistError, setWishlistError] = useState(null);
-  
+
   // Use refs to track if we've already fetched to avoid infinite loops
   const hasFetchedWishlist = useRef(false);
   const hasFetchedDiscounts = useRef(false);
+  const hasFetchedNotifications = useRef(false);
 
   const [uName, setUName] = useState("");
   const [uEmail, setUEmail] = useState("");
@@ -68,7 +74,7 @@ function UserDashboard({
   const [saveState, setSave] = useState(null);
   const fileRef = useRef();
 
-  const unread = notifications?.filter((n) => !n.read).length || 0;
+  const unread = notifications?.count || 0;
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -77,20 +83,20 @@ function UserDashboard({
     );
   }, []);
 
-// Fetch wishlist and notifications on mount
+  // Fetch wishlist and notifications on mount
   useEffect(() => {
     // Fetch wishlist from API to get fresh data (only once)
     if (!hasFetchedWishlist.current) {
       hasFetchedWishlist.current = true;
-      
-      const shouldFetchWishlist = !wishlist || 
-        (Array.isArray(wishlist) && wishlist.length === 0) || 
+
+      const shouldFetchWishlist = !wishlist ||
+        (Array.isArray(wishlist) && wishlist.length === 0) ||
         (wishlist && !wishlist.results);
-      
+
       if (shouldFetchWishlist) {
         setLoadingWishlist(true);
         setWishlistError(null);
-        
+
         const result = getWishlist();
         // Handle case where action might not return a promise
         if (result && typeof result.then === 'function') {
@@ -107,7 +113,7 @@ function UserDashboard({
         }
       }
     }
-    
+
     // Fetch all discounts if not already loaded (only once)
     if (!hasFetchedDiscounts.current) {
       hasFetchedDiscounts.current = true;
@@ -115,26 +121,27 @@ function UserDashboard({
         getDiscounts();
       }
     }
-    
-    // Fetch notifications only once
-    if (!notifications) {
+
+    // Fetch notifications on mount (only once)
+    if (!hasFetchedNotifications.current) {
+      hasFetchedNotifications.current = true;
       getUserNotifications();
     }
-  }, [notifications, getUserNotifications]); // Empty deps - only run on mount
+  }, []); // Empty deps - only run on mount
 
   // Transform wishlist API response to extract discount data
   // The API returns an array like: [{ id: 1, discount: "https://.../discounts/53/" }, ...]
   // We need to extract the discount ID from the URL and match with full discount data from store
   const transformWishlist = (wishlistData, allDiscounts) => {
     if (!wishlistData) return [];
-    
+
     // Helper to get discount ID from URL
     const getDiscountIdFromUrl = (url) => {
       if (!url) return null;
       const match = url.match(/\/discounts\/(\d+)\/?$/);
       return match ? parseInt(match[1]) : null;
     };
-    
+
     // Get all discount IDs from store
     let discountIdMap = {};
     if (allDiscounts && allDiscounts.results && Array.isArray(allDiscounts.results)) {
@@ -146,7 +153,7 @@ function UserDashboard({
         discountIdMap[d.id] = d;
       });
     }
-    
+
     // Check if it's in paginated format (count/results) - older format
     if (wishlistData.results && Array.isArray(wishlistData.results)) {
       return wishlistData.results
@@ -157,7 +164,7 @@ function UserDashboard({
           _savedAt: item.created_at
         }));
     }
-    
+
     // If it's an array (newer format from API), extract discount IDs from URLs and match with full data
     if (Array.isArray(wishlistData)) {
       // First, filter out duplicates by using a Set to track seen discount IDs
@@ -169,15 +176,15 @@ function UserDashboard({
         seenIds.add(discountId);
         return true;
       });
-      
+
       return uniqueItems
         .map(item => {
           // Extract discount ID from URL like "https://.../discounts/53/"
           const discountId = getDiscountIdFromUrl(item.discount);
-          
+
           // Get full discount data from store if available
           const fullDiscount = discountId ? discountIdMap[discountId] : null;
-          
+
           return {
             ...fullDiscount, // Spread full discount properties (id, title, flyer, etc.)
             id: discountId, // Ensure ID is set
@@ -186,7 +193,7 @@ function UserDashboard({
           };
         });
     }
-    
+
     return [];
   };
 
@@ -206,7 +213,7 @@ function UserDashboard({
 
   const toggleSave = (id) => {
     const isCurrentlySaved = savedIds.has(id);
-    
+
     // Optimistic update
     setSavedIds((p) => {
       const n = new Set(p);
@@ -234,15 +241,15 @@ function UserDashboard({
     e.preventDefault();
     if (emailErr || phoneErr) return;
     setSave("saving");
-    
+
     const fd = new FormData();
     fd.append("name", uName);
     fd.append("email", uEmail);
     fd.append("contact", uPhone);
     if (newFile) fd.append("profile_pic", newFile);
-    
+
     updateUser(fd);
-    
+
     setTimeout(() => {
       setSave("saved");
       setTimeout(() => setSave(null), 3000);
@@ -360,7 +367,7 @@ function UserDashboard({
                 title="Nothing saved yet"
                 body="Tap the heart on any discount to save it here."
               />
-) : (
+            ) : (
               <div className="dashboard-grid">
                 {savedItems.map((d, i) => (
                   <Card
@@ -375,40 +382,15 @@ function UserDashboard({
               </div>
             ))}
 
-          {tab === "notifications" &&
-            <>
-              <div className="dashboard-notif-header">
-                {unread > 0 && <span className="dashboard-notif-pill">{unread} unread</span>}
-              </div>
-              {(!notifications || notifications.length === 0) ? (
-                <Empty
-                  icon="🔔"
-                  title="All caught up"
-                  body="No notifications right now."
-                />
-              ) : (
-                <div className="dashboard-notif-list">
-                  {notifications.map((n, i) => (
-                    <div
-                      key={n.id ?? i}
-                      className={`dashboard-notif-row ${!n.read ? "unread" : ""}`}
-                      style={{ animation: `fadeUp .32s ${i * 45}ms ease both` }}
-                    >
-                      <div className={`dashboard-notif-dot ${!n.read ? "unread" : "read"}`} />
-                      <div>
-                        <div className={`dashboard-notif-msg ${!n.read ? "unread" : "read"}`}>
-                          {n.msg ?? n.message}
-                        </div>
-                        <div className="dashboard-notif-time">
-                          {n.time ?? n.created_at ?? ""}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          }
+          {tab === "notifications" && (
+            !notifications || notifications.results?.length === 0
+              ? <Empty icon="🔔" title="All caught up" body="No notifications right now." />
+              : <NotificationList
+                notifications={notifications}
+                onMarkRead={markNotificationAsRead}
+                onMarkAllRead={markAllNotificationsAsRead}
+              />
+          )}
 
           {tab === "settings" && (
             <div className="dashboard-settings-grid">
@@ -544,6 +526,8 @@ const mapDispatchToProps = (dispatch) => ({
   getDiscounts: () => dispatch(getDiscountsAPI()),
   getUserNotifications: () => dispatch(getUserNotificationsAPI()),
   updateUser: (data) => dispatch(userUpdateAPI(data)),
+  markNotificationAsRead: (id) => dispatch(markNotificationAsReadAPI(id)),
+  markAllNotificationsAsRead: () => dispatch(markAllNotificationsAsReadAPI()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserDashboard);

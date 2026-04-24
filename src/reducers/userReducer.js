@@ -1,12 +1,14 @@
-import { 
-    ACTIVATE_USER, 
-    SET_USER, 
-    SET_USER_TOKEN, 
-    SET_USER_ORDER, 
-    SET_PAYMENT, 
+import {
+    ACTIVATE_USER,
+    SET_USER,
+    SET_USER_TOKEN,
+    SET_USER_ORDER,
+    SET_PAYMENT,
     SET_USER_NOTIFICATIONS,
     SET_USER_TICKETS,
-    SET_USER_IS_FOLLOWER
+    SET_USER_IS_FOLLOWER,
+    MARK_NOTIFICATION_READ,
+    MARK_ALL_NOTIFICATIONS_READ
 } from "../actions/actionType";
 
 
@@ -35,9 +37,9 @@ const INITIAL_STATE = {
 
 
 const userReducer = (state = INITIAL_STATE, action) => {
-    switch (action.type){
+    switch (action.type) {
         case SET_USER:
-            if (action.user===null){
+            if (action.user === null) {
                 sessionStorage.removeItem('user');
                 localStorage.removeItem('user')
                 sessionStorage.removeItem('user-token');
@@ -49,10 +51,10 @@ const userReducer = (state = INITIAL_STATE, action) => {
                 sessionStorage.removeItem('user-is-following');
             }
             else {
-                if (action.user.rememberMe){
+                if (action.user.rememberMe) {
                     localStorage.setItem('user', JSON.stringify(action.user));
                 }
-                else{
+                else {
                     sessionStorage.setItem('user', JSON.stringify(action.user));
                 }
             }
@@ -68,12 +70,12 @@ const userReducer = (state = INITIAL_STATE, action) => {
             };
 
         case SET_USER_TOKEN:
-            if (state.user && state.user.rememberMe){
+            if (state.user && state.user.rememberMe) {
                 localStorage.setItem('user-token', JSON.stringify(action.token));
             }
-            else{
+            else {
                 sessionStorage.setItem('user-token', JSON.stringify(action.token));
-            };            
+            };
             return {
                 ...state,
                 token: action.token
@@ -98,6 +100,26 @@ const userReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 notifications: action.notifications
+            };
+
+        case "MARK_NOTIFICATION_READ":
+            return {
+                ...state,
+                notifications: {
+                    ...state.notifications,
+                    results: state.notifications.results.map((n) =>
+                        n.id === action.payload ? { ...n, is_read: true } : n
+                    ),
+                },
+            };
+
+        case "MARK_ALL_NOTIFICATIONS_READ":
+            return {
+                ...state,
+                notifications: {
+                    ...state.notifications,
+                    results: state.notifications.results.map((n) => ({ ...n, is_read: true })),
+                },
             };
 
         case SET_USER_IS_FOLLOWER:

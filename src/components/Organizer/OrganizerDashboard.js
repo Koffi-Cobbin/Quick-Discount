@@ -371,7 +371,7 @@ const OrganizerDashboard = (props) => {
     followersCount,
   };
 
-  const notificationsData = props.notifications || [];
+  const notificationsData = props.notifications.results || [];
   const unreadCount = notificationsData.filter(n => !n.read).length;
 
   const tabs = [

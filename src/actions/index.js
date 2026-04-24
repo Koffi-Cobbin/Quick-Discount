@@ -32,7 +32,9 @@ import {
   SET_DISCOUNT_LIKED,
   UPDATE_ORGANIZER_FOLLOWERS,
   REMOVE_USER_DISCOUNT_LIKE,
-  ADD_USER_DISCOUNT_LIKE
+  ADD_USER_DISCOUNT_LIKE,
+  MARK_ALL_NOTIFICATIONS_READ,
+  MARK_NOTIFICATION_READ
 } from "./actionType";
 import { BASE_URL, STAFF_EMAIL } from "../utils/constants";
 import * as messages from "../utils/messages";
@@ -61,6 +63,17 @@ export const setUserOrder = (payload) => ({
 export const setUserNotifications = (payload) => ({
   type: SET_USER_NOTIFICATIONS,
   notifications: payload,
+});
+
+// Marks a single notification as read by id
+export const markNotificationRead = (id) => ({
+  type: "MARK_NOTIFICATION_READ",
+  payload: id,
+});
+
+// Marks all notifications as read
+export const markAllNotificationsRead = () => ({
+  type: "MARK_ALL_NOTIFICATIONS_READ",
 });
 
 export const setUserIsFollower = (payload) => ({
@@ -1009,15 +1022,22 @@ export function getCartItemsAPI() {
 // --------------------------------------
 // ------ GET USER NOTIFICATIONS --------
 
-export function getUserNotificationsAPI() {
-  return (dispatch) => {
-    const url = `${BASE_URL}/messages/`;
+export function getUserNotificationsAPI(type = null) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const authToken = state.userState.token.access;
+
+    const params = new URLSearchParams({ is_read: false });
+    if (type) params.append("type", type);
+
+    const url = `${BASE_URL}/notifications/filter/?${params.toString()}`;
 
     fetch(url, {
       method: "GET",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
       },
     })
       .then((response) => {
@@ -1025,8 +1045,87 @@ export function getUserNotificationsAPI() {
         else return response.json();
       })
       .then((notifications) => {
+        console.log("Fetched Notifications: ", notifications);
         dispatch(setUserNotifications(notifications));
-        console.log("Notifications ", notifications);
+        console.log("Unread Notifications: ", notifications);
+      })
+      .catch((errorMessage) => {
+        console.log(errorMessage);
+      });
+  };
+}
+
+
+// ─────────────────────────────────────────────────────
+// ──── MARK SINGLE NOTIFICATION AS READ ───────────────
+
+export function markNotificationAsReadAPI(notificationId) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const authToken = state.userState.token.access;
+
+    const url = `${BASE_URL}/notifications/${notificationId}/mark-as-read/`;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        return response.json();
+      })
+      .then((updatedNotification) => {
+        console.log("Marked as read: ", updatedNotification);
+        dispatch(markNotificationRead(notificationId));
+      })
+      .catch((errorMessage) => {
+        console.log(errorMessage);
+      });
+  };
+}
+
+
+// ─────────────────────────────────────────────────────
+// ──── MARK ALL NOTIFICATIONS AS READ ─────────────────
+
+export function markAllNotificationsAsReadAPI() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const authToken = state.userState.token.access;
+    const notifications = state.userState.notifications?.results ?? [];
+
+    // Collect IDs of all currently unread notifications
+    const unreadIds = notifications
+      .filter((n) => !n.is_read)
+      .map((n) => n.id);
+
+    if (unreadIds.length === 0) return;
+
+    const url = `${BASE_URL}/notifications/bulk-update/`;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({
+        notification_ids: unreadIds,
+        is_read: true,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        return response.json();
+      })
+      .then((result) => {
+        console.log("Bulk marked as read: ", result);
+        dispatch(markAllNotificationsRead());
       })
       .catch((errorMessage) => {
         console.log(errorMessage);

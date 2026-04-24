@@ -189,6 +189,7 @@ export default function ReviewList({
   initialSort = "helpful",
   initialRatingFilter = null,
   initialVerifiedOnly = false,
+  showWriteReview = true,
   sorts = [
     { value: "helpful", label: "Most helpful" },
     { value: "newest",  label: "Newest" },
@@ -239,15 +240,16 @@ export default function ReviewList({
           </CheckboxLabel>
         </ControlsLeft>
 
-        <WriteButton
-          $active={showForm}
-          onClick={() => setShowForm((v) => !v)}
-        >
-          {showForm ? cancel : writeReview}
-        </WriteButton>
+        {/* Only render the button when the user is eligible to review */}
+        {showWriteReview && (
+          <WriteButton $active={showForm} onClick={() => setShowForm((v) => !v)}>
+            {showForm ? cancel : writeReview}
+          </WriteButton>
+        )}
       </ControlsRow>
 
-      {showForm && (
+      {/* Form is also gated so a direct prop-change can't reveal it */}
+      {showForm && showWriteReview && (
         <FormWrapper>
           <ReviewForm
             onSubmit={onCreateReview}
